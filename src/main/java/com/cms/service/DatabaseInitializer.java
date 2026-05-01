@@ -24,18 +24,24 @@ public class DatabaseInitializer {
     private static final Properties props = HibernateUtil.getDbProperties();
 
     public static void initialize() {
+        System.out.println(">>> [CMS-INIT] Starting Database Initialization...");
         logger.info(">>> [CMS-INIT] Starting Database Initialization...");
         
-        // Phase 1: JDBC Bootstrap (Schema Migrations)
-        runJdbcBootstrap();
-        
-        // Phase 2: Mandatory Reference Data (Lookups)
-        seedReferenceData();
-        
-        // Phase 3: Security Baseline (Admin Account)
-        ensureAdminAccount();
-        
-        logger.info(">>> [CMS-INIT] Database Initialization Complete.");
+        try {
+            // Phase 1: JDBC Bootstrap (Schema Migrations)
+            runJdbcBootstrap();
+            
+            // Phase 2: Mandatory Reference Data (Lookups)
+            seedReferenceData();
+            
+            // Phase 3: Security Baseline (Admin Account)
+            ensureAdminAccount();
+            
+            logger.info(">>> [CMS-INIT] Database Initialization Complete.");
+        } catch (Exception e) {
+            logger.error("Database initialization failed", e);
+            throw new RuntimeException("Database initialization failed", e);
+        }
     }
 
     private static void runJdbcBootstrap() {
@@ -43,7 +49,7 @@ public class DatabaseInitializer {
         // This method is kept for minor hotfixes or ensuring the DB exists.
         String url = props.getProperty("db.url", "jdbc:mysql://localhost:3306/?createDatabaseIfNotExist=true");
         String user = props.getProperty("db.username", "root");
-        String pass = props.getProperty("db.password", "admin");
+        String pass = props.getProperty("db.password", "");
 
         try (Connection conn = DriverManager.getConnection(url, user, pass);
              Statement stmt = conn.createStatement()) {
@@ -93,7 +99,6 @@ public class DatabaseInitializer {
 
     private static void ensureAdminAccount() {
         try {
-            // Use pure JDBC to bypass all ORM issues
             String url = props.getProperty("db.url", "jdbc:mysql://localhost:3306/cms_db");
             String user = props.getProperty("db.username", "root");
             String pass = props.getProperty("db.password", "");
@@ -101,7 +106,6 @@ public class DatabaseInitializer {
             try (Connection conn = DriverManager.getConnection(url, user, pass);
                  Statement stmt = conn.createStatement()) {
                 
-                // Check if admin exists
                 var rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE username = 'admin'");
                 rs.next();
                 long adminCount = rs.getLong(1);
@@ -109,20 +113,15 @@ public class DatabaseInitializer {
                 if (adminCount == 0) {
                     String passwordHash = BCrypt.hashpw("admin123", BCrypt.gensalt());
                     
-                    // Insert Person
-                    stmt.execute(
+                    stmt.executeUpdate(
                         "INSERT INTO persons (first_name, last_name, is_identified, person_status, created_at, updated_at) " +
                         "VALUES ('System', 'Administrator', true, 'OFFICER', NOW(), NOW())"
                     );
                     
-                    // Get person ID
-                    var rs2 = stmt.executeQuery(
-                        "SELECT id FROM persons WHERE first_name = 'System' AND last_name = 'Administrator' ORDER BY id DESC LIMIT 1"
-                    );
+                    var rs2 = stmt.executeQuery("SELECT id FROM persons ORDER BY id DESC LIMIT 1");
                     rs2.next();
                     long personId = rs2.getLong(1);
                     
-                    // Insert User
                     var ps = conn.prepareStatement(
                         "INSERT INTO users (badge_number, username, password_hash, person_id, role, status, must_change_password, created_at, updated_at) " +
                         "VALUES ('SYS-001', 'admin', ?, ?, 'ADMINISTRATOR', 'ACTIVE', true, NOW(), NOW())"

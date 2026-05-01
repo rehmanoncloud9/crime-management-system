@@ -41,11 +41,7 @@ public class HibernateUtil {
             }
 
             // Insecure logging removed for C-26
-            System.out.println(">>> [CMS-BOOT] Initializing Hibernate SessionFactory...");
-            logger.info("Building SessionFactory...");
-
             SessionFactory sf = configuration.buildSessionFactory();
-            System.out.println(">>> [CMS-BOOT] SessionFactory created successfully!");
             return sf;
 
         } catch (Throwable ex) {
