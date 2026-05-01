@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+    <Label text="Prosecution Dashboard" textFill="#2c3e50">
+        <font><Font name="System Bold" size="24.0"/></font>
+    </Label>
+    <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: #ecf0f1; -fx-padding: 15; -fx-background-radius: 5;">
+        <Label text="Cases Linked to My Court Matters" style="-fx-font-weight: bold;"/>
+        <TableView VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn text="Court Case #"/>
+                <TableColumn text="CMS Case #"/>
+                <TableColumn text="Next Hearing"/>
+                <TableColumn text="Status"/>
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>

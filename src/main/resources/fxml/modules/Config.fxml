@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.ConfigController" styleClass="module">
+    <padding>
+        <Insets bottom="16" left="16" right="16" top="16"/>
+    </padding>
+
+    <Label text="⚙️ System Configuration" styleClass="heading-xl"/>
+
+    <VBox spacing="16" styleClass="card">
+        <Label text="General Settings" styleClass="heading-md"/>
+        <GridPane hgap="20" vgap="14">
+            <Label text="System Name:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="systemNameField" text="Interpol CMS v2.0"
+                       GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="300"/>
+
+            <Label text="Default Precinct:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextField fx:id="defaultPrecinctField" text="Central Command"
+                       GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <Label text="Database Auto-Backup:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <CheckBox fx:id="autoBackupCheck" selected="true"
+                      GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+            <Label text="AI Sensitivity Level:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <Slider fx:id="aiSensitivitySlider" min="0" max="100" value="75"
+                    showTickLabels="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        </GridPane>
+    </VBox>
+
+    <VBox spacing="16" styleClass="card">
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Label text="Crime Types Management" styleClass="heading-md" HBox.hgrow="ALWAYS"/>
+            <Button text="+ Add Type" onAction="#handleAddCrimeType" styleClass="btn, btn-primary"/>
+        </HBox>
+        <TableView fx:id="crimeTypeTable" prefHeight="300">
+            <columns>
+                <TableColumn fx:id="crimeNameCol" text="Name" prefWidth="200"/>
+                <TableColumn fx:id="crimeCodeCol" text="Code" prefWidth="120"/>
+                <TableColumn fx:id="crimeDescCol" text="Description" prefWidth="300"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+        <Button onAction="#handleSave" text="SAVE SETTINGS" styleClass="btn, btn-success"/>
+    </HBox>
+</VBox>

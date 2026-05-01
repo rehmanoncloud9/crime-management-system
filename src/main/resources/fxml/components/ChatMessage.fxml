@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.geometry.Insets?>
+
+<HBox fx:id="root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+      spacing="12" maxWidth="650">
+    <padding><Insets top="10" bottom="10" left="15" right="15"/></padding>
+    
+    <!-- AVATAR -->
+    <VBox alignment="TOP_CENTER">
+        <StackPane>
+            <Circle fx:id="avatarCircle" radius="18" fill="#3b82f6"/>
+            <Label fx:id="avatarChar" text="A" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+        </StackPane>
+    </VBox>
+
+    <!-- CONTENT -->
+    <VBox spacing="4" HBox.hgrow="ALWAYS">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label fx:id="senderName" text="AI ASSISTANT" style="-fx-text-fill: #94a3b8; -fx-font-size: 10px; -fx-font-weight: bold;"/>
+            <Label fx:id="timestamp" text="12:45" style="-fx-text-fill: #6BBFCC; -fx-font-size: 9px;"/>
+        </HBox>
+        
+        <VBox fx:id="bubble" styleClass="message-bubble-ai">
+            <Label fx:id="messageText" wrapText="true" text="Hello message placeholder..." 
+                   style="-fx-font-size: 13px;"/>
+        </VBox>
+    </VBox>
+</HBox>

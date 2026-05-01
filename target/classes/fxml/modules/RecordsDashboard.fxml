@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+    <Label text="Records Clerk Dashboard" textFill="#2c3e50">
+        <font><Font name="System Bold" size="24.0"/></font>
+    </Label>
+    <HBox spacing="20" VBox.vgrow="ALWAYS">
+        <VBox spacing="10" style="-fx-background-color: #ecf0f1; -fx-padding: 15; -fx-background-radius: 5;" HBox.hgrow="ALWAYS">
+            <Label text="Pending Data Entry Tasks" style="-fx-font-weight: bold;"/>
+            <ListView VBox.vgrow="ALWAYS"/>
+        </VBox>
+        <VBox spacing="10" prefWidth="300" style="-fx-background-color: #ecf0f1; -fx-padding: 15; -fx-background-radius: 5;">
+            <Label text="Recently Updated Records" style="-fx-font-weight: bold;"/>
+            <ListView VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </HBox>
+</VBox>

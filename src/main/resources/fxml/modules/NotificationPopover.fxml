@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.NotificationPopoverController"
+      style="-fx-background-color: #0D1526; -fx-border-color: rgba(0,212,255,0.2); -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5); -fx-background-radius: 8; -fx-border-radius: 8;"
+      prefWidth="350" maxHeight="500">
+    
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT">
+        <Label text="Notifications" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="✕" onAction="#closePopover" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-font-weight: bold; -fx-cursor: hand;"/>
+    </HBox>
+    <Separator style="-fx-padding: 5 0 5 0;"/>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;" hbarPolicy="NEVER">
+        <VBox fx:id="notificationList" spacing="8" style="-fx-background-color: #0D1526; -fx-padding: 5;"/>
+    </ScrollPane>
+</VBox>

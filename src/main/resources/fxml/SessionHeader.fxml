@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<HBox alignment="CENTER_LEFT" spacing="10" styleClass="app-header"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.HeaderController">
+
+    <!-- HAMBURGER MENU TOGGLE — top-left of header bar -->
+    <Button fx:id="menuToggleBtn" text="&#9776;" onAction="#handleMenuToggle"
+            styleClass="btn-icon, btn-back"
+            style="-fx-font-size: 18px; -fx-min-width: 40; -fx-min-height: 40; -fx-cursor: hand;"/>
+
+    <!-- NAVIGATION CONTROLS -->
+    <HBox alignment="CENTER_LEFT" spacing="8" styleClass="header-nav">
+        <Button fx:id="backBtn" text="&#11013;" onAction="#handleBack"
+                styleClass="btn-icon, btn-back" visible="false" managed="false"/>
+        <FlowPane fx:id="breadcrumbPane" hgap="4" alignment="CENTER_LEFT"
+                  styleClass="breadcrumb-container"/>
+    </HBox>
+
+    <Region HBox.hgrow="ALWAYS"/>
+
+    <!-- User profile -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <StackPane>
+            <Circle fx:id="profileCircle" radius="20" fill="#0D1526" stroke="#00D4FF" strokeWidth="2"/>
+            <Label fx:id="initialsLabel" text="?"
+                   style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #00D4FF;"/>
+        </StackPane>
+        <VBox alignment="CENTER_LEFT" spacing="1">
+            <Label fx:id="userNameLabel" text="Officer Name" styleClass="header-username"/>
+            <Label fx:id="officerRankLabel" text="Rank #Badge"  styleClass="header-rank"/>
+        </VBox>
+        <Label fx:id="roleBadge" text="OFFICER" styleClass="role-badge, role-badge-default"/>
+    </HBox>
+
+    <Region HBox.hgrow="ALWAYS"/>
+
+    <Label fx:id="precinctLabel" text="" styleClass="text-secondary"/>
+
+    <Region HBox.hgrow="ALWAYS"/>
+
+    <!-- Clock -->
+    <VBox alignment="CENTER_RIGHT" spacing="1">
+        <Label fx:id="dateLabel" text="" styleClass="header-date"/>
+        <Label fx:id="timeLabel" text="" styleClass="header-clock"/>
+    </VBox>
+
+    <!-- Actions -->
+    <HBox alignment="CENTER" spacing="10">
+        <Button fx:id="notificationBtn" text="&#128276;" onAction="#handleNotificationClick"
+                styleClass="btn-icon"/>
+        <Button fx:id="logoutBtn" text="LOGOUT" onAction="#handleLogout"
+                styleClass="btn, btn-danger"/>
+    </HBox>
+
+</HBox>

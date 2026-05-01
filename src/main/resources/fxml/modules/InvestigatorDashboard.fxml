@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true"  styleClass="scroll-pane"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cms.controller.InvestigatorDashboardController">
+    <VBox spacing="20">
+        <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
+
+        <Label text="Investigator Dashboard" styleClass="heading-xl"/>
+
+        <HBox spacing="16" VBox.vgrow="ALWAYS">
+            <!-- Main table area -->
+            <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
+                <Label text="Ongoing Investigations" styleClass="heading-md"/>
+                <TableView fx:id="investigationsTable" VBox.vgrow="ALWAYS" prefHeight="350">
+                    <columns>
+                        <TableColumn fx:id="caseNumberCol" text="Case #" prefWidth="120"/>
+                        <TableColumn fx:id="incidentTitleCol" text="Incident Title" prefWidth="250"/>
+                        <TableColumn fx:id="statusCol" text="Status" prefWidth="100"/>
+                        <TableColumn fx:id="openedAtCol" text="Opened At" prefWidth="140"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <!-- Side panel -->
+            <VBox spacing="16" prefWidth="280">
+                <VBox spacing="8" styleClass="card, stat-card-orange">
+                    <Label text="🤖 AI Insights" styleClass="heading-md"/>
+                    <Label text="No new patterns detected today." wrapText="true" styleClass="text-secondary"/>
+                </VBox>
+                <VBox spacing="8" styleClass="card">
+                    <Label text="📅 Upcoming Hearings" styleClass="heading-md"/>
+                    <ListView prefHeight="150"/>
+                </VBox>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>

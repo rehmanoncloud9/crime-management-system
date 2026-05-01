@@ -1,0 +1,60 @@
+package com.cms;
+
+import com.cms.service.HibernateUtil;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MainApp extends Application {
+    private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
+
+    @Override
+    public void start(Stage primaryStage) {
+        // 1) Seed database separately
+        try {
+            System.out.println(">>> [CMS-BOOT] Initializing database seeding...");
+            com.cms.service.SampleDataService.seedAll();
+            System.out.println(">>> [CMS-BOOT] Seeding cycle complete.");
+        } catch (Exception e) {
+            System.err.println(">>> [CMS-BOOT-ERROR] SEEDING FAILED! Check stack trace below:");
+            e.printStackTrace();
+            logger.error("Sample data seeding failed", e);
+        }
+
+        // 2) Always try to load UI
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
+            Scene scene = new Scene(root, 960, 620);
+            scene.getStylesheets().add(getClass().getResource("/css/application.css").toExternalForm());
+
+            primaryStage.setTitle("Crime Management System v5.0");
+            primaryStage.setScene(scene);
+            primaryStage.setMinWidth(900);
+            primaryStage.setMinHeight(600);
+            primaryStage.setResizable(true);
+
+            // Respect the taskbar — use visual bounds, NOT setMaximized
+            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+            primaryStage.setX(bounds.getMinX());
+            primaryStage.setY(bounds.getMinY());
+            primaryStage.setWidth(bounds.getWidth());
+            primaryStage.setHeight(bounds.getHeight());
+
+            primaryStage.show();
+
+        } catch (Exception e) {
+            logger.error("Failed to start application UI", e);
+        }
+    }
+
+    @Override
+    public void stop() { HibernateUtil.shutdown(); }
+
+    public static void main(String[] args) { launch(args); }
+}

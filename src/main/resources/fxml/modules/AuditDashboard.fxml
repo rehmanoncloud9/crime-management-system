@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true"  styleClass="scroll-pane"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cms.controller.AuditDashboardController">
+    <VBox spacing="16">
+        <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
+
+        <Label text="Audit Dashboard" styleClass="heading-xl"/>
+
+        <!-- Search/Filter Toolbar -->
+        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="module-toolbar">
+            <TextField fx:id="searchField" promptText="🔍 Filter by user or entity..." prefWidth="280"/>
+            <ComboBox fx:id="actionCombo" promptText="All Actions" prefWidth="160"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <!-- Audit Table -->
+        <VBox spacing="10" styleClass="card" VBox.vgrow="ALWAYS">
+            <Label text="Recent Audit Activity" styleClass="heading-md"/>
+            <TableView fx:id="auditTable" VBox.vgrow="ALWAYS" prefHeight="400">
+                <columns>
+                    <TableColumn fx:id="timestampCol" text="Timestamp" prefWidth="160"/>
+                    <TableColumn fx:id="userCol" text="User" prefWidth="130"/>
+                    <TableColumn fx:id="actionCol" text="Action" prefWidth="110"/>
+                    <TableColumn fx:id="entityCol" text="Entity" prefWidth="130"/>
+                    <TableColumn fx:id="descCol" text="Description" prefWidth="320"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </VBox>
+</ScrollPane>

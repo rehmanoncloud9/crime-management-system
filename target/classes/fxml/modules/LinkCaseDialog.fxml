@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="16" prefWidth="600" prefHeight="500" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.LinkCaseController" stylesheets="@../../css/modules.css">
+    <padding><Insets bottom="20" left="20" right="20" top="20"/></padding>
+
+    <Label text="Link Person to Case" styleClass="heading-md"/>
+    
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="Search cases by number or incident..." HBox.hgrow="ALWAYS"/>
+        <Button text="🔍 Search" onAction="#handleSearch" styleClass="btn, btn-primary"/>
+    </HBox>
+
+    <TableView fx:id="caseTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="numberCol" text="Case Number" prefWidth="150"/>
+            <TableColumn fx:id="incidentCol" text="Incident" prefWidth="200"/>
+            <TableColumn fx:id="statusCol" text="Status" prefWidth="100"/>
+            <TableColumn fx:id="dateCol" text="Opened At" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Label text="Link as: " style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="roleCombo" prefWidth="150"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancel" onAction="#handleCancel" styleClass="btn, btn-outline"/>
+        <Button fx:id="linkBtn" text="🔗 Link to Case" onAction="#handleLink" styleClass="btn, btn-success"/>
+    </HBox>
+</VBox>

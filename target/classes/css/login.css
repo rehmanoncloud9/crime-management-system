@@ -1,0 +1,49 @@
+/* CMS v5.0 — Elite Dark Login */
+.root { -fx-font-family: "Segoe UI", "Inter", sans-serif; }
+
+.left-panel {
+    -fx-background-color: linear-gradient(to bottom, #050810, #07090F, #08101C);
+    -fx-padding: 40;
+    -fx-border-color: rgba(0,212,255,0.1); -fx-border-width: 0 1 0 0;
+}
+.logo-icon {
+    -fx-text-fill: #00D4FF; -fx-font-size: 72px;
+    -fx-effect: dropshadow(gaussian, rgba(0,212,255,0.9), 30, 0.4, 0, 0);
+}
+.logo {
+    -fx-text-fill: white; -fx-font-size: 52px; -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,212,255,0.5), 16, 0, 0, 0);
+}
+.subtitle { -fx-text-fill: rgba(0,212,255,0.55); -fx-font-size: 12px; }
+.right-panel { -fx-background-color: #07090F; -fx-padding: 60; }
+.title { -fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #00D4FF; }
+.desc  { -fx-font-size: 13px; -fx-text-fill: #6BBFCC; }
+.input-group { -fx-spacing: 8; }
+.input-label { -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: rgba(0,212,255,0.7); }
+.input {
+    -fx-background-color: #0A0E1A; -fx-background-radius: 10; -fx-border-radius: 10;
+    -fx-padding: 14; -fx-border-color: rgba(0,212,255,0.25); -fx-border-width: 1;
+    -fx-font-size: 14px; -fx-text-fill: #00D4FF; -fx-prompt-text-fill: rgba(0,212,255,0.3);
+}
+.input:focused {
+    -fx-border-color: #00D4FF;
+    -fx-effect: dropshadow(gaussian, rgba(0,212,255,0.4), 14, 0, 0, 0);
+    -fx-background-color: #0C1222;
+}
+.login-btn {
+    -fx-background-color: linear-gradient(to right, #00AACC, #00D4FF);
+    -fx-text-fill: #07090F; -fx-background-radius: 10; -fx-padding: 15;
+    -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+.login-btn:hover {
+    -fx-background-color: linear-gradient(to right, #00CCFF, #33EEFF);
+    -fx-effect: dropshadow(gaussian, rgba(0,212,255,0.7), 22, 0, 0, 0);
+}
+.login-btn:pressed { -fx-background-color: #008FBB; }
+.error-text { -fx-text-fill: #FF4757; -fx-font-size: 13px; }
+.text-secondary { -fx-text-fill: #6BBFCC; }
+.label { -fx-text-fill: #00D4FF; }
+.hyperlink { -fx-text-fill: #00D4FF; -fx-border-color: transparent; }
+.hyperlink:hover { -fx-text-fill: #33EEFF; }
+.separator .line { -fx-border-color: rgba(0,212,255,0.12); }

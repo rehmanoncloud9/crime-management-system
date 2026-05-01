@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox styleClass="module" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.PersonRegistryController">
+    <VBox spacing="16">
+        <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
+
+        <Label text="Person Registry" styleClass="heading-xl"/>
+
+        <!-- Toolbar -->
+        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="module-toolbar">
+            <Button onAction="#handleAddPerson" text="+ Add New Person" styleClass="btn, btn-primary"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <TextField fx:id="searchField" promptText="🔍 Search by name or CNIC..." prefWidth="320"/>
+            <Button onAction="#loadPersons" text="Refresh" styleClass="btn, btn-outline"/>
+        </HBox>
+
+        <Separator/>
+
+        <!-- List Area -->
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+            <FlowPane fx:id="personFlowPane" hgap="20" vgap="20" style="-fx-padding: 10;">
+                <!-- Person cards injected here -->
+            </FlowPane>
+        </ScrollPane>
+    </VBox>
+</VBox>

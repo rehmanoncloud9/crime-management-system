@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true"  styleClass="scroll-pane"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cms.controller.MyCasesController">
+    <VBox spacing="16">
+        <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
+
+        <Label text="My Active Investigations" styleClass="heading-xl"/>
+
+        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="module-toolbar">
+            <TextField fx:id="searchField" promptText="🔍 Search cases..." prefWidth="280"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <TableView fx:id="caseTable" VBox.vgrow="ALWAYS" prefHeight="450">
+            <columns>
+                <TableColumn fx:id="numberCol" text="Case Number" prefWidth="140"/>
+                <TableColumn fx:id="titleCol" text="Case Title" prefWidth="300"/>
+                <TableColumn fx:id="statusCol" text="Status" prefWidth="110"/>
+                <TableColumn fx:id="dateCol" text="Date Opened" prefWidth="140"/>
+            </columns>
+        </TableView>
+    </VBox>
+</ScrollPane>

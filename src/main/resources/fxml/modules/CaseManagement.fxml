@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="16" styleClass="module" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.CaseManagementController">
+        <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
+
+        <Label text="Case Management" styleClass="heading-xl"/>
+
+        <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.3">
+            <!-- Left: Case List -->
+            <VBox spacing="12" styleClass="card">
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="searchField" promptText="🔍 Search cases..." HBox.hgrow="ALWAYS" onAction="#handleSearch"/>
+                    <Button onAction="#handleSearch" styleClass="btn, btn-outline" text="Search"/>
+                </HBox>
+                <ListView fx:id="caseListView" VBox.vgrow="ALWAYS" styleClass="list-view-transparent"/>
+                <Button text="+ New Case" onAction="#handleNewCase" maxWidth="Infinity" styleClass="btn, btn-primary"/>
+            </VBox>
+
+            <!-- Right: Case Details -->
+            <VBox fx:id="detailView" spacing="16" styleClass="card" disable="true">
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <VBox HBox.hgrow="ALWAYS">
+                        <Label fx:id="detailCaseNumber" text="Select a Case" styleClass="heading-lg"/>
+                        <Label fx:id="detailIncidentTitle" text="No case selected" styleClass="text-muted"/>
+                    </VBox>
+                    <Button fx:id="startInvestigateBtn" text="Start Investigation" onAction="#handleStartInvestigation" styleClass="btn, btn-outline" disable="true"/>
+                    <Button fx:id="closeCaseBtn" text="Close Case" onAction="#handleCloseCase" styleClass="btn, btn-danger" disable="true"/>
+                </HBox>
+
+                <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" styleClass="modern-tabpane">
+                    <Tab text="Overview">
+                        <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent">
+                            <VBox spacing="15" style="-fx-padding: 15;">
+                                <GridPane hgap="20" vgap="10">
+                                    <Label text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="labelStatus" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                    <Label text="Investigator:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="labelInvestigator" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                    <Label text="Opened At:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="labelOpened" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                                    <Label text="Crime Type:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="labelCrimeType" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                                </GridPane>
+                                <Separator/>
+                                <Label text="Incident Description" styleClass="heading-sm"/>
+                                <Label fx:id="labelDescription" wrapText="true" style="-fx-text-fill: #555;"/>
+                            </VBox>
+                        </ScrollPane>
+                    </Tab>
+                    <Tab text="Timeline">
+                        <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent">
+                            <VBox fx:id="timelineContainer" spacing="0" style="-fx-padding: 20;"/>
+                        </ScrollPane>
+                    </Tab>
+                    <Tab text="Suspects">
+                        <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent">
+                            <FlowPane fx:id="suspectFlowPane" hgap="15" vgap="15" style="-fx-padding: 15;"/>
+                        </ScrollPane>
+                    </Tab>
+                    <Tab text="Evidence">
+                        <TableView fx:id="evidenceTable">
+                            <columns>
+                                <TableColumn fx:id="evidenceNumCol" text="ID" prefWidth="100"/>
+                                <TableColumn fx:id="evidenceTypeCol" text="Type" prefWidth="120"/>
+                                <TableColumn fx:id="evidenceDescCol" text="Description" prefWidth="250"/>
+                                <TableColumn fx:id="evidenceStatusCol" text="Status" prefWidth="100"/>
+                            </columns>
+                        </TableView>
+                    </Tab>
+                </TabPane>
+            </VBox>
+        </SplitPane>
+    </VBox>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="16" prefWidth="420" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.OfficerEditController">
+    <padding><Insets bottom="20" left="20" right="20" top="20"/></padding>
+
+    <Label text="Edit Officer Profile" styleClass="heading-md"/>
+
+    <!-- Photo Section -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <ImageView fx:id="photoView" fitWidth="80" fitHeight="80" preserveRatio="true"/>
+        <VBox spacing="6">
+            <Button text="📷 Change Photo" onAction="#handleChangePhoto" styleClass="btn, btn-outline"/>
+            <Label fx:id="photoStatusLabel" text="" style="-fx-font-size: 11px; -fx-text-fill: #6BBFCC;"/>
+        </VBox>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Details Form -->
+    <GridPane vgap="10" hgap="10">
+        <Label text="Badge #:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="badgeField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                   style="-fx-opacity: 0.7;"/>
+
+        <Label text="Full Name:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Role:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <ComboBox fx:id="roleCombo" GridPane.columnIndex="1" GridPane.rowIndex="2" maxWidth="Infinity"/>
+
+        <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextField fx:id="emailField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+        <Label text="Phone:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <TextField fx:id="phoneField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+        <Label text="Precinct:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+        <TextField fx:id="precinctField" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+        <Label text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+        <ComboBox fx:id="statusCombo" GridPane.columnIndex="1" GridPane.rowIndex="6" maxWidth="Infinity"/>
+    </GridPane>
+
+    <Region VBox.vgrow="ALWAYS"/>
+
+    <!-- Action Buttons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cancel" onAction="#handleCancel" styleClass="btn, btn-outline"/>
+        <Button text="Save Changes" onAction="#handleSave" styleClass="btn, btn-success"/>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Danger Zone / Administrative -->
+    <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: rgba(255,71,87,0.08); -fx-background-radius: 8;">
+        <Label text="⚠️ Administrative Actions" style="-fx-text-fill: #991b1b; -fx-font-weight: bold;"/>
+        <HBox spacing="10">
+            <Button text="Reset Password" onAction="#handleResetPassword" styleClass="btn, btn-outline" style="-fx-font-size: 11;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Delete Officer" onAction="#handleDeleteOfficer" styleClass="btn, btn-danger" style="-fx-font-size: 11;"/>
+        </HBox>
+    </VBox>
+</VBox>

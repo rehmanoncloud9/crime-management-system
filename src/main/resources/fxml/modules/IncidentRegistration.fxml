@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.IncidentRegistrationController" styleClass="module">
+    <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
+
+        <Label text="Register New Crime Incident" styleClass="heading-xl"/>
+
+        <VBox spacing="16" styleClass="card">
+            <Label text="Incident Details" styleClass="heading-md"/>
+            <GridPane hgap="20" vgap="14">
+                <Label text="Incident Title:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="titleField" promptText="Brief title of the incident"
+                           GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="400"/>
+
+                <Label text="Crime Type:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <ComboBox fx:id="typeCombo" promptText="Select Category"
+                          GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                <Label text="Date &amp; Time:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <DatePicker fx:id="datePicker" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                <Label text="District:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                <ComboBox fx:id="districtCombo" promptText="Select District" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="400" maxWidth="400"/>
+
+                <Label text="City:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                <ComboBox fx:id="cityCombo" promptText="Select City" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="400" maxWidth="400"/>
+
+                <Label text="Area:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                <ComboBox fx:id="areaCombo" promptText="Select Area" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="400" maxWidth="400"/>
+
+                <Label text="Location Details:" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+                <TextArea fx:id="locationArea" promptText="Precinct, building, or specific spot details"
+                          GridPane.columnIndex="1" GridPane.rowIndex="6" prefHeight="80" wrapText="true"/>
+
+                <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+                <TextArea fx:id="descriptionArea" promptText="Detailed description of the event"
+                          GridPane.columnIndex="1" GridPane.rowIndex="7" prefHeight="150" wrapText="true"/>
+            </GridPane>
+        </VBox>
+
+        <HBox spacing="12">
+            <Button fx:id="submitButton" onAction="#handleSubmit" text="SUBMIT REPORT" styleClass="btn, btn-success"/>
+            <Button fx:id="exportButton" onAction="#handleExportFIR" text="EXPORT FIR" styleClass="btn, btn-primary" disable="true"/>
+            <Button onAction="#handleCancel" text="CANCEL" styleClass="btn, btn-outline"/>
+        </HBox>
+    </VBox>

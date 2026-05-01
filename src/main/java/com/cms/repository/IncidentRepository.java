@@ -1,0 +1,59 @@
+package com.cms.repository;
+
+import com.cms.model.CrimeIncident;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+public class IncidentRepository {
+
+    private final EntityManager entityManager;
+
+    public IncidentRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public List<CrimeIncident> findAll(int limit, int offset) {
+        TypedQuery<CrimeIncident> query = entityManager.createQuery(
+                "SELECT i FROM CrimeIncident i ORDER BY i.occurredAt DESC",
+                CrimeIncident.class
+        );
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
+        return query.getResultList();
+    }
+
+    public Optional<CrimeIncident> findByNumber(String incidentNumber) {
+        if (incidentNumber == null || incidentNumber.isBlank()) return Optional.empty();
+        return entityManager.createQuery(
+                "SELECT i FROM CrimeIncident i WHERE i.incidentNumber = :num",
+                CrimeIncident.class)
+            .setParameter("num", incidentNumber)
+            .getResultStream().findFirst();
+    }
+
+    public Optional<CrimeIncident> findById(Long id) {
+        if (id == null) return Optional.empty();
+        return Optional.ofNullable(entityManager.find(CrimeIncident.class, id));
+    }
+
+    public void save(CrimeIncident incident) {
+        if (incident.getId() == null) entityManager.persist(incident);
+        else                          entityManager.merge(incident);
+    }
+
+    public long countInMonth(int year, int month) {
+        LocalDateTime start = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime end   = start.plusMonths(1);
+        Long result = entityManager.createQuery(
+                "SELECT COUNT(i) FROM CrimeIncident i WHERE i.occurredAt >= :start AND i.occurredAt < :end",
+                Long.class)
+            .setParameter("start", start)
+            .setParameter("end", end)
+            .getSingleResult();
+        return result != null ? result : 0L;
+    }
+}

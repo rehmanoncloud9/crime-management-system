@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cms.controller.MainController"
+            style="-fx-background-color: #07090F;">
+
+    <!-- TOP: Session Header (toggle button lives here at left) -->
+    <top>
+        <fx:include source="SessionHeader.fxml"/>
+    </top>
+
+    <!-- BODY -->
+    <center>
+        <HBox style="-fx-background-color: #07090F;">
+
+            <!-- SIDEBAR: slides in/out via MainController -->
+            <VBox fx:id="sideMenu"
+                  style="-fx-background-color: #060A14;"
+                  styleClass="sidebar">
+                <VBox styleClass="sidebar-brand">
+                    <Label text="🛡 CMS" styleClass="brand-title"/>
+                    <Label text="Crime Management System" styleClass="brand-subtitle"/>
+                </VBox>
+                <Separator/>
+                <!-- Menu buttons injected by MainController.buildSidebar() -->
+            </VBox>
+
+            <!-- MAIN CONTENT AREA -->
+            <ScrollPane fitToWidth="true" fitToHeight="true" HBox.hgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                        hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+                <StackPane fx:id="contentArea"
+                           style="-fx-background-color: #07090F; -fx-padding: 20;"/>
+            </ScrollPane>
+
+        </HBox>
+    </center>
+
+</BorderPane>
