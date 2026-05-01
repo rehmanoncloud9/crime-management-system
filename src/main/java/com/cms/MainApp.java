@@ -16,10 +16,18 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        System.out.println("###################################################");
+        System.out.println("### CMS APPLICATION STARTING - DIAGNOSTIC MODE  ###");
+        System.out.println("###################################################");
+        
         // 1) System Initialization (Migrations & Lookups)
         try {
+            System.out.println(">>> [CMS-BOOT] Starting System Initialization...");
             com.cms.service.DatabaseInitializer.initialize();
+            System.out.println(">>> [CMS-BOOT] System initialized.");
         } catch (Throwable e) {
+            System.err.println(">>> [CMS-BOOT-ERROR] Initialization CRITICAL FAILURE!");
+            e.printStackTrace();
             logger.error("Database initialization failed", e);
         }
 
@@ -46,6 +54,7 @@ public class MainApp extends Application {
 
         } catch (Exception e) {
             logger.error("Failed to start application UI", e);
+            e.printStackTrace();
         }
     }
 
