@@ -8,11 +8,14 @@ import com.cms.model.Person;
 import com.cms.model.User;
 import com.cms.model.enums.ArrestStatus;
 import com.cms.model.enums.CasePriority;
+import com.cms.model.enums.CaseStatus;
 import com.cms.model.enums.EvidenceStatus;
 import com.cms.model.enums.IncidentStatus;
 import com.cms.model.enums.PersonStatus;
+import com.cms.model.enums.Role;
 import com.cms.repository.CaseRepository;
 import com.cms.repository.IncidentRepository;
+import com.cms.util.SecurityUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,13 +25,14 @@ import java.util.Set;
 
 public class CaseWorkflowService {
 
-    private static final Set<IncidentStatus> CASE_CLOSURE_STATES = Set.of(
-            IncidentStatus.CLOSED_CONVICTED,
-            IncidentStatus.CLOSED_ACQUITTED,
-            IncidentStatus.CLOSED_UNSOLVED
+    private static final Set<CaseStatus> CASE_CLOSURE_STATES = Set.of(
+            CaseStatus.CLOSED_CONVICTED,
+            CaseStatus.CLOSED_ACQUITTED,
+            CaseStatus.CLOSED_UNSOLVED
     );
 
     public CrimeIncident verifyIncident(Long incidentId) {
+        SecurityUtils.requireRole(Role.OFFICER, Role.SUPERVISOR, Role.ADMINISTRATOR);
         return HibernateUtil.executeTransaction(session -> {
             CrimeIncident incident = new IncidentRepository(session).findById(incidentId)
                     .orElseThrow(() -> new IllegalArgumentException("Incident not found: " + incidentId));
@@ -40,6 +44,7 @@ public class CaseWorkflowService {
     }
 
     public CaseFile convertIncidentToCase(Long incidentId, Long leadOfficerId, CasePriority priority) {
+        SecurityUtils.requireRole(Role.SUPERVISOR, Role.ADMINISTRATOR);
         return HibernateUtil.executeTransaction(session -> {
             CrimeIncident incident = new IncidentRepository(session).findById(incidentId)
                     .orElseThrow(() -> new IllegalArgumentException("Incident not found: " + incidentId));
@@ -62,7 +67,7 @@ public class CaseWorkflowService {
             CaseFile caseFile = new CaseFile(nextCaseNumber(), incident);
             caseFile.setPriority(priority == null ? CasePriority.MEDIUM : priority);
             caseFile.setPrimaryInvestigator(lead);
-            caseFile.setStatus(IncidentStatus.OPEN);
+            caseFile.setStatus(CaseStatus.OPEN);
             session.persist(caseFile);
 
             incident.setStatus(IncidentStatus.CONVERTED);
@@ -72,6 +77,7 @@ public class CaseWorkflowService {
     }
 
     public void assignOfficers(Long caseId, Long leadOfficerId, List<Long> supportingOfficerIds, Long assignedById) {
+        SecurityUtils.requireRole(Role.SUPERVISOR, Role.ADMINISTRATOR);
         HibernateUtil.executeTransaction(session -> {
             CaseFile caseFile = new CaseRepository(session).findById(caseId)
                     .orElseThrow(() -> new IllegalArgumentException("Case not found: " + caseId));
@@ -101,9 +107,9 @@ public class CaseWorkflowService {
                     .executeUpdate();
             }
 
-            ensureTransition(caseFile.getStatus(), IncidentStatus.UNDER_INVESTIGATION, allowedCaseTransitions());
+            ensureTransition(caseFile.getStatus(), CaseStatus.UNDER_INVESTIGATION, allowedCaseTransitions());
             caseFile.setPrimaryInvestigator(lead);
-            caseFile.setStatus(IncidentStatus.UNDER_INVESTIGATION);
+            caseFile.setStatus(CaseStatus.UNDER_INVESTIGATION);
             session.merge(caseFile);
             return null;
         });
@@ -121,29 +127,43 @@ public class CaseWorkflowService {
                 throw new IllegalArgumentException("Person not found: " + personId);
             }
 
+            // Determine the correct weak-entity table based on role
+            String tableName = switch (role) {
+                case SUSPECT -> "case_suspects";
+                case VICTIM  -> "case_victims";
+                case WITNESS -> "case_witnesses";
+                default -> throw new IllegalArgumentException("Invalid role");
+            };
+
             Long duplicate = session.createNativeQuery(
-                    "SELECT COUNT(*) FROM case_persons WHERE case_id = :caseId AND person_id = :personId AND role = :role",
+                    "SELECT COUNT(*) FROM " + tableName + " WHERE case_id = :caseId AND person_id = :personId",
                     Long.class)
                 .setParameter("caseId", caseId)
                 .setParameter("personId", personId)
-                .setParameter("role", role.name())
                 .getSingleResult();
             if (duplicate != null && duplicate > 0) {
                 throw new IllegalStateException("Duplicate person-role mapping for this case");
             }
 
-            session.createNativeQuery(
-                    "INSERT INTO case_persons(case_id, person_id, role, added_by) VALUES (:caseId, :personId, :role, :addedBy)")
-                .setParameter("caseId", caseId)
-                .setParameter("personId", personId)
-                .setParameter("role", role.name())
-                .setParameter("addedBy", addedBy)
-                .executeUpdate();
+            // ERD Disjoint constraint: person cannot hold more than one role in the same case
+            // (enforced by DB trigger trg_disjoint_*, but double-check here too)
+            for (String otherTable : new String[]{"case_suspects", "case_victims", "case_witnesses"}) {
+                if (otherTable.equals(tableName)) continue;
+                Long conflict = session.createNativeQuery(
+                        "SELECT COUNT(*) FROM " + otherTable + " WHERE case_id = :caseId AND person_id = :personId",
+                        Long.class)
+                    .setParameter("caseId", caseId)
+                    .setParameter("personId", personId)
+                    .getSingleResult();
+                if (conflict != null && conflict > 0) {
+                    throw new IllegalStateException("ERD Disjoint Violation: Person already has a role in this case");
+                }
+            }
 
-            // Keep existing compatibility mappings in sync with current entity relationships.
+            // Insert into the correct weak entity table via the ORM convenience method
             switch (role) {
                 case SUSPECT -> caseFile.addSuspect(person);
-                case VICTIM -> caseFile.addVictim(person);
+                case VICTIM  -> caseFile.addVictim(person);
                 case WITNESS -> caseFile.addWitness(person);
                 default -> { }
             }
@@ -153,6 +173,7 @@ public class CaseWorkflowService {
     }
 
     public void advanceEvidenceStatus(Long evidenceId, EvidenceStatus newStatus) {
+        SecurityUtils.requireRole(Role.OFFICER, Role.SUPERVISOR, Role.ADMINISTRATOR, Role.RECORDS_CLERK);
         HibernateUtil.executeTransaction(session -> {
             Evidence evidence = session.get(Evidence.class, evidenceId);
             if (evidence == null) {
@@ -166,16 +187,17 @@ public class CaseWorkflowService {
     }
 
     public ArrestRecord registerArrest(Long caseId, Long suspectId, Long officerId, String bookingRef) {
+        SecurityUtils.requireRole(Role.OFFICER, Role.SUPERVISOR, Role.ADMINISTRATOR);
         return HibernateUtil.executeTransaction(session -> {
             CaseFile caseFile = new CaseRepository(session).findById(caseId)
                     .orElseThrow(() -> new IllegalArgumentException("Case not found: " + caseId));
 
-            if (caseFile.getStatus() != IncidentStatus.UNDER_INVESTIGATION) {
+            if (caseFile.getStatus() != CaseStatus.UNDER_INVESTIGATION) {
                 throw new IllegalStateException("Arrest allowed only when case is UNDER_INVESTIGATION");
             }
 
             Long suspectLinkCount = session.createNativeQuery(
-                    "SELECT COUNT(*) FROM case_persons WHERE case_id = :caseId AND person_id = :personId AND role = 'SUSPECT'",
+                    "SELECT COUNT(*) FROM case_suspects WHERE case_id = :caseId AND person_id = :personId",
                     Long.class)
                 .setParameter("caseId", caseId)
                 .setParameter("personId", suspectId)
@@ -200,13 +222,14 @@ public class CaseWorkflowService {
 
             suspect.setPersonStatus(PersonStatus.IN_CUSTODY);
             session.merge(suspect);
-            caseFile.setStatus(IncidentStatus.ARRESTED);
+            caseFile.setStatus(CaseStatus.ARRESTED);
             session.merge(caseFile);
             return arrest;
         });
     }
 
     public void generateChargeSheet(Long caseId, Long filedBy, String summary, String legalSections) {
+        SecurityUtils.requireRole(Role.SUPERVISOR, Role.ADMINISTRATOR, Role.LEGAL_OFFICER);
         HibernateUtil.executeTransaction(session -> {
             CaseFile caseFile = new CaseRepository(session).findById(caseId)
                     .orElseThrow(() -> new IllegalArgumentException("Case not found: " + caseId));
@@ -220,7 +243,7 @@ public class CaseWorkflowService {
             }
 
             long suspectCount = session.createNativeQuery(
-                    "SELECT COUNT(*) FROM case_persons WHERE case_id = :caseId AND role = 'SUSPECT'", Long.class)
+                    "SELECT COUNT(*) FROM case_suspects WHERE case_id = :caseId", Long.class)
                 .setParameter("caseId", caseId)
                 .getSingleResult();
             if (suspectCount <= 0) {
@@ -246,25 +269,27 @@ public class CaseWorkflowService {
                 .setParameter("sections", legalSections)
                 .executeUpdate();
 
-            ensureTransition(caseFile.getStatus(), IncidentStatus.CHARGED, allowedCaseTransitions());
-            caseFile.setStatus(IncidentStatus.CHARGED);
+            ensureTransition(caseFile.getStatus(), CaseStatus.CHARGED, allowedCaseTransitions());
+            caseFile.setStatus(CaseStatus.CHARGED);
             session.merge(caseFile);
             return null;
         });
     }
 
     public void markCaseInTrial(Long caseId) {
+        SecurityUtils.requireRole(Role.SUPERVISOR, Role.ADMINISTRATOR, Role.LEGAL_OFFICER);
         HibernateUtil.executeTransaction(session -> {
             CaseFile caseFile = new CaseRepository(session).findById(caseId)
                     .orElseThrow(() -> new IllegalArgumentException("Case not found: " + caseId));
-            ensureTransition(caseFile.getStatus(), IncidentStatus.IN_TRIAL, allowedCaseTransitions());
-            caseFile.setStatus(IncidentStatus.IN_TRIAL);
+            ensureTransition(caseFile.getStatus(), CaseStatus.IN_TRIAL, allowedCaseTransitions());
+            caseFile.setStatus(CaseStatus.IN_TRIAL);
             session.merge(caseFile);
             return null;
         });
     }
 
-    public void closeCase(Long caseId, IncidentStatus closureState, String reason) {
+    public void closeCase(Long caseId, CaseStatus closureState, String reason) {
+        SecurityUtils.requireRole(Role.SUPERVISOR, Role.ADMINISTRATOR);
         if (!CASE_CLOSURE_STATES.contains(closureState)) {
             throw new IllegalArgumentException("Invalid closure state");
         }
@@ -273,7 +298,7 @@ public class CaseWorkflowService {
             CaseFile caseFile = new CaseRepository(session).findById(caseId)
                     .orElseThrow(() -> new IllegalArgumentException("Case not found: " + caseId));
 
-            if (closureState == IncidentStatus.CLOSED_UNSOLVED) {
+            if (closureState == CaseStatus.CLOSED_UNSOLVED) {
                 if (reason == null || reason.isBlank()) {
                     throw new IllegalStateException("Unsolved case requires explicit reason");
                 }
@@ -313,7 +338,7 @@ public class CaseWorkflowService {
         }
 
         Long victimCount = session.createNativeQuery(
-                "SELECT COUNT(*) FROM case_persons WHERE case_id = :caseId AND role = 'VICTIM'", Long.class)
+                "SELECT COUNT(*) FROM case_victims WHERE case_id = :caseId", Long.class)
             .setParameter("caseId", caseFile.getId())
             .getSingleResult();
         if (victimCount == null || victimCount == 0) {
@@ -322,8 +347,8 @@ public class CaseWorkflowService {
 
         Long medicalCount = session.createNativeQuery(
                 "SELECT COUNT(*) FROM medical_records mr " +
-                        "JOIN case_persons cp ON cp.person_id = mr.person_id " +
-                        "WHERE cp.case_id = :caseId AND cp.role = 'VICTIM'",
+                        "JOIN case_victims cv ON cv.person_id = mr.person_id " +
+                        "WHERE cv.case_id = :caseId",
                 Long.class)
             .setParameter("caseId", caseFile.getId())
             .getSingleResult();
@@ -344,8 +369,8 @@ public class CaseWorkflowService {
 
             Long causeOfDeathCount = session.createNativeQuery(
                     "SELECT COUNT(*) FROM medical_records mr " +
-                            "JOIN case_persons cp ON cp.person_id = mr.person_id " +
-                            "WHERE cp.case_id = :caseId AND cp.role = 'VICTIM' " +
+                            "JOIN case_victims cv ON cv.person_id = mr.person_id " +
+                            "WHERE cv.case_id = :caseId " +
                             "AND mr.medical_notes IS NOT NULL AND TRIM(mr.medical_notes) <> ''",
                     Long.class)
                 .setParameter("caseId", caseFile.getId())
@@ -357,7 +382,10 @@ public class CaseWorkflowService {
     }
 
     private String nextCaseNumber() {
-        return "CASE-" + LocalDate.now().getYear() + "-" + System.currentTimeMillis();
+        // W-33: Use high-precision timestamp + random salt to prevent collisions
+        return String.format("CASE-%d-%04d", 
+            System.currentTimeMillis() % 100000000L, 
+            new java.util.Random().nextInt(9999));
     }
 
     private static <T extends Enum<T>> void ensureTransition(T current, T next,
@@ -376,16 +404,16 @@ public class CaseWorkflowService {
         );
     }
 
-    private static java.util.Map<IncidentStatus, Set<IncidentStatus>> allowedCaseTransitions() {
+    private static java.util.Map<CaseStatus, Set<CaseStatus>> allowedCaseTransitions() {
         return java.util.Map.of(
-                IncidentStatus.OPEN, Set.of(IncidentStatus.UNDER_INVESTIGATION),
-                IncidentStatus.UNDER_INVESTIGATION, Set.of(IncidentStatus.ARRESTED, IncidentStatus.CHARGED),
-                IncidentStatus.ARRESTED, Set.of(IncidentStatus.CHARGED),
-                IncidentStatus.CHARGED, Set.of(IncidentStatus.IN_TRIAL),
-                IncidentStatus.IN_TRIAL, CASE_CLOSURE_STATES,
-                IncidentStatus.CLOSED_UNSOLVED, Set.of(),
-                IncidentStatus.CLOSED_ACQUITTED, Set.of(),
-                IncidentStatus.CLOSED_CONVICTED, Set.of()
+                CaseStatus.OPEN, Set.of(CaseStatus.UNDER_INVESTIGATION),
+                CaseStatus.UNDER_INVESTIGATION, Set.of(CaseStatus.ARRESTED, CaseStatus.CHARGED),
+                CaseStatus.ARRESTED, Set.of(CaseStatus.CHARGED),
+                CaseStatus.CHARGED, Set.of(CaseStatus.IN_TRIAL),
+                CaseStatus.IN_TRIAL, CASE_CLOSURE_STATES,
+                CaseStatus.CLOSED_UNSOLVED, Set.of(),
+                CaseStatus.CLOSED_ACQUITTED, Set.of(),
+                CaseStatus.CLOSED_CONVICTED, Set.of()
         );
     }
 

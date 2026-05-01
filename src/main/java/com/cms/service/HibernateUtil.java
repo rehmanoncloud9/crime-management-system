@@ -40,10 +40,9 @@ public class HibernateUtil {
                 if (dbProperties.containsKey("db.password")) configuration.setProperty("hibernate.connection.password", dbProperties.getProperty("db.password"));
             }
 
-            logger.info("Building SessionFactory with config: {}", configuration.getProperties());
+            // Insecure logging removed for C-26
             System.out.println(">>> [CMS-BOOT] Initializing Hibernate SessionFactory...");
-            System.out.println(">>> [CMS-BOOT] URL: " + configuration.getProperty("hibernate.connection.url"));
-            System.out.println(">>> [CMS-BOOT] User: " + configuration.getProperty("hibernate.connection.username"));
+            logger.info("Building SessionFactory...");
 
             SessionFactory sf = configuration.buildSessionFactory();
             System.out.println(">>> [CMS-BOOT] SessionFactory created successfully!");

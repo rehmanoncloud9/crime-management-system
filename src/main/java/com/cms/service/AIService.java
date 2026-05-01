@@ -160,7 +160,7 @@ public class AIService {
     private int getPastCasesCount(Person person) {
         return HibernateUtil.executeTransaction(session -> {
             Long count = session.createQuery(
-                            "SELECT COUNT(c) FROM CaseFile c WHERE c.suspect.id = :id",
+                            "SELECT COUNT(c) FROM CaseFile c JOIN c.suspects s WHERE s.id = :id",
                             Long.class)
                     .setParameter("id", person.getId())
                     .getSingleResult();

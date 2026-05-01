@@ -51,7 +51,11 @@ public class ArrestService {
             // Create and populate the arrest record
             ArrestRecord ar = new ArrestRecord(suspect, officer);
             ar.setCaseFile(cf);
-            ar.setCharges(charges);
+            if (charges != null && !charges.isBlank()) {
+                for (String c : charges.split("[,\\n]")) {
+                    if (!c.trim().isEmpty()) ar.addCharge(c.trim());
+                }
+            }
             ar.setArrestLocation(arrestLocation);
             ar.setCustodyLocation(custodyLocation);
             ar.setBookingReference(bookingReference.trim());
@@ -70,13 +74,14 @@ public class ArrestService {
             // AUTO-CLOSE: If the case has only 1 suspect, close case immediately
             int suspectCount = cf.getSuspects().size();
             if (suspectCount <= 1) {
-                cf.closeCase("Auto-closed: Arrest made for sole suspect");
+                cf.closeCase(com.cms.model.enums.CaseStatus.CLOSED_CONVICTED, "Auto-closed: Arrest made for sole suspect");
                 logger.info("Auto-closed case {} after arrest of sole suspect", cf.getCaseNumber());
             } else {
-                // If multiple suspects, just update status to ARREST_MADE if not already
-                if (cf.getStatus() != IncidentStatus.CLOSED &&
-                    cf.getStatus() != IncidentStatus.CLOSED_CONVICTED) {
-                    cf.setStatus(IncidentStatus.ARRESTED);
+                // If multiple suspects, just update status to ARRESTED if not already
+                if (cf.getStatus() != com.cms.model.enums.CaseStatus.CLOSED_CONVICTED &&
+                    cf.getStatus() != com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED &&
+                    cf.getStatus() != com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED) {
+                    cf.setStatus(com.cms.model.enums.CaseStatus.ARRESTED);
                 }
             }
             session.merge(cf);

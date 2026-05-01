@@ -224,7 +224,7 @@ public class AIChatService {
                 CaseFile cf = new CaseFile();
                 cf.setCaseNumber("CASE-" + System.currentTimeMillis());
                 cf.setIncident(incident);
-                cf.setStatus(IncidentStatus.OPEN);
+                cf.setStatus(com.cms.model.enums.CaseStatus.OPEN);
                 session.persist(cf);
                 
                 session.getTransaction().commit();

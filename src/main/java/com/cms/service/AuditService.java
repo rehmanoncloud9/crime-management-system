@@ -19,22 +19,26 @@ public class AuditService {
 
     public void log(AuditAction action, String entityType, Long entityId, String description) {
         User currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser == null) return;
-        logAction(currentUser, action, description);
+        logAction(currentUser, action, entityType, entityId, description);
     }
 
-    public void logAction(User actor, AuditAction action, String description) {
-        if (actor == null) return;
+    public void logAction(User actor, AuditAction action, String entityType, Long entityId, String description) {
         try {
             HibernateUtil.executeVoidTransaction(session -> {
-                // Re-attach user to this session
-                User managedActor = actor;
-                if (actor.getId() != null) {
-                    User found = session.get(User.class, actor.getId());
-                    if (found != null) managedActor = found;
+                User managedActor = null;
+                String actorName = "SYSTEM";
+
+                if (actor != null && actor.getId() != null) {
+                    managedActor = session.get(User.class, actor.getId());
+                    actorName = managedActor != null ? managedActor.getFullName() : "UNKNOWN";
                 }
-                AuditLog log = new AuditLog(managedActor, managedActor.getFullName(), action);
-                log.setEntityType(action.name());
+
+                AuditLog log = new AuditLog();
+                log.setUser(managedActor); // Can be null for system actions
+                log.setUserName(actorName);
+                log.setAction(action);
+                log.setEntityType(entityType);
+                log.setEntityId(entityId);
                 log.setDescription(description);
                 log.setIpAddress("127.0.0.1");
                 log.setWorkstationId(System.getProperty("user.name", "workstation"));
@@ -43,6 +47,10 @@ public class AuditService {
         } catch (Exception e) {
             logger.warn("Audit logging failed (non-critical): {}", e.getMessage());
         }
+    }
+
+    public void logAction(User actor, AuditAction action, String description) {
+        logAction(actor, action, null, null, description);
     }
 
     // Backwards-compatible overload

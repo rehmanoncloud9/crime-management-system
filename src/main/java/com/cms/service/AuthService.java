@@ -68,17 +68,6 @@ public class AuthService {
             userOpt = userRepository.findByUsername(identifier);
         }
 
-        // 🚨 EMERGENCY BYPASS: If DB is empty/seeding failed, allow 'admin' / 'admin123'
-        if (userOpt.isEmpty() && "admin".equals(identifier) && "admin123".equals(password)) {
-            logger.warn("!!! [AUTH] EMERGENCY BYPASS TRIGGERED for 'admin' !!!");
-            User root = new User();
-            root.setUsername("admin");
-            root.setFullName("Emergency Admin");
-            root.setRole(Role.ADMINISTRATOR);
-            root.setStatus(UserStatus.ACTIVE);
-            return root;
-        }
-
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found: " + identifier);
         }

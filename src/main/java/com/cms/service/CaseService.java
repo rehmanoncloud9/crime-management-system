@@ -17,7 +17,7 @@ public class CaseService {
                 "ORDER BY cf.id DESC", CaseFile.class)
                 .setMaxResults(500).list();
             cases.forEach(cf -> {
-                try { if (cf.getSuspects() != null) cf.getSuspects().size(); } catch (Exception ignore) {}
+                try { if (cf.getCaseSuspects() != null) cf.getCaseSuspects().size(); } catch (Exception ignore) {}
             });
             return cases;
         });
@@ -56,7 +56,7 @@ public class CaseService {
 
             CaseFile newCase = new CaseFile("CASE-" + System.currentTimeMillis(), opt.get());
             newCase.setPrimaryInvestigator(managedUser);
-            newCase.setStatus(com.cms.model.enums.IncidentStatus.OPEN);
+            newCase.setStatus(com.cms.model.enums.CaseStatus.OPEN);
             session.persist(newCase);
             created[0] = newCase;
             return null;
@@ -76,15 +76,17 @@ public class CaseService {
         }
     }
 
-    public void updateCaseStatus(Long caseId, com.cms.model.enums.IncidentStatus newStatus, String closureReason) {
-        com.cms.model.enums.IncidentStatus[] oldStatus = {null};
+    public void updateCaseStatus(Long caseId, com.cms.model.enums.CaseStatus newStatus, String closureReason) {
+        com.cms.model.enums.CaseStatus[] oldStatus = {null};
         HibernateUtil.executeTransaction(session -> {
             var opt = new CaseRepository(session).findById(caseId);
             if (opt.isPresent()) {
                 CaseFile cf = opt.get();
                 oldStatus[0] = cf.getStatus();
-                if (newStatus == com.cms.model.enums.IncidentStatus.CLOSED)
-                    cf.closeCase(closureReason == null ? "Closed" : closureReason);
+                if (newStatus == com.cms.model.enums.CaseStatus.CLOSED_CONVICTED || 
+                    newStatus == com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED || 
+                    newStatus == com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED)
+                    cf.closeCase(newStatus, closureReason == null ? "Closed" : closureReason);
                 else
                     cf.setStatus(newStatus);
                 session.merge(cf);
@@ -136,7 +138,7 @@ public class CaseService {
 
             CaseFile cf = caseOpt.get();
             cf.setPrimaryInvestigator(officer);
-            cf.setStatus(com.cms.model.enums.IncidentStatus.UNDER_INVESTIGATION);
+            cf.setStatus(com.cms.model.enums.CaseStatus.UNDER_INVESTIGATION);
             session.merge(cf);
             return null;
         });

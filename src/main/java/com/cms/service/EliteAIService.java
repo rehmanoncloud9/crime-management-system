@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +41,17 @@ public class EliteAIService {
     }
 
     private String getApiKey() {
-        String key = System.getProperty("GROQ_API_KEY");
-        if (key == null || key.isBlank()) key = System.getenv("GROQ_API_KEY");
+        String key = System.getenv("GROQ_API_KEY");
         if (key == null || key.isBlank()) {
-            throw new IllegalStateException("API Key not found in environment variables (GROQ_API_KEY)");
+            try {
+                Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+                key = dotenv.get("GROQ_API_KEY");
+            } catch (Exception ignore) {}
+        }
+        if (key == null || key.isBlank()) key = System.getProperty("GROQ_API_KEY");
+        
+        if (key == null || key.isBlank()) {
+            throw new IllegalStateException("GROQ_API_KEY not found in environment.");
         }
         return key.trim();
     }
@@ -142,10 +150,11 @@ public class EliteAIService {
             long persons  = q(s,"SELECT COUNT(p) FROM Person p");
             long cases    = q(s,"SELECT COUNT(cf) FROM CaseFile cf");
             long open     = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class)
-                             .setParameter("st",IncidentStatus.OPEN).uniqueResult();
+                             .setParameter("st", CaseStatus.OPEN).uniqueResult();
             long officers = q(s,"SELECT COUNT(u) FROM User u");
             long evidence = q(s,"SELECT COUNT(e) FROM Evidence e");
-            long warrants = s.createQuery("SELECT COUNT(p) FROM Person p WHERE p.hasActiveWarrant=true",Long.class).uniqueResult();
+            long warrants = s.createQuery("SELECT COUNT(p) FROM Person p WHERE p.deletedAt IS NULL AND EXISTS (SELECT w FROM Warrant w WHERE w.suspect = p AND w.status = :ws)",Long.class)
+                             .setParameter("ws", WarrantStatus.ISSUED).uniqueResult();
             return String.format("Persons: %d | Cases: %d | Open cases: %d | Officers: %d | Evidence: %d | Active warrants: %d",
                 persons, cases, open, officers, evidence, warrants);
         } catch (Exception e) { return "Database context temporarily unavailable."; }
@@ -155,7 +164,7 @@ public class EliteAIService {
     private String greeting() {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
             long open = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class)
-                         .setParameter("st",IncidentStatus.OPEN).uniqueResult();
+                         .setParameter("st", CaseStatus.OPEN).uniqueResult();
             User u = SessionManager.getInstance().getCurrentUser();
             String first = u != null ? u.getFullName().split(" ")[0] : "Officer";
             return "Hey " + first + "! Good to see you.\n\n" +
@@ -171,11 +180,13 @@ public class EliteAIService {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
             long persons  = q(s,"SELECT COUNT(p) FROM Person p");
             long cases    = q(s,"SELECT COUNT(cf) FROM CaseFile cf");
-            long open     = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class).setParameter("st",IncidentStatus.OPEN).uniqueResult();
-            long closed   = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class).setParameter("st",IncidentStatus.CLOSED).uniqueResult();
+            long open     = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class).setParameter("st", CaseStatus.OPEN).uniqueResult();
+            long closed   = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status IN (:stList)",Long.class)
+                             .setParameter("stList", List.of(CaseStatus.CLOSED_CONVICTED, CaseStatus.CLOSED_ACQUITTED, CaseStatus.CLOSED_UNSOLVED)).uniqueResult();
             long officers = q(s,"SELECT COUNT(u) FROM User u");
             long evidence = q(s,"SELECT COUNT(e) FROM Evidence e");
-            long warrants = s.createQuery("SELECT COUNT(p) FROM Person p WHERE p.hasActiveWarrant=true",Long.class).uniqueResult();
+            long warrants = s.createQuery("SELECT COUNT(p) FROM Person p WHERE p.deletedAt IS NULL AND EXISTS (SELECT w FROM Warrant w WHERE w.suspect = p AND w.status = :ws)",Long.class)
+                             .setParameter("ws", WarrantStatus.ISSUED).uniqueResult();
             double rate   = cases > 0 ? (double)(closed)/(cases)*100 : 0;
 
             return "Here's a quick overview of the system right now:\n\n" +
@@ -192,7 +203,7 @@ public class EliteAIService {
     private String getActiveCases() {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
             List<CaseFile> cases = s.createQuery("FROM CaseFile cf WHERE cf.status=:st ORDER BY cf.id DESC",CaseFile.class)
-                .setParameter("st",IncidentStatus.OPEN).setMaxResults(8).list();
+                .setParameter("st", CaseStatus.OPEN).setMaxResults(8).list();
             if (cases.isEmpty()) return "Good news — there are no open cases at the moment!";
             StringBuilder sb = new StringBuilder("Here are the currently open cases (" + cases.size() + " shown):\n\n");
             for (CaseFile cf : cases) {
@@ -338,8 +349,9 @@ public class EliteAIService {
             for (Object[] row : top)
                 sb.append(r++).append(". **").append(row[0]).append("** — ").append(row[1]).append(" incident").append((long)row[1]==1?"":"s").append("\n");
 
-            long open   = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class).setParameter("st",IncidentStatus.OPEN).uniqueResult();
-            long closed = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class).setParameter("st",IncidentStatus.CLOSED).uniqueResult();
+            long open   = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class).setParameter("st", CaseStatus.OPEN).uniqueResult();
+            long closed = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status IN (:stList)",Long.class)
+                             .setParameter("stList", List.of(CaseStatus.CLOSED_CONVICTED, CaseStatus.CLOSED_ACQUITTED, CaseStatus.CLOSED_UNSOLVED)).uniqueResult();
             long total  = open + closed;
             if (total > 0) {
                 double rate = (double)closed/total*100;
