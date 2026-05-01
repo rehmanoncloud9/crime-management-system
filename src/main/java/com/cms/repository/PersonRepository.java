@@ -17,7 +17,7 @@ public class PersonRepository {
 
     public List<Person> findAll(int limit, int offset) {
         TypedQuery<Person> query = entityManager.createQuery(
-                "SELECT p FROM Person p ORDER BY p.id DESC",
+                "SELECT p FROM Person p WHERE p.deletedAt IS NULL ORDER BY p.id DESC",
                 Person.class
         );
 
@@ -33,7 +33,8 @@ public class PersonRepository {
 
         TypedQuery<Person> query = entityManager.createQuery(
                 "SELECT p FROM Person p " +
-                        "WHERE LOWER(p.firstName) LIKE LOWER(:fn) " +
+                        "WHERE p.deletedAt IS NULL " +
+                        "AND LOWER(p.firstName) LIKE LOWER(:fn) " +
                         "AND LOWER(p.lastName) LIKE LOWER(:ln) " +
                         "ORDER BY p.id DESC",
                 Person.class
@@ -66,7 +67,7 @@ public class PersonRepository {
             "LEFT JOIN FETCH p.city " +
             "LEFT JOIN FETCH p.area " +
             "LEFT JOIN FETCH p.medicalRecord " +
-            "WHERE p.id = :id",
+            "WHERE p.id = :id AND p.deletedAt IS NULL",
             Person.class
         );
         query.setParameter("id", id);
@@ -87,7 +88,10 @@ public class PersonRepository {
     }
 
     public void delete(Long id) {
-        findById(id).ifPresent(entityManager::remove);
+        findById(id).ifPresent(p -> {
+            p.setDeletedAt(java.time.LocalDateTime.now());
+            entityManager.merge(p);
+        });
     }
 
     public List<Person> search(String keyword) {
@@ -98,9 +102,10 @@ public class PersonRepository {
         String pattern = "%" + keyword.trim().toLowerCase() + "%";
         TypedQuery<Person> query = entityManager.createQuery(
             "SELECT p FROM Person p " +
-            "WHERE LOWER(p.firstName) LIKE :p " +
+            "WHERE p.deletedAt IS NULL AND (" +
+            "LOWER(p.firstName) LIKE :p " +
             "OR LOWER(p.lastName) LIKE :p " +
-            "OR LOWER(p.nationalId) LIKE :p " +
+            "OR LOWER(p.nationalId) LIKE :p) " +
             "ORDER BY p.id DESC",
             Person.class
         );

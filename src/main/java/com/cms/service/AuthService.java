@@ -67,6 +67,9 @@ public class AuthService {
         if (userOpt.isEmpty()) {
             userOpt = userRepository.findByUsername(identifier);
         }
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByBadgeNumber(identifier);
+        }
 
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found: " + identifier);

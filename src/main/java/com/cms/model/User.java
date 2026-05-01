@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
         name = "users",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "username"),
-                @UniqueConstraint(columnNames = "email"),
                 @UniqueConstraint(columnNames = "badge_number")
         }
 )
@@ -34,23 +33,13 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @NotBlank
-    @Size(max = 75)
-    @Column(name = "first_name", nullable = false, length = 75)
-    private String firstName;
-
-    @NotBlank
-    @Size(max = 75)
-    @Column(name = "last_name", nullable = false, length = 75)
-    private String lastName;
-
     /**
      * ERD Specialisation 1 — Overlapping (○), Partial: PERSONS → USERS.
      * Joined-table strategy: a User IS-A Person. person_id links to the
-     * base PERSONS record. UNIQUE ensures one-to-one. Nullable = partial.
+     * base PERSONS record. UNIQUE ensures one-to-one.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "person_id", unique = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "person_id", unique = true, nullable = false)
     private Person person;
 
     @Column(name = "officer_rank")
@@ -65,20 +54,8 @@ public class User {
     @Column(name = "precinct")
     private String precinct;
 
-    @Email
-    private String email;
-
-    @Pattern(regexp = "^\\+?[0-9]{7,15}$")
-    private String phone;
-
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
     @Column(name = "date_joined")
     private LocalDate dateOfJoining;
-
-    @Lob
-    @Column(name = "profile_photo", columnDefinition = "LONGBLOB")
-    private byte[] profilePhoto;
 
     @Column(name = "profile_photo_path")
     private String profilePhotoPath;
@@ -184,12 +161,13 @@ public class User {
 
     public String getPasswordHash() { return passwordHash; }
 
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
+    public String getFirstName() { return person != null ? person.getFirstName() : "Staff"; }
+    public String getLastName() { return person != null ? person.getLastName() : ""; }
 
     @Transient
     public String getFullName() {
-        return (firstName != null ? firstName : "") + (lastName != null ? " " + lastName : "");
+        if (person != null) return person.getFirstName() + " " + person.getLastName();
+        return "Staff User";
     }
 
     public Person getPerson() { return person; }
@@ -214,14 +192,13 @@ public class User {
 
     public User getCreatedBy() { return createdBy; }
 
-    public byte[] getProfilePhoto() { return profilePhoto; }
-
+    public byte[] getProfilePhoto() { return person != null ? person.getPhoto() : null; }
     public String getDepartment() { return department; }
-    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public LocalDate getDateOfBirth() { return person != null ? person.getDateOfBirth() : null; }
     public LocalDate getDateOfJoining() { return dateOfJoining; }
     public String getProfilePhotoPath() { return profilePhotoPath; }
-    public String getEmail() { return email; }
-    public String getPhone() { return phone; }
+    public String getEmail() { return person != null ? person.getEmail() : null; }
+    public String getPhone() { return person != null ? person.getPhone() : null; }
     public LocalDateTime getLastActive() { return lastActive; }
     public boolean isMustChangePassword() { return mustChangePassword; }
 
@@ -230,26 +207,24 @@ public class User {
     public void setId(Long id) { this.id = id; }
     public void setBadgeNumber(String badgeNumber) { this.badgeNumber = badgeNumber; }
     public void setUsername(String username) { this.username = username; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-
-    public void setLastName(String lastName) { this.lastName = lastName; }
-
+    public void setFirstName(String firstName) { if (person != null) person.setFirstName(firstName); }
+    public void setLastName(String lastName) { if (person != null) person.setLastName(lastName); }
     public void setFullName(String fullName) {
-        if (fullName != null) {
+        if (fullName != null && person != null) {
             String[] parts = fullName.split(" ", 2);
-            this.firstName = parts[0];
-            this.lastName = parts.length > 1 ? parts[1] : "";
+            person.setFirstName(parts[0]);
+            person.setLastName(parts.length > 1 ? parts[1] : "");
         }
     }
     public void setOfficerRank(String officerRank) { this.officerRank = officerRank; }
     public void setRole(Role role) { this.role = role; }
     public void setDepartment(String department) { this.department = department; }
     public void setPrecinct(String precinct) { this.precinct = precinct; }
-    public void setEmail(String email) { this.email = email; }
-    public void setPhone(String phone) { this.phone = phone; }
-    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+    public void setEmail(String email) { if (person != null) person.setEmail(email); }
+    public void setPhone(String phone) { if (person != null) person.setPhone(phone); }
+    public void setDateOfBirth(LocalDate dateOfBirth) { if (person != null) person.setDateOfBirth(dateOfBirth); }
     public void setDateOfJoining(LocalDate dateOfJoining) { this.dateOfJoining = dateOfJoining; }
-    public void setProfilePhoto(byte[] profilePhoto) { this.profilePhoto = profilePhoto; }
+    public void setProfilePhoto(byte[] profilePhoto) { if (person != null) person.setPhoto(profilePhoto); }
     public void setProfilePhotoPath(String profilePhotoPath) { this.profilePhotoPath = profilePhotoPath; }
     public void setStatus(UserStatus status) { this.status = status; }
     public void setMustChangePassword(boolean mustChangePassword) { this.mustChangePassword = mustChangePassword; }

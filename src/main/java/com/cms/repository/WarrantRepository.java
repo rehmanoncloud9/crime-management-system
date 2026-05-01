@@ -1,6 +1,7 @@
 package com.cms.repository;
 
 import com.cms.model.Warrant;
+import com.cms.model.enums.WarrantStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
@@ -37,7 +38,7 @@ public class WarrantRepository {
         );
 
         query.setParameter("id", personId);
-        query.setParameter("status", "ISSUED"); // ideally enum
+        query.setParameter("status", WarrantStatus.ISSUED);
 
         query.setFirstResult(offset);
         query.setMaxResults(limit);

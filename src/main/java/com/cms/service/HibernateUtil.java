@@ -1,4 +1,4 @@
- package com.cms.service;
+package com.cms.service;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;

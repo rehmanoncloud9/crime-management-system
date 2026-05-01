@@ -6,10 +6,10 @@
     <session-factory>
         <!-- Database connection settings -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <!-- Credentials loaded programmatically from db.properties by HibernateUtil -->
+        <!-- Credentials are PLACEHOLDERS - loaded programmatically from db.properties by HibernateUtil -->
         <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/cms_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;createDatabaseIfNotExist=true</property>
-        <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password"></property>
+        <property name="hibernate.connection.username">admin</property>
+        <property name="hibernate.connection.password">placeholder</property>
 
         <!-- HikariCP Connection Pool -->
         <property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
@@ -18,7 +18,7 @@
 
         <!-- Hibernate properties -->
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
-        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.show_sql">false</property>
         <property name="hibernate.format_sql">true</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
 
@@ -33,8 +33,14 @@
         <mapping class="com.cms.model.CaseFile"/>
         <mapping class="com.cms.model.CourtCase"/>
         <mapping class="com.cms.model.CourtHearing"/>
+        <mapping class="com.cms.model.Court"/>
         <mapping class="com.cms.model.CrimeIncident"/>
         <mapping class="com.cms.model.CrimeType"/>
+        <mapping class="com.cms.model.WarrantType"/>
+        <mapping class="com.cms.model.HearingType"/>
+        <mapping class="com.cms.model.RoleEntity"/>
+        <mapping class="com.cms.model.Permission"/>
+        <mapping class="com.cms.model.MediaFile"/>
         <mapping class="com.cms.model.Evidence"/>
         <mapping class="com.cms.model.RelatedCase"/>
         <mapping class="com.cms.model.ModusOperandi"/>
@@ -42,6 +48,15 @@
         <mapping class="com.cms.model.Person"/>
         <mapping class="com.cms.model.Warrant"/>
         <mapping class="com.cms.model.Notification"/>
+        <mapping class="com.cms.model.Appeal"/>
+        <mapping class="com.cms.model.CaseNote"/>
+        <mapping class="com.cms.model.CourtCaseEvidence"/>
+        <!-- Weak Entities (ERD Specialisation 2: Disjoint, Partial) -->
+        <mapping class="com.cms.model.CaseSuspect"/>
+        <mapping class="com.cms.model.CaseVictim"/>
+        <mapping class="com.cms.model.CaseWitness"/>
+        <!-- ERD Specialisation 1: Overlapping, Partial -->
+        <mapping class="com.cms.model.Civilian"/>
         <!-- Geographic Entities -->
         <mapping class="com.cms.model.geo.Country"/>
         <mapping class="com.cms.model.geo.Province"/>

@@ -149,8 +149,11 @@ public class Person {
     @Column(name = "gang_affiliation")
     private String gangAffiliation;
 
+    @Pattern(regexp = "^\\+?[0-9]{7,15}$")
+    private String phone;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "risk_score")
+    @Column(name = "risk_score", columnDefinition = "VARCHAR(20)")
     private RiskScore riskScore;
 
     @Column(name = "risk_score_updated_at")
@@ -301,6 +304,12 @@ public class Person {
 
     public RiskScore getRiskScore() { return riskScore; }
     public void setRiskScore(RiskScore riskScore) { this.riskScore = riskScore; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 

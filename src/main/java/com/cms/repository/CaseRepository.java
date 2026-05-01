@@ -46,7 +46,8 @@ public class CaseRepository {
                 "LEFT JOIN FETCH c.primaryInvestigator " +
                 "WHERE LOWER(c.caseNumber) LIKE LOWER(:kw) " +
                 "OR LOWER(i.title) LIKE LOWER(:kw) " +
-                "OR LOWER(c.primaryInvestigator.fullName) LIKE LOWER(:kw) " +
+                "OR LOWER(c.primaryInvestigator.person.firstName) LIKE LOWER(:kw) " +
+                "OR LOWER(c.primaryInvestigator.person.lastName) LIKE LOWER(:kw) " +
                 "ORDER BY c.id DESC",
                 CaseFile.class
         );
@@ -92,9 +93,9 @@ public class CaseRepository {
             "LEFT JOIN FETCH c.incident i " +
             "LEFT JOIN FETCH i.crimeType " +
             "LEFT JOIN FETCH c.primaryInvestigator " +
-            "LEFT JOIN FETCH c.suspects " +
-            "LEFT JOIN FETCH c.victims " +
-            "LEFT JOIN FETCH c.witnesses " +
+            "LEFT JOIN FETCH c.caseSuspects cs LEFT JOIN FETCH cs.person " +
+            "LEFT JOIN FETCH c.caseVictims cv LEFT JOIN FETCH cv.person " +
+            "LEFT JOIN FETCH c.caseWitnesses cw LEFT JOIN FETCH cw.person " +
             "WHERE c.id = :id",
             CaseFile.class
         );
@@ -155,7 +156,7 @@ public class CaseRepository {
                 "WHERE u.role IN (:officerRole, :supervisorRole, :detectiveRole) " +
                 "AND u.status = :activeStatus " +
                 (busyIds.isEmpty() ? "" : "AND u.id NOT IN :busyIds ") +
-                "ORDER BY u.fullName";
+                "ORDER BY u.person.firstName, u.person.lastName";
 
         TypedQuery<User> query = entityManager.createQuery(hql, User.class)
                 .setParameter("officerRole", Role.OFFICER)

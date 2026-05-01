@@ -19,7 +19,7 @@ public class AIAnalysisResult {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "analysis_type", nullable = false)
+    @Column(name = "analysis_type", nullable = false, columnDefinition = "VARCHAR(40)")
     private AnalysisType analysisType;
 
     @Column(name = "subject_type", nullable = false, length = 50)

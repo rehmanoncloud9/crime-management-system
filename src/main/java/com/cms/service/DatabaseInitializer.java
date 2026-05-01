@@ -39,42 +39,18 @@ public class DatabaseInitializer {
     }
 
     private static void runJdbcBootstrap() {
-        String url = props.getProperty("db.url", "jdbc:mysql://localhost:3306/cms_db?createDatabaseIfNotExist=true");
+        // We now favor the schema_enhanced.sql for the baseline.
+        // This method is kept for minor hotfixes or ensuring the DB exists.
+        String url = props.getProperty("db.url", "jdbc:mysql://localhost:3306/?createDatabaseIfNotExist=true");
         String user = props.getProperty("db.username", "root");
         String pass = props.getProperty("db.password", "admin");
 
         try (Connection conn = DriverManager.getConnection(url, user, pass);
              Statement stmt = conn.createStatement()) {
-            
-            logger.info("Running JDBC Schema Migrations...");
-
-            // --- USER & RBAC ---
-            stmt.execute("ALTER TABLE users MODIFY COLUMN role VARCHAR(30) NOT NULL");
-            stmt.execute("CREATE TABLE IF NOT EXISTS roles (id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50) NOT NULL UNIQUE, description VARCHAR(255)) ENGINE=InnoDB");
-            stmt.execute("CREATE TABLE IF NOT EXISTS permissions (id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL UNIQUE, description VARCHAR(255)) ENGINE=InnoDB");
-            stmt.execute("CREATE TABLE IF NOT EXISTS role_permissions (role_id INT UNSIGNED NOT NULL, permission_id INT UNSIGNED NOT NULL, PRIMARY KEY (role_id, permission_id), FOREIGN KEY (role_id) REFERENCES roles(id), FOREIGN KEY (permission_id) REFERENCES permissions(id)) ENGINE=InnoDB");
-
-            // --- PERSONS & SOFT DELETE ---
-            stmt.execute("ALTER TABLE persons MODIFY COLUMN gender VARCHAR(20)");
-            stmt.execute("ALTER TABLE persons ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL");
-            stmt.execute("ALTER TABLE persons ADD COLUMN IF NOT EXISTS national_id VARCHAR(20) UNIQUE");
-
-            // --- CASES & WORKFLOW ---
-            stmt.execute("ALTER TABLE case_files MODIFY COLUMN status VARCHAR(50) NOT NULL");
-            stmt.execute("ALTER TABLE case_files ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL");
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_case_investigator ON case_files (primary_investigator_id)");
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_case_status_deleted ON case_files (status, deleted_at)");
-
-            // --- GEO ---
-            stmt.execute("ALTER TABLE areas ADD COLUMN IF NOT EXISTS latitude DECIMAL(10,7), ADD COLUMN IF NOT EXISTS longitude DECIMAL(10,7)");
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_area_geo ON areas (latitude, longitude)");
-
-            // --- MEDIA ---
-            stmt.execute("CREATE TABLE IF NOT EXISTS media_files (id BIGINT AUTO_INCREMENT PRIMARY KEY, entity_type VARCHAR(50) NOT NULL, entity_id BIGINT NOT NULL, file_name VARCHAR(255) NOT NULL, storage_uri VARCHAR(1000) NOT NULL, mime_type VARCHAR(100), file_size_bytes BIGINT, uploaded_by BIGINT, uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
-
-            logger.info("JDBC Bootstrap successful.");
+            stmt.execute("CREATE DATABASE IF NOT EXISTS cms_db");
+            logger.info("JDBC Bootstrap: Database 'cms_db' confirmed.");
         } catch (Exception e) {
-            logger.warn("JDBC Bootstrap encountered issues (likely already applied): {}", e.getMessage());
+            logger.error("JDBC Bootstrap failed: {}", e.getMessage());
         }
     }
 
@@ -116,22 +92,60 @@ public class DatabaseInitializer {
     }
 
     private static void ensureAdminAccount() {
-        HibernateUtil.executeVoidTransaction(session -> {
-            long adminCount = session.createQuery("SELECT COUNT(u) FROM User u WHERE u.username = 'admin'", Long.class).uniqueResult();
-            if (adminCount == 0) {
-                logger.info("No admin user found. Creating default security principal 'admin'...");
-                User admin = new User();
-                admin.setUsername("admin");
-                admin.setPasswordHash(BCrypt.hashpw("admin123", BCrypt.gensalt()));
-                admin.setFirstName("System");
-                admin.setLastName("Administrator");
-                admin.setBadgeNumber("SYS-001");
-                admin.setRole(Role.ADMINISTRATOR);
-                admin.setStatus(UserStatus.ACTIVE);
-                admin.setMustChangePassword(true); // 🛡️ Security Requirement
-                session.persist(admin);
-                logger.info("Default administrator 'admin' / 'admin123' initialized. PASSWORD CHANGE REQUIRED ON FIRST LOGIN.");
-            }
-        });
+        try {
+            HibernateUtil.executeVoidTransaction(session -> {
+                long adminCount = session.createQuery("SELECT COUNT(u) FROM User u WHERE u.username = 'admin'", Long.class).uniqueResult();
+                System.out.println(">>> [CMS-INIT] Admin count: " + adminCount);
+                logger.info("Admin count: {}", adminCount);
+                
+                if (adminCount == 0) {
+                    logger.info("No admin user found. Creating default security principal 'admin'...");
+                    System.out.println(">>> [CMS-INIT] Creating admin user...");
+                    
+                    try {
+                        // 1. Create the Person base record (Mandatory for ISA relationship)
+                        Person adminPerson = new Person();
+                        adminPerson.setFirstName("System");
+                        adminPerson.setLastName("Administrator");
+                        adminPerson.setIdentified(true);
+                        adminPerson.setPersonStatus(PersonStatus.OFFICER);
+                        session.persist(adminPerson);
+                        session.flush();
+                        System.out.println(">>> [CMS-INIT] Person created with ID: " + adminPerson.getId());
+                        
+                        // 2. Create the User account linked to that Person
+                        User admin = new User();
+                        admin.setUsername("admin");
+                        admin.setPasswordHash(BCrypt.hashpw("admin123", BCrypt.gensalt()));
+                        admin.setPerson(adminPerson);
+                        admin.setBadgeNumber("SYS-001");
+                        admin.setRole(Role.ADMINISTRATOR);
+                        admin.setStatus(UserStatus.ACTIVE);
+                        admin.setMustChangePassword(true);
+                        
+                        session.persist(admin);
+                        session.flush();
+                        System.out.println(">>> [CMS-INIT] SUCCESS: Admin 'admin' created with ID: " + admin.getId());
+                        logger.info("Default administrator 'admin' / 'admin123' initialized with linked Person record.");
+                    } catch (Exception e) {
+                        System.err.println(">>> [CMS-INIT] ERROR creating admin: " + e.getMessage());
+                        logger.error("Failed to create admin user", e);
+                        throw e;
+                    }
+                } else {
+                    System.out.println(">>> [CMS-INIT] Admin already exists (Count: " + adminCount + ")");
+                    logger.info("Admin account already exists (Count: {}).", adminCount);
+                }
+                
+                // Final verification
+                List<String> usernames = session.createQuery("SELECT u.username FROM User u", String.class).getResultList();
+                logger.info("[CMS-INIT] Users in database: {}", usernames);
+                System.out.println(">>> [CMS-INIT] Users in database: " + usernames);
+            });
+        } catch (Exception e) {
+            System.err.println(">>> [CMS-INIT] CRITICAL ERROR in ensureAdminAccount: " + e.getMessage());
+            logger.error("Critical error in ensureAdminAccount", e);
+            throw new RuntimeException("Failed to ensure admin account", e);
+        }
     }
 }

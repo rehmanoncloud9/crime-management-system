@@ -18,12 +18,8 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) {
         // 1) System Initialization (Migrations & Lookups)
         try {
-            System.out.println(">>> [CMS-BOOT] Starting System Initialization...");
             com.cms.service.DatabaseInitializer.initialize();
-            System.out.println(">>> [CMS-BOOT] System initialized.");
-        } catch (Exception e) {
-            System.err.println(">>> [CMS-BOOT-ERROR] Initialization failed!");
-            e.printStackTrace();
+        } catch (Throwable e) {
             logger.error("Database initialization failed", e);
         }
 

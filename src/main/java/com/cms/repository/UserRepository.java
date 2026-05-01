@@ -30,13 +30,28 @@ public class UserRepository {
         return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
 
+    public Optional<User> findByBadgeNumber(String badgeNumber) {
+        if (badgeNumber == null || badgeNumber.isBlank()) {
+            return Optional.empty();
+        }
+
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE u.badgeNumber = :badge",
+                User.class
+        );
+        query.setParameter("badge", badgeNumber);
+
+        List<User> results = query.getResultList();
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+    }
+
     public Optional<User> findByEmail(String email) {
         if (email == null || email.isBlank()) {
             return Optional.empty();
         }
 
         TypedQuery<User> query = entityManager.createQuery(
-                "SELECT u FROM User u WHERE u.email = :email",
+                "SELECT u FROM User u WHERE u.person.email = :email",
                 User.class
         );
         query.setParameter("email", email);
@@ -65,7 +80,8 @@ public class UserRepository {
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u " +
                         "WHERE LOWER(u.badgeNumber) LIKE LOWER(:kw) " +
-                        "OR LOWER(u.fullName) LIKE LOWER(:kw) " +
+                        "OR LOWER(u.person.firstName) LIKE LOWER(:kw) " +
+                        "OR LOWER(u.person.lastName) LIKE LOWER(:kw) " +
                         "OR LOWER(u.username) LIKE LOWER(:kw) " +
                         "ORDER BY u.id DESC",
                 User.class

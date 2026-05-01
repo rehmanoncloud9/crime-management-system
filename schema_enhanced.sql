@@ -2,23 +2,24 @@
 -- Version: 3.0 (normalized, FK-safe, production-oriented)
 -- MySQL 8+
 
-CREATE DATABASE IF NOT EXISTS cms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+CREATE DATABASE IF NOT EXISTS cms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE cms_db;
 
 SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- =========================
 -- GEO LOOKUP HIERARCHY
 -- =========================
 CREATE TABLE countries (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL UNIQUE,
     code CHAR(3) UNIQUE
 ) ENGINE=InnoDB;
 
 CREATE TABLE provinces (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    country_id INT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    country_id BIGINT UNSIGNED NOT NULL,
     name VARCHAR(120) NOT NULL,
     code VARCHAR(20),
     CONSTRAINT fk_province_country
@@ -29,8 +30,8 @@ CREATE TABLE provinces (
 ) ENGINE=InnoDB;
 
 CREATE TABLE districts (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    province_id INT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    province_id BIGINT UNSIGNED NOT NULL,
     name VARCHAR(120) NOT NULL,
     code VARCHAR(20),
     CONSTRAINT fk_district_province
@@ -41,8 +42,8 @@ CREATE TABLE districts (
 ) ENGINE=InnoDB;
 
 CREATE TABLE cities (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    district_id INT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    district_id BIGINT UNSIGNED NOT NULL,
     name VARCHAR(120) NOT NULL,
     postal_code VARCHAR(20),
     CONSTRAINT fk_city_district
@@ -53,8 +54,8 @@ CREATE TABLE cities (
 ) ENGINE=InnoDB;
 
 CREATE TABLE areas (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    city_id INT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    city_id BIGINT UNSIGNED NOT NULL,
     name VARCHAR(120) NOT NULL,
     area_type VARCHAR(30),
     latitude DECIMAL(10, 7),
@@ -76,18 +77,12 @@ CREATE TABLE users (
     badge_number VARCHAR(50) NOT NULL UNIQUE,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(75) NOT NULL,
-    last_name VARCHAR(75) NOT NULL,
-    person_id BIGINT UNSIGNED UNIQUE,
+    person_id BIGINT UNSIGNED NOT NULL UNIQUE,
     officer_rank VARCHAR(100),
     role VARCHAR(30) NOT NULL,
     department VARCHAR(150),
     precinct VARCHAR(100),
-    email VARCHAR(255) UNIQUE,
-    phone VARCHAR(20),
-    date_of_birth DATE,
     date_joined DATE,
-    profile_photo LONGBLOB,
     profile_photo_path VARCHAR(500),
     status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
     must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
@@ -102,7 +97,7 @@ CREATE TABLE users (
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_user_person
         FOREIGN KEY (person_id) REFERENCES persons(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
+        ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (failed_login_attempts >= 0)
 ) ENGINE=InnoDB;
 
@@ -118,20 +113,20 @@ CREATE TABLE civilians (
 ) ENGINE=InnoDB;
 
 CREATE TABLE roles (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255)
 ) ENGINE=InnoDB;
 
 CREATE TABLE permissions (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(255)
 ) ENGINE=InnoDB;
 
 CREATE TABLE role_permissions (
-    role_id INT UNSIGNED NOT NULL,
-    permission_id INT UNSIGNED NOT NULL,
+    role_id BIGINT UNSIGNED NOT NULL,
+    permission_id BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (role_id, permission_id),
     CONSTRAINT fk_rp_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
     CONSTRAINT fk_rp_perm FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
@@ -187,13 +182,15 @@ CREATE TABLE crime_incidents (
     reporter_name VARCHAR(200),
     reporter_contact VARCHAR(100),
     location_address VARCHAR(255),
-    district_id INT UNSIGNED,
-    city_id INT UNSIGNED,
-    area_id INT UNSIGNED,
+    district_id BIGINT UNSIGNED,
+    city_id BIGINT UNSIGNED,
+    area_id BIGINT UNSIGNED,
     precinct VARCHAR(100),
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
     reporting_officer_id BIGINT UNSIGNED,
+    reporter_person_id BIGINT UNSIGNED,
+    severity_level VARCHAR(30) DEFAULT 'MEDIUM',
     status VARCHAR(50) NOT NULL DEFAULT 'REPORTED',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -211,6 +208,9 @@ CREATE TABLE crime_incidents (
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_incident_officer
         FOREIGN KEY (reporting_officer_id) REFERENCES users(id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_incident_reporter_person
+        FOREIGN KEY (reporter_person_id) REFERENCES persons(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_incident_crime_type (crime_type_id),
     INDEX idx_incident_officer (reporting_officer_id),
@@ -249,7 +249,7 @@ CREATE TABLE case_files (
     opened_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     closed_at DATETIME,
     closure_reason TEXT,
-    related_case_ids TEXT,
+    deleted_at DATETIME NULL,
     CONSTRAINT fk_case_incident
         FOREIGN KEY (incident_id) REFERENCES crime_incidents(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -262,7 +262,7 @@ CREATE TABLE case_files (
     INDEX idx_case_status_deleted (status, deleted_at),
     CHECK (closed_at IS NULL OR closed_at >= opened_at),
     CHECK (priority IN ('LOW','MEDIUM','HIGH')),
-    CHECK (status IN ('OPEN','UNDER_INVESTIGATION','ARRESTED','CHARGED','IN_TRIAL','CLOSED_CONVICTED','CLOSED_ACQUITTED','CLOSED_UNSOLVED','CLOSED'))
+    CHECK (status IN ('OPEN','UNDER_INVESTIGATION','ARRESTED','CHARGED','IN_TRIAL','CLOSED_CONVICTED','CLOSED_ACQUITTED','CLOSED_UNSOLVED','REOPENED'))
 ) ENGINE=InnoDB;
 
 -- Officer assignment M:N (requested relationship)
@@ -294,29 +294,28 @@ CREATE TABLE persons (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    aliases TEXT,
     date_of_birth DATE,
     gender VARCHAR(20),
-    nationality_country_id INT UNSIGNED,
+    nationality_country_id BIGINT UNSIGNED,
     national_id VARCHAR(20) UNIQUE,
     height_cm SMALLINT,
     weight_kg SMALLINT,
     eye_color VARCHAR(50),
     hair_color VARCHAR(50),
     `build` VARCHAR(50),
-    distinguishing_marks TEXT,
-    district_id INT UNSIGNED,
-    city_id INT UNSIGNED,
-    area_id INT UNSIGNED,
+    district_id BIGINT UNSIGNED,
+    city_id BIGINT UNSIGNED,
+    area_id BIGINT UNSIGNED,
     address TEXT,
     is_identified BOOLEAN NOT NULL DEFAULT TRUE,
     email VARCHAR(255) UNIQUE,
+    phone VARCHAR(20),
     photo MEDIUMBLOB,
+    is_high_risk BOOLEAN DEFAULT FALSE,
     gang_affiliation VARCHAR(150),
     risk_score VARCHAR(20) DEFAULT 'LOW' COMMENT 'Derived attribute cached for performance',
     risk_score_updated_at DATETIME,
     has_active_warrant BOOLEAN DEFAULT FALSE,
-    is_identified BOOLEAN DEFAULT TRUE,
     age INT GENERATED ALWAYS AS (TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE())) VIRTUAL,
     person_status VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -337,7 +336,7 @@ CREATE TABLE persons (
     INDEX idx_person_status (person_status),
     INDEX idx_person_national_id (national_id),
     INDEX idx_person_names (first_name, last_name),
-    FULLTEXT INDEX ft_person_search (first_name, last_name, distinguishing_marks, address),
+    FULLTEXT INDEX ft_person_search (first_name, last_name, address),
     CHECK (height_cm IS NULL OR height_cm > 0),
     CHECK (weight_kg IS NULL OR weight_kg > 0)
 ) ENGINE=InnoDB;
@@ -528,7 +527,7 @@ CREATE TABLE evidence_custody_log (
 ) ENGINE=InnoDB;
 
 CREATE TABLE warrant_types (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT
 ) ENGINE=InnoDB;
@@ -565,7 +564,7 @@ CREATE TABLE arrest_records (
     arresting_officer_id BIGINT UNSIGNED NOT NULL,
     case_id BIGINT UNSIGNED,
     warrant_id BIGINT UNSIGNED,
-    arrest_date DATETIME NOT NULL,
+    arrested_at DATETIME NOT NULL,
     arrest_location VARCHAR(500),
     custody_location VARCHAR(500),
     bail_amount DECIMAL(12, 2),
@@ -584,10 +583,10 @@ CREATE TABLE arrest_records (
 
 CREATE TABLE arrest_charges (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    arrest_id BIGINT UNSIGNED NOT NULL,
+    arrest_record_id BIGINT UNSIGNED NOT NULL,
     description VARCHAR(500) NOT NULL,
     legal_section VARCHAR(100),
-    CONSTRAINT fk_acharge_arrest FOREIGN KEY (arrest_id) REFERENCES arrest_records(id) ON DELETE CASCADE
+    CONSTRAINT fk_acharge_arrest FOREIGN KEY (arrest_record_id) REFERENCES arrest_records(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- =========================
@@ -595,11 +594,10 @@ CREATE TABLE arrest_charges (
 -- =========================
 CREATE TABLE courts (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    court_code VARCHAR(30) NOT NULL UNIQUE,
-    court_name VARCHAR(150) NOT NULL UNIQUE,
-    court_level VARCHAR(50),
-    district_id INT UNSIGNED,
-    city_id INT UNSIGNED,
+    name VARCHAR(150) NOT NULL UNIQUE,
+    type VARCHAR(100),
+    district_id BIGINT UNSIGNED,
+    city_id BIGINT UNSIGNED,
     address VARCHAR(300),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_court_district
@@ -648,6 +646,13 @@ CREATE TABLE appeals (
     CONSTRAINT fk_appeal_filed_by FOREIGN KEY (filed_by) REFERENCES users(id) ON DELETE SET NULL,
     CHECK (status IN ('FILED','UNDER_REVIEW','HEARING','GRANTED','DENIED','WITHDRAWN'))
 ) ENGINE=InnoDB;
+
+CREATE TABLE hearing_types (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT
+) ENGINE=InnoDB;
+
 
 CREATE TABLE court_hearings (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -711,7 +716,7 @@ CREATE TABLE media_files (
 -- =========================
 CREATE TABLE modus_operandi (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    person_id BIGINT UNSIGNED,
+    person_id BIGINT UNSIGNED NOT NULL,
     crime_type_id INT UNSIGNED,
     method_description TEXT,
     typical_time_of_day VARCHAR(20),
@@ -719,17 +724,17 @@ CREATE TABLE modus_operandi (
     target_type VARCHAR(200),
     tools_used TEXT,
     tags TEXT,
-    noted_by BIGINT UNSIGNED,
+    noted_by BIGINT UNSIGNED NOT NULL,
     noted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_mo_person
         FOREIGN KEY (person_id) REFERENCES persons(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
+        ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_mo_crime_type
         FOREIGN KEY (crime_type_id) REFERENCES crime_types(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_mo_noted_by
         FOREIGN KEY (noted_by) REFERENCES users(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
+        ON DELETE RESTRICT ON UPDATE CASCADE,
     FULLTEXT INDEX ft_mo_search (method_description, tools_used, target_type)
 ) ENGINE=InnoDB;
 
@@ -753,6 +758,36 @@ CREATE TABLE audit_logs (
     INDEX idx_audit_entity (entity_type, entity_id),
     INDEX idx_audit_timestamp (`timestamp`)
 ) ENGINE=InnoDB;
+
+CREATE TABLE notifications (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    priority VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
+    type VARCHAR(30) NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    INDEX idx_notification_read (is_read),
+    INDEX idx_notification_timestamp (timestamp)
+) ENGINE=InnoDB;
+
+CREATE TABLE chat_sessions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    start_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_activity DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_chat_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE chat_messages (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    session_id BIGINT UNSIGNED NOT NULL,
+    sender VARCHAR(20) NOT NULL, -- 'USER' or 'AI'
+    content TEXT,
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_chat_session FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 
 CREATE TABLE ai_analysis_results (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -781,12 +816,11 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Arrest must belong to a case';
     END IF;
 
+    -- Updated: check case_suspects instead of case_persons
     IF NOT EXISTS (
-        SELECT 1
-        FROM case_persons cp
-        WHERE cp.case_id = NEW.case_id
-          AND cp.person_id = NEW.suspect_id
-          AND cp.role = 'SUSPECT'
+        SELECT 1 FROM case_suspects cs
+        WHERE cs.case_id = NEW.case_id
+          AND cs.person_id = NEW.person_id
     ) THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Arrest suspect must be linked as SUSPECT in the case';
@@ -832,8 +866,9 @@ BEGIN
             SET MESSAGE_TEXT = 'Charge sheet requires at least one evidence record';
     END IF;
 
+    -- Updated: check case_suspects instead of case_persons
     IF NOT EXISTS (
-        SELECT 1 FROM case_persons cp WHERE cp.case_id = NEW.case_id AND cp.role = 'SUSPECT'
+        SELECT 1 FROM case_suspects cs WHERE cs.case_id = NEW.case_id
     ) THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Charge sheet requires at least one suspect';
@@ -972,20 +1007,8 @@ DELIMITER ;
 -- 4. PERFORMANCE INDEXES (non-unique indexes for fast lookups)
 -- ========================================================================
 
--- Person lookups by national ID
-ALTER TABLE persons ADD INDEX idx_person_national_id (national_id);
-
 -- Crime incident lookups by report date
 ALTER TABLE crime_incidents ADD INDEX idx_incident_reported_at (reported_at);
-
--- Arrest record lookups by booking reference
-ALTER TABLE arrest_records ADD INDEX idx_arrest_booking (booking_reference);
-
--- Case file lookups by priority (for dashboard/reporting)
-ALTER TABLE case_files ADD INDEX idx_case_priority (priority);
-
--- Evidence lookups by case (though FK exists, explicit index helps)
-ALTER TABLE evidence ADD INDEX idx_evidence_case (case_id);
 
 -- Warrant lookups by expiry (for queries on valid warrants)
 ALTER TABLE warrants ADD INDEX idx_warrant_expires (expires_at);
@@ -1005,21 +1028,23 @@ SELECT
     cf.case_number,
     ci.title AS incident_title,
     ci.occurred_at,
-    u.full_name AS investigator,
+    CONCAT(p.first_name, ' ', p.last_name) AS investigator,
     cf.priority,
     cf.status,
     COUNT(DISTINCT e.id) AS evidence_count,
-    COUNT(DISTINCT CASE WHEN cp.role = 'SUSPECT' THEN cp.person_id END) AS suspect_count,
-    COUNT(DISTINCT CASE WHEN cp.role = 'VICTIM' THEN cp.person_id END) AS victim_count,
+    COUNT(DISTINCT cs.person_id) AS suspect_count,
+    COUNT(DISTINCT cv.person_id) AS victim_count,
     cf.opened_at,
     DATEDIFF(CURDATE(), DATE(cf.opened_at)) AS days_open
 FROM case_files cf
 JOIN crime_incidents ci ON ci.id = cf.incident_id
 LEFT JOIN users u ON u.id = cf.primary_investigator_id
+LEFT JOIN persons p ON p.id = u.person_id
 LEFT JOIN evidence e ON e.case_id = cf.id
-LEFT JOIN case_persons cp ON cp.case_id = cf.id
+LEFT JOIN case_suspects cs ON cs.case_id = cf.id
+LEFT JOIN case_victims cv ON cv.case_id = cf.id
 WHERE cf.status NOT IN ('CLOSED', 'CLOSED_CONVICTED', 'CLOSED_ACQUITTED', 'CLOSED_UNSOLVED')
-GROUP BY cf.id, cf.case_number, ci.title, ci.occurred_at, u.full_name, cf.priority, cf.status, cf.opened_at;
+GROUP BY cf.id, cf.case_number, ci.title, ci.occurred_at, p.first_name, p.last_name, cf.priority, cf.status, cf.opened_at;
 
 -- View: Criminal profile with arrest history
 DROP VIEW IF EXISTS v_criminal_profile;
@@ -1030,15 +1055,15 @@ SELECT
     p.national_id,
     p.risk_score,
     p.has_active_warrant,
-    COUNT(DISTINCT CASE WHEN cp.role = 'SUSPECT' THEN cp.case_id END) AS total_suspect_cases,
+    COUNT(DISTINCT cs.case_id) AS total_suspect_cases,
     COUNT(DISTINCT ar.id) AS total_arrests,
     MAX(ar.arrested_at) AS last_arrested,
     MIN(p.date_of_birth) AS age_calculation_dob,
-    GROUP_CONCAT(DISTINCT p.gang_affiliation SEPARATOR ', ') AS gang_affiliations
+    p.gang_affiliation
 FROM persons p
-LEFT JOIN case_persons cp ON cp.person_id = p.id AND cp.role = 'SUSPECT'
-LEFT JOIN arrest_records ar ON ar.suspect_id = p.id
-GROUP BY p.id, p.first_name, p.last_name, p.national_id, p.risk_score, p.has_active_warrant;
+LEFT JOIN case_suspects cs ON cs.person_id = p.id
+LEFT JOIN arrest_records ar ON ar.person_id = p.id
+GROUP BY p.id, p.first_name, p.last_name, p.national_id, p.risk_score, p.has_active_warrant, p.gang_affiliation;
 
 -- View: Case closure analysis
 DROP VIEW IF EXISTS v_closed_cases_summary;
@@ -1051,16 +1076,17 @@ SELECT
     cf.closed_at,
     DATEDIFF(DATE(cf.closed_at), DATE(cf.opened_at)) AS investigation_days,
     cf.closure_reason,
-    u.full_name AS investigator,
+    CONCAT(p.first_name, ' ', p.last_name) AS investigator,
     COUNT(DISTINCT e.id) AS evidence_collected,
     COUNT(DISTINCT CASE WHEN cc.status IN ('CONVICTED', 'ACQUITTED') THEN cc.id END) AS court_decisions
 FROM case_files cf
 JOIN crime_incidents ci ON ci.id = cf.incident_id
 LEFT JOIN users u ON u.id = cf.primary_investigator_id
+LEFT JOIN persons p ON p.id = u.person_id
 LEFT JOIN evidence e ON e.case_id = cf.id
 LEFT JOIN court_cases cc ON cc.case_id = cf.id
 WHERE cf.status IN ('CLOSED', 'CLOSED_CONVICTED', 'CLOSED_ACQUITTED', 'CLOSED_UNSOLVED')
-GROUP BY cf.id, cf.case_number, ci.title, cf.status, cf.closed_at, cf.closure_reason, u.full_name;
+GROUP BY cf.id, cf.case_number, ci.title, cf.status, cf.closed_at, cf.closure_reason, p.first_name, p.last_name;
 
 -- View: Evidence chain of custody
 DROP VIEW IF EXISTS v_evidence_custody_chain;
@@ -1072,13 +1098,14 @@ SELECT
     cf.case_number,
     e.collection_location,
     e.current_storage_location,
-    u.full_name AS collected_by,
+    CONCAT(p.first_name, ' ', p.last_name) AS collected_by,
     e.collected_at,
     e.status,
     e.file_path
 FROM evidence e
 JOIN case_files cf ON cf.id = e.case_id
 JOIN users u ON u.id = e.collected_by
+JOIN persons p ON p.id = u.person_id
 ORDER BY e.collected_at DESC;
 
 -- ========================================================================
@@ -1136,9 +1163,10 @@ BEGIN
     
     -- Log to audit trail
     INSERT INTO audit_logs(user_id, user_name, action, entity_type, entity_id, description, `timestamp`)
-    SELECT p_user_id, u.full_name, 'CLOSE_CASE', 'case_files', p_case_id, 
+    SELECT p_user_id, CONCAT(p.first_name, ' ', p.last_name), 'CLOSE_CASE', 'case_files', p_case_id, 
            CONCAT('Case closed with status: ', p_status, '. Reason: ', p_reason), NOW()
     FROM users u 
+    JOIN persons p ON p.id = u.person_id
     WHERE u.id = p_user_id;
     
     COMMIT;
@@ -1169,7 +1197,6 @@ DELIMITER ;
 -- DOCUMENTATION: Known Denormalizations (design decisions)
 -- ========================================================================
 
-/*
 -- =========================
 -- ERD SPECIALISATION HIERARCHIES
 -- =========================
@@ -1178,56 +1205,15 @@ DELIMITER ;
 -- Joined-table strategy: every User/Civilian HAS-A Person base record.
 -- Overlapping: a person can be BOTH a User AND a Civilian.
 -- Partial: not every Person must be a User or Civilian.
+-- (Implemented via fk_user_person and fk_civilian_person in table definitions)
 
-ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS person_id BIGINT UNSIGNED UNIQUE,
-    ADD CONSTRAINT fk_user_person
-        FOREIGN KEY (person_id) REFERENCES persons(id)
-        ON DELETE SET NULL ON UPDATE CASCADE;
-
-CREATE TABLE IF NOT EXISTS civilians (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    person_id BIGINT UNSIGNED NOT NULL UNIQUE,
-    occupation VARCHAR(100),
-    employer VARCHAR(150),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_civilian_person
-        FOREIGN KEY (person_id) REFERENCES persons(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
 
 
 -- ── Specialisation 2: Disjoint (⊕), Partial — PERSONS → CASE_SUSPECTS / CASE_VICTIMS / CASE_WITNESSES ──
 -- These are WEAK ENTITIES (not bare join tables). They have descriptive attributes beyond the composite PK.
 -- Disjoint: a person can hold at most ONE role per case.
 -- Partial: not every Person needs to appear in any of these tables.
-
--- Add descriptive attributes to make these proper weak entities per ERD
-ALTER TABLE case_suspects
-    ADD COLUMN IF NOT EXISTS motive TEXT,
-    ADD COLUMN IF NOT EXISTS threat_level VARCHAR(20) DEFAULT 'LOW'
-        CHECK (threat_level IN ('LOW','MEDIUM','HIGH','CRITICAL')),
-    ADD COLUMN IF NOT EXISTS added_by BIGINT UNSIGNED,
-    ADD COLUMN IF NOT EXISTS added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ADD CONSTRAINT fk_csu_added_by
-        FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL;
-
-ALTER TABLE case_victims
-    ADD COLUMN IF NOT EXISTS statement TEXT,
-    ADD COLUMN IF NOT EXISTS injury_description TEXT,
-    ADD COLUMN IF NOT EXISTS added_by BIGINT UNSIGNED,
-    ADD COLUMN IF NOT EXISTS added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ADD CONSTRAINT fk_cv_added_by
-        FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL;
-
-ALTER TABLE case_witnesses
-    ADD COLUMN IF NOT EXISTS statement TEXT,
-    ADD COLUMN IF NOT EXISTS reliability_rating TINYINT CHECK (reliability_rating BETWEEN 1 AND 5),
-    ADD COLUMN IF NOT EXISTS added_by BIGINT UNSIGNED,
-    ADD COLUMN IF NOT EXISTS added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ADD CONSTRAINT fk_cw_added_by
-        FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL;
+-- (Implemented via descriptive columns in weak entity table definitions)
 
 -- Drop legacy case_persons table (replaced by three ERD-defined weak entity tables)
 DROP TABLE IF EXISTS case_persons;
@@ -1275,7 +1261,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-
 
 /*
 DESIGN DECISIONS - Known Denormalizations:
@@ -1329,3 +1314,4 @@ ERD SPECIALISATION HIERARCHIES IMPLEMENTED:
 */
 
 -- End of Database Enhancements
+SET FOREIGN_KEY_CHECKS = 1;

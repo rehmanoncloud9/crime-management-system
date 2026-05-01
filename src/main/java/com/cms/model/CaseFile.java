@@ -35,11 +35,11 @@ public class CaseFile {
     private User primaryInvestigator;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "priority", nullable = false, length = 20)
+    @Column(name = "priority", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
     private CasePriority priority;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 50, columnDefinition = "VARCHAR(50)")
     private CaseStatus status;
 
     @Column(name = "opened_at", nullable = false, updatable = false)
