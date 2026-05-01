@@ -57,11 +57,15 @@ CREATE TABLE areas (
     city_id INT UNSIGNED NOT NULL,
     name VARCHAR(120) NOT NULL,
     area_type VARCHAR(30),
+    latitude DECIMAL(10, 7),
+    longitude DECIMAL(10, 7),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_area_city
         FOREIGN KEY (city_id) REFERENCES cities(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     UNIQUE KEY uk_area_city_name (city_id, name),
-    INDEX idx_area_city (city_id)
+    INDEX idx_area_city (city_id),
+    INDEX idx_area_geo (latitude, longitude)
 ) ENGINE=InnoDB;
 
 -- =========================
@@ -72,7 +76,9 @@ CREATE TABLE users (
     badge_number VARCHAR(50) NOT NULL UNIQUE,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(150) NOT NULL,
+    first_name VARCHAR(75) NOT NULL,
+    last_name VARCHAR(75) NOT NULL,
+    person_id BIGINT UNSIGNED UNIQUE,
     officer_rank VARCHAR(100),
     role VARCHAR(30) NOT NULL,
     department VARCHAR(150),
@@ -94,7 +100,41 @@ CREATE TABLE users (
     CONSTRAINT fk_user_created_by
         FOREIGN KEY (created_by) REFERENCES users(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_user_person
+        FOREIGN KEY (person_id) REFERENCES persons(id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
     CHECK (failed_login_attempts >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE civilians (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    person_id BIGINT UNSIGNED NOT NULL UNIQUE,
+    occupation VARCHAR(100),
+    employer VARCHAR(150),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_civilian_person FOREIGN KEY (person_id) REFERENCES persons(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE roles (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(255)
+) ENGINE=InnoDB;
+
+CREATE TABLE permissions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(255)
+) ENGINE=InnoDB;
+
+CREATE TABLE role_permissions (
+    role_id INT UNSIGNED NOT NULL,
+    permission_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (role_id, permission_id),
+    CONSTRAINT fk_rp_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    CONSTRAINT fk_rp_perm FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE login_sessions (
@@ -219,6 +259,7 @@ CREATE TABLE case_files (
     INDEX idx_case_primary_investigator (primary_investigator_id),
     INDEX idx_case_priority (priority),
     INDEX idx_case_status (status),
+    INDEX idx_case_status_deleted (status, deleted_at),
     CHECK (closed_at IS NULL OR closed_at >= opened_at),
     CHECK (priority IN ('LOW','MEDIUM','HIGH')),
     CHECK (status IN ('OPEN','UNDER_INVESTIGATION','ARRESTED','CHARGED','IN_TRIAL','CLOSED_CONVICTED','CLOSED_ACQUITTED','CLOSED_UNSOLVED','CLOSED'))
@@ -271,14 +312,16 @@ CREATE TABLE persons (
     is_identified BOOLEAN NOT NULL DEFAULT TRUE,
     email VARCHAR(255) UNIQUE,
     photo MEDIUMBLOB,
-    has_active_warrant BOOLEAN NOT NULL DEFAULT FALSE,
-    is_high_risk BOOLEAN NOT NULL DEFAULT FALSE,
-    gang_affiliation VARCHAR(255),
-    risk_score VARCHAR(20),
+    gang_affiliation VARCHAR(150),
+    risk_score VARCHAR(20) DEFAULT 'LOW' COMMENT 'Derived attribute cached for performance',
     risk_score_updated_at DATETIME,
+    has_active_warrant BOOLEAN DEFAULT FALSE,
+    is_identified BOOLEAN DEFAULT TRUE,
+    age INT GENERATED ALWAYS AS (TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE())) VIRTUAL,
     person_status VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
     CONSTRAINT fk_person_country
         FOREIGN KEY (nationality_country_id) REFERENCES countries(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
@@ -292,10 +335,26 @@ CREATE TABLE persons (
         FOREIGN KEY (area_id) REFERENCES areas(id)
         ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_person_status (person_status),
-    INDEX idx_person_high_risk (is_high_risk),
+    INDEX idx_person_national_id (national_id),
+    INDEX idx_person_names (first_name, last_name),
     FULLTEXT INDEX ft_person_search (first_name, last_name, distinguishing_marks, address),
     CHECK (height_cm IS NULL OR height_cm > 0),
     CHECK (weight_kg IS NULL OR weight_kg > 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE person_marks (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    person_id BIGINT UNSIGNED NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    body_location VARCHAR(100),
+    CONSTRAINT fk_pmark_person FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE person_aliases (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    person_id BIGINT UNSIGNED NOT NULL,
+    alias VARCHAR(150) NOT NULL,
+    CONSTRAINT fk_palias_person FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE medical_records (
@@ -338,35 +397,55 @@ CREATE TABLE case_persons (
     INDEX idx_case_person_role (role)
 ) ENGINE=InnoDB;
 
+CREATE TABLE case_notes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    case_id BIGINT UNSIGNED NOT NULL,
+    author_id BIGINT UNSIGNED NOT NULL,
+    note_text TEXT NOT NULL,
+    is_confidential BOOLEAN DEFAULT FALSE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cn_case FOREIGN KEY (case_id) REFERENCES case_files(id) ON DELETE CASCADE,
+    CONSTRAINT fk_cn_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- Compatibility with existing JPA join tables
 CREATE TABLE case_suspects (
     case_id BIGINT UNSIGNED NOT NULL,
     person_id BIGINT UNSIGNED NOT NULL,
+    motive TEXT,
+    threat_level VARCHAR(20) DEFAULT 'LOW',
+    added_by BIGINT UNSIGNED,
+    added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (case_id, person_id),
-    CONSTRAINT fk_case_suspect_case FOREIGN KEY (case_id) REFERENCES case_files(id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_case_suspect_person FOREIGN KEY (person_id) REFERENCES persons(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT fk_case_suspect_case FOREIGN KEY (case_id) REFERENCES case_files(id) ON DELETE CASCADE,
+    CONSTRAINT fk_case_suspect_person FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE,
+    CONSTRAINT fk_case_suspect_added_by FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE case_victims (
     case_id BIGINT UNSIGNED NOT NULL,
     person_id BIGINT UNSIGNED NOT NULL,
+    statement TEXT,
+    injury_description TEXT,
+    added_by BIGINT UNSIGNED,
+    added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (case_id, person_id),
-    CONSTRAINT fk_case_victim_case FOREIGN KEY (case_id) REFERENCES case_files(id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_case_victim_person FOREIGN KEY (person_id) REFERENCES persons(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT fk_case_victim_case FOREIGN KEY (case_id) REFERENCES case_files(id) ON DELETE CASCADE,
+    CONSTRAINT fk_case_victim_person FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE,
+    CONSTRAINT fk_case_victim_added_by FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE case_witnesses (
     case_id BIGINT UNSIGNED NOT NULL,
     person_id BIGINT UNSIGNED NOT NULL,
+    statement TEXT,
+    reliability_rating INT CHECK (reliability_rating BETWEEN 1 AND 5),
+    added_by BIGINT UNSIGNED,
+    added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (case_id, person_id),
-    CONSTRAINT fk_case_witness_case FOREIGN KEY (case_id) REFERENCES case_files(id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_case_witness_person FOREIGN KEY (person_id) REFERENCES persons(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT fk_case_witness_case FOREIGN KEY (case_id) REFERENCES case_files(id) ON DELETE CASCADE,
+    CONSTRAINT fk_case_witness_person FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE,
+    CONSTRAINT fk_case_witness_added_by FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE person_associates (
@@ -415,8 +494,18 @@ CREATE TABLE evidence (
     INDEX idx_evidence_case (case_id),
     INDEX idx_evidence_suspect (suspect_id),
     INDEX idx_evidence_status (status),
-    CHECK (status IN ('COLLECTED','ANALYZED','VERIFIED','IN_STORAGE','IN_LAB','TRANSFERRED','IN_COURT','RETURNED','DESTROYED')),
+    CHECK (status IN ('COLLECTED','ANALYZED','VERIFIED','IN_STORAGE','IN_LAB','TRANSFERRED','IN_COURT','RETURNED','DESTROYED','IN_TRANSFER','STORED')),
     CHECK (type IN ('PHYSICAL','DIGITAL','DOCUMENTARY','FORENSIC','BIOLOGICAL'))
+) ENGINE=InnoDB;
+
+CREATE TABLE court_case_evidence (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    court_case_id BIGINT UNSIGNED NOT NULL,
+    evidence_id BIGINT UNSIGNED NOT NULL,
+    presented_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    CONSTRAINT fk_cce_case FOREIGN KEY (court_case_id) REFERENCES court_cases(id) ON DELETE CASCADE,
+    CONSTRAINT fk_cce_evidence FOREIGN KEY (evidence_id) REFERENCES evidence(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE evidence_custody_log (
@@ -438,62 +527,67 @@ CREATE TABLE evidence_custody_log (
     INDEX idx_custody_action_at (action_at)
 ) ENGINE=InnoDB;
 
+CREATE TABLE warrant_types (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT
+) ENGINE=InnoDB;
+
 CREATE TABLE warrants (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     warrant_number VARCHAR(50) NOT NULL UNIQUE,
     case_id BIGINT UNSIGNED,
     suspect_id BIGINT UNSIGNED NOT NULL,
     issued_by VARCHAR(255) NOT NULL,
+    issuing_court_id BIGINT UNSIGNED,
     issued_at DATE NOT NULL,
     expires_at DATE,
-    charges TEXT NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ISSUED',
-    created_by BIGINT UNSIGNED,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_warrant_case
-        FOREIGN KEY (case_id) REFERENCES case_files(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT fk_warrant_suspect
-        FOREIGN KEY (suspect_id) REFERENCES persons(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT fk_warrant_created_by
-        FOREIGN KEY (created_by) REFERENCES users(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    INDEX idx_warrant_case (case_id),
-    INDEX idx_warrant_suspect (suspect_id),
+    CONSTRAINT fk_warrant_case FOREIGN KEY (case_id) REFERENCES case_files(id) ON DELETE SET NULL,
+    CONSTRAINT fk_warrant_suspect FOREIGN KEY (suspect_id) REFERENCES persons(id) ON DELETE CASCADE,
+    CONSTRAINT fk_warrant_court FOREIGN KEY (issuing_court_id) REFERENCES courts(id) ON DELETE SET NULL,
     CHECK (expires_at IS NULL OR expires_at >= issued_at)
+) ENGINE=InnoDB;
+
+CREATE TABLE warrant_charges (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    warrant_id BIGINT UNSIGNED NOT NULL,
+    description VARCHAR(500) NOT NULL,
+    legal_section VARCHAR(100),
+    CONSTRAINT fk_wcharge_warrant FOREIGN KEY (warrant_id) REFERENCES warrants(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE arrest_records (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    person_id BIGINT UNSIGNED NOT NULL,
+    arresting_officer_id BIGINT UNSIGNED NOT NULL,
     case_id BIGINT UNSIGNED,
     warrant_id BIGINT UNSIGNED,
-    suspect_id BIGINT UNSIGNED NOT NULL,
-    arresting_officer_id BIGINT UNSIGNED NOT NULL,
-    arrested_at DATETIME NOT NULL,
-    arrest_location VARCHAR(255),
-    custody_location VARCHAR(255),
+    arrest_date DATETIME NOT NULL,
+    arrest_location VARCHAR(500),
+    custody_location VARCHAR(500),
+    bail_amount DECIMAL(12, 2),
+    bail_status VARCHAR(20) DEFAULT 'NOT_APPLICABLE',
+    arrest_status VARCHAR(20) NOT NULL DEFAULT 'COMPLETED',
     booking_reference VARCHAR(100) UNIQUE,
-    charges TEXT,
-    arrest_status VARCHAR(20) NOT NULL DEFAULT 'INITIATED',
-    CONSTRAINT fk_arrest_case
-        FOREIGN KEY (case_id) REFERENCES case_files(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT fk_arrest_warrant
-        FOREIGN KEY (warrant_id) REFERENCES warrants(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT fk_arrest_suspect
-        FOREIGN KEY (suspect_id) REFERENCES persons(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT fk_arrest_officer
-        FOREIGN KEY (arresting_officer_id) REFERENCES users(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    INDEX idx_arrest_case (case_id),
-    INDEX idx_arrest_suspect (suspect_id),
-    INDEX idx_arrest_officer (arresting_officer_id),
-    INDEX idx_arrest_date (arrested_at),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_arrest_person FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE,
+    CONSTRAINT fk_arrest_officer FOREIGN KEY (arresting_officer_id) REFERENCES users(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_arrest_case FOREIGN KEY (case_id) REFERENCES case_files(id) ON DELETE SET NULL,
+    CONSTRAINT fk_arrest_warrant FOREIGN KEY (warrant_id) REFERENCES warrants(id) ON DELETE SET NULL,
+    CHECK (bail_status IN ('NOT_APPLICABLE','PENDING','GRANTED','DENIED','FORFEITED')),
     CHECK (arrest_status IN ('INITIATED','COMPLETED','CANCELLED'))
+) ENGINE=InnoDB;
+
+CREATE TABLE arrest_charges (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    arrest_id BIGINT UNSIGNED NOT NULL,
+    description VARCHAR(500) NOT NULL,
+    legal_section VARCHAR(100),
+    CONSTRAINT fk_acharge_arrest FOREIGN KEY (arrest_id) REFERENCES arrest_records(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- =========================
@@ -521,22 +615,38 @@ CREATE TABLE court_cases (
     case_id BIGINT UNSIGNED NOT NULL UNIQUE,
     court_id BIGINT UNSIGNED,
     court_case_number VARCHAR(50) UNIQUE,
-    court_name VARCHAR(150),
     judge_name VARCHAR(100),
     prosecutor_id BIGINT UNSIGNED,
     filed_at DATE NOT NULL,
+    verdict TEXT,
+    verdict_date DATE,
+    sentence_details TEXT,
+    arrest_id BIGINT UNSIGNED,
+    defendant_id BIGINT UNSIGNED,
     status VARCHAR(50) NOT NULL DEFAULT 'FILED',
-    CONSTRAINT fk_court_case_file
-        FOREIGN KEY (case_id) REFERENCES case_files(id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_court_case_court
-        FOREIGN KEY (court_id) REFERENCES courts(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT fk_court_prosecutor
-        FOREIGN KEY (prosecutor_id) REFERENCES users(id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_court_case_file FOREIGN KEY (case_id) REFERENCES case_files(id) ON DELETE CASCADE,
+    CONSTRAINT fk_court_case_court FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE SET NULL,
+    CONSTRAINT fk_court_prosecutor FOREIGN KEY (prosecutor_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_court_case_arrest FOREIGN KEY (arrest_id) REFERENCES arrest_records(id) ON DELETE SET NULL,
+    CONSTRAINT fk_court_case_defendant FOREIGN KEY (defendant_id) REFERENCES persons(id) ON DELETE SET NULL,
     INDEX idx_court_id (court_id),
     INDEX idx_court_status (status)
+) ENGINE=InnoDB;
+
+CREATE TABLE appeals (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    court_case_id BIGINT UNSIGNED NOT NULL,
+    appeal_number VARCHAR(50) NOT NULL UNIQUE,
+    filed_by BIGINT UNSIGNED,
+    filed_at DATE NOT NULL,
+    grounds TEXT NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'FILED',
+    outcome TEXT,
+    decided_at DATE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_appeal_court_case FOREIGN KEY (court_case_id) REFERENCES court_cases(id) ON DELETE CASCADE,
+    CONSTRAINT fk_appeal_filed_by FOREIGN KEY (filed_by) REFERENCES users(id) ON DELETE SET NULL,
+    CHECK (status IN ('FILED','UNDER_REVIEW','HEARING','GRANTED','DENIED','WITHDRAWN'))
 ) ENGINE=InnoDB;
 
 CREATE TABLE court_hearings (
@@ -581,6 +691,19 @@ CREATE TABLE charge_sheets (
         FOREIGN KEY (filed_by) REFERENCES users(id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     CHECK (status IN ('DRAFT','FILED','SUBMITTED'))
+) ENGINE=InnoDB;
+
+CREATE TABLE media_files (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id BIGINT UNSIGNED NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    storage_uri VARCHAR(1000) NOT NULL,
+    mime_type VARCHAR(100),
+    file_size_bytes BIGINT,
+    uploaded_by BIGINT UNSIGNED,
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_media_user FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- =========================
@@ -1047,6 +1170,114 @@ DELIMITER ;
 -- ========================================================================
 
 /*
+-- =========================
+-- ERD SPECIALISATION HIERARCHIES
+-- =========================
+
+-- ── Specialisation 1: Overlapping (○), Partial — PERSONS → USERS / CIVILIANS ──
+-- Joined-table strategy: every User/Civilian HAS-A Person base record.
+-- Overlapping: a person can be BOTH a User AND a Civilian.
+-- Partial: not every Person must be a User or Civilian.
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS person_id BIGINT UNSIGNED UNIQUE,
+    ADD CONSTRAINT fk_user_person
+        FOREIGN KEY (person_id) REFERENCES persons(id)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+CREATE TABLE IF NOT EXISTS civilians (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    person_id BIGINT UNSIGNED NOT NULL UNIQUE,
+    occupation VARCHAR(100),
+    employer VARCHAR(150),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_civilian_person
+        FOREIGN KEY (person_id) REFERENCES persons(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+
+-- ── Specialisation 2: Disjoint (⊕), Partial — PERSONS → CASE_SUSPECTS / CASE_VICTIMS / CASE_WITNESSES ──
+-- These are WEAK ENTITIES (not bare join tables). They have descriptive attributes beyond the composite PK.
+-- Disjoint: a person can hold at most ONE role per case.
+-- Partial: not every Person needs to appear in any of these tables.
+
+-- Add descriptive attributes to make these proper weak entities per ERD
+ALTER TABLE case_suspects
+    ADD COLUMN IF NOT EXISTS motive TEXT,
+    ADD COLUMN IF NOT EXISTS threat_level VARCHAR(20) DEFAULT 'LOW'
+        CHECK (threat_level IN ('LOW','MEDIUM','HIGH','CRITICAL')),
+    ADD COLUMN IF NOT EXISTS added_by BIGINT UNSIGNED,
+    ADD COLUMN IF NOT EXISTS added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD CONSTRAINT fk_csu_added_by
+        FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE case_victims
+    ADD COLUMN IF NOT EXISTS statement TEXT,
+    ADD COLUMN IF NOT EXISTS injury_description TEXT,
+    ADD COLUMN IF NOT EXISTS added_by BIGINT UNSIGNED,
+    ADD COLUMN IF NOT EXISTS added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD CONSTRAINT fk_cv_added_by
+        FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE case_witnesses
+    ADD COLUMN IF NOT EXISTS statement TEXT,
+    ADD COLUMN IF NOT EXISTS reliability_rating TINYINT CHECK (reliability_rating BETWEEN 1 AND 5),
+    ADD COLUMN IF NOT EXISTS added_by BIGINT UNSIGNED,
+    ADD COLUMN IF NOT EXISTS added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD CONSTRAINT fk_cw_added_by
+        FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- Drop legacy case_persons table (replaced by three ERD-defined weak entity tables)
+DROP TABLE IF EXISTS case_persons;
+
+
+-- ── Disjoint (⊕) Constraint Triggers ──
+-- A person CANNOT hold more than one role in the same case.
+
+DELIMITER $$
+
+CREATE TRIGGER trg_disjoint_victim
+BEFORE INSERT ON case_victims
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM case_witnesses WHERE case_id = NEW.case_id AND person_id = NEW.person_id)
+    OR EXISTS (SELECT 1 FROM case_suspects WHERE case_id = NEW.case_id AND person_id = NEW.person_id)
+    THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERD Disjoint Violation: Person already has a role in this case.';
+    END IF;
+END$$
+
+CREATE TRIGGER trg_disjoint_witness
+BEFORE INSERT ON case_witnesses
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM case_victims WHERE case_id = NEW.case_id AND person_id = NEW.person_id)
+    OR EXISTS (SELECT 1 FROM case_suspects WHERE case_id = NEW.case_id AND person_id = NEW.person_id)
+    THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERD Disjoint Violation: Person already has a role in this case.';
+    END IF;
+END$$
+
+CREATE TRIGGER trg_disjoint_suspect
+BEFORE INSERT ON case_suspects
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM case_victims WHERE case_id = NEW.case_id AND person_id = NEW.person_id)
+    OR EXISTS (SELECT 1 FROM case_witnesses WHERE case_id = NEW.case_id AND person_id = NEW.person_id)
+    THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERD Disjoint Violation: Person already has a role in this case.';
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+/*
 DESIGN DECISIONS - Known Denormalizations:
 
 1. persons.aliases (TEXT)
@@ -1061,17 +1292,9 @@ DESIGN DECISIONS - Known Denormalizations:
    - Could extract: person_gangs(person_id, gang_id) + gangs table
    - Current design: sufficient for case requirements
 
-3. evidence.charges (relational)
-   - Charges linked to case via evidence
-   - Better design would have charges table with FK to case_files
-   - Current approach: works via case_persons + case linkage
-
-4. warrants.charges (TEXT or relational)
-   - Similar to evidence.charges
-   - For court visibility: separate charges table recommended
-
-All of the above are acceptable for a college database course project,
-but would be normalized in a production criminal justice system.
+3. persons.risk_score (VARCHAR 20)
+   - DERIVED ATTRIBUTE per ERD. Stored for performance: computed by AI/ML pipeline.
+   - Cached here, refreshed periodically. Justified denormalization.
 
 NORMALIZATION IMPROVEMENTS IMPLEMENTED:
 
@@ -1082,6 +1305,27 @@ NORMALIZATION IMPROVEMENTS IMPLEMENTED:
 ✓ Indexes on frequently-queried columns
 ✓ Views provide normalized data presentation layer
 ✓ Stored procedures encapsulate complex operations
+
+ERD SPECIALISATION HIERARCHIES IMPLEMENTED:
+
+✓ Specialisation 1 — Overlapping (○), Partial: PERSONS → USERS / CIVILIANS
+✓ Specialisation 2 — Weak Entities: CASE_ROLES (Disjoint ⊕, Partial)
+
+✓ Normalization — Multivalued Attributes (1NF):
+    - persons.distinguishing_marks → person_marks table
+    - arrest_records.charges → arrest_charges table
+    - warrants.charges → warrant_charges table
+
+✓ Normalization — Strong Entities:
+    - promoted court_name to dedicated COURTS table linked via court_id.
+
+  Strategy: Joined-table (table-per-subclass) via person_id FK
+  users.person_id UNIQUE FK → persons(id), civilians.person_id UNIQUE FK → persons(id)
+
+✓ Specialisation 2 — Disjoint (⊕), Partial: PERSONS → CASE_SUSPECTS / CASE_VICTIMS / CASE_WITNESSES
+  Composite PK (case_id, person_id). Weak entities with descriptive attributes.
+  Disjoint constraint enforced via triggers trg_disjoint_victim/witness/suspect.
+  Legacy case_persons table dropped.
 */
 
 -- End of Database Enhancements

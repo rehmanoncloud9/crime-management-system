@@ -16,15 +16,15 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // 1) Seed database separately
+        // 1) System Initialization (Migrations & Lookups)
         try {
-            System.out.println(">>> [CMS-BOOT] Initializing database seeding...");
-            com.cms.service.SampleDataService.seedAll();
-            System.out.println(">>> [CMS-BOOT] Seeding cycle complete.");
+            System.out.println(">>> [CMS-BOOT] Starting System Initialization...");
+            com.cms.service.DatabaseInitializer.initialize();
+            System.out.println(">>> [CMS-BOOT] System initialized.");
         } catch (Exception e) {
-            System.err.println(">>> [CMS-BOOT-ERROR] SEEDING FAILED! Check stack trace below:");
+            System.err.println(">>> [CMS-BOOT-ERROR] Initialization failed!");
             e.printStackTrace();
-            logger.error("Sample data seeding failed", e);
+            logger.error("Database initialization failed", e);
         }
 
         // 2) Always try to load UI
