@@ -22,7 +22,7 @@ public class AuditLog {
 
     // Who performed action
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    @JoinColumn(name = "user_id", nullable = true, updatable = false)
     private User user;
 
     // Snapshot (VERY important: survives even if user is deleted/changed)
@@ -82,10 +82,13 @@ public class AuditLog {
     public Long getId() { return id; }
 
     public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
 
     public AuditAction getAction() { return action; }
+    public void setAction(AuditAction action) { this.action = action; }
 
     public String getEntityType() { return entityType; }
     public void setEntityType(String entityType) {

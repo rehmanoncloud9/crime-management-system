@@ -26,8 +26,9 @@ public class CourtCase {
     @Column(name = "court_case_number", unique = true, length = 50)
     private String courtCaseNumber;
 
-    @Column(name = "court_name", length = 150)
-    private String courtName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "court_id")
+    private Court court;
 
     @Column(name = "judge_name", length = 100)
     private String judgeName;
@@ -38,6 +39,23 @@ public class CourtCase {
 
     @Column(name = "filed_at", nullable = false, updatable = false)
     private LocalDate filedAt;
+
+    @Column(name = "verdict", columnDefinition = "TEXT")
+    private String verdict;
+
+    @Column(name = "verdict_date")
+    private LocalDate verdictDate;
+
+    @Column(name = "sentence_details", columnDefinition = "TEXT")
+    private String sentenceDetails;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "arrest_id")
+    private ArrestRecord arrest;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "defendant_id")
+    private Person defendant;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
@@ -78,9 +96,12 @@ public class CourtCase {
         this.courtCaseNumber = sanitize(courtCaseNumber);
     }
 
-    public String getCourtName() { return courtName; }
-    public void setCourtName(String courtName) {
-        this.courtName = sanitize(courtName);
+    public Court getCourt() { return court; }
+    public void setCourt(Court court) { this.court = court; }
+
+    @Transient
+    public String getCourtName() {
+        return court != null ? court.getName() : "N/A";
     }
 
     public String getJudgeName() { return judgeName; }
@@ -95,6 +116,21 @@ public class CourtCase {
 
     public LocalDate getFiledAt() { return filedAt; }
     public void setFiledAt(LocalDate filedAt) { this.filedAt = filedAt; }
+
+    public String getVerdict() { return verdict; }
+    public void setVerdict(String verdict) { this.verdict = verdict; }
+
+    public LocalDate getVerdictDate() { return verdictDate; }
+    public void setVerdictDate(LocalDate verdictDate) { this.verdictDate = verdictDate; }
+
+    public String getSentenceDetails() { return sentenceDetails; }
+    public void setSentenceDetails(String sentenceDetails) { this.sentenceDetails = sentenceDetails; }
+
+    public ArrestRecord getArrest() { return arrest; }
+    public void setArrest(ArrestRecord arrest) { this.arrest = arrest; }
+
+    public Person getDefendant() { return defendant; }
+    public void setDefendant(Person defendant) { this.defendant = defendant; }
 
     public CourtStatus getStatus() { return status; }
 

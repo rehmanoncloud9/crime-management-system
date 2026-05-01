@@ -1,6 +1,6 @@
 package com.cms.model;
 
-import com.cms.model.enums.IncidentStatus;
+import com.cms.model.enums.CaseStatus;
 import com.cms.model.enums.CasePriority;
 import jakarta.persistence.*;
 
@@ -8,12 +8,14 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "case_files",
         indexes = {
                 @Index(name = "idx_case_number", columnList = "case_number"),
-                @Index(name = "idx_case_status", columnList = "status")
+                @Index(name = "idx_case_status", columnList = "status"),
+                @Index(name = "idx_case_investigator", columnList = "primary_investigator_id")
         })
 public class CaseFile {
 
@@ -38,7 +40,7 @@ public class CaseFile {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private IncidentStatus status;
+    private CaseStatus status;
 
     @Column(name = "opened_at", nullable = false, updatable = false)
     private LocalDateTime openedAt;
@@ -49,46 +51,27 @@ public class CaseFile {
     @Column(name = "closure_reason", columnDefinition = "TEXT")
     private String closureReason;
 
-    // Keep as TEXT for portability
-    @Column(name = "related_case_ids", columnDefinition = "TEXT")
-    private String relatedCaseIds;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "case_suspects",
-            joinColumns = @JoinColumn(name = "case_id"),
-            inverseJoinColumns = @JoinColumn(name = "person_id")
-    )
-    private Set<Person> suspects = new HashSet<>();
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "case_victims",
-            joinColumns = @JoinColumn(name = "case_id"),
-            inverseJoinColumns = @JoinColumn(name = "person_id")
-    )
-    private Set<Person> victims = new HashSet<>();
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "case_witnesses",
-            joinColumns = @JoinColumn(name = "case_id"),
-            inverseJoinColumns = @JoinColumn(name = "person_id")
-    )
-    private Set<Person> witnesses = new HashSet<>();
-
     /**
-     * One-to-many relationship with RelatedCase.
-     * Maps to case_files via the related_cases table (1NF normalized).
-     * This replaces the legacy comma-separated related_case_ids field.
+     * ERD Specialisation 2 — Weak entities with composite PK (case_id, person_id).
+     * Disjoint (⊕): a person can only hold ONE role per case.
+     * Partial: not every person needs to be in any of these.
      */
+    @OneToMany(mappedBy = "caseFile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<CaseSuspect> caseSuspects = new HashSet<>();
+
+    @OneToMany(mappedBy = "caseFile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<CaseVictim> caseVictims = new HashSet<>();
+
+    @OneToMany(mappedBy = "caseFile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<CaseWitness> caseWitnesses = new HashSet<>();
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "caseFile", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RelatedCase> relatedCases = new HashSet<>();
 
     // Constructors
     public CaseFile() {
         this.openedAt = LocalDateTime.now();
-        this.status = IncidentStatus.OPEN;
+        this.status = CaseStatus.OPEN;
         this.priority = CasePriority.MEDIUM;
     }
 
@@ -105,7 +88,7 @@ public class CaseFile {
             openedAt = LocalDateTime.now();
         }
         if (status == null) {
-            status = IncidentStatus.OPEN;
+            status = CaseStatus.OPEN;
         }
         if (priority == null) {
             priority = CasePriority.MEDIUM;
@@ -138,18 +121,22 @@ public class CaseFile {
         this.priority = Objects.requireNonNull(priority, "priority cannot be null");
     }
 
-    public IncidentStatus getStatus() { return status; }
+    public CaseStatus getStatus() { return status; }
 
     // Controlled state transition
-    public void setStatus(IncidentStatus status) {
+    public void setStatus(CaseStatus status) {
         Objects.requireNonNull(status, "status cannot be null");
 
         // Example rule: cannot reopen closed case without explicit logic
-        if (this.status == IncidentStatus.CLOSED && status != IncidentStatus.CLOSED) {
+        if (isClosed() && status != CaseStatus.CLOSED_CONVICTED && status != CaseStatus.CLOSED_ACQUITTED && status != CaseStatus.CLOSED_UNSOLVED) {
             throw new IllegalStateException("Cannot change status of a closed case");
         }
 
         this.status = status;
+    }
+
+    public boolean isClosed() {
+        return status == CaseStatus.CLOSED_CONVICTED || status == CaseStatus.CLOSED_ACQUITTED || status == CaseStatus.CLOSED_UNSOLVED;
     }
 
     public LocalDateTime getOpenedAt() { return openedAt; }
@@ -158,64 +145,63 @@ public class CaseFile {
 
     public String getClosureReason() { return closureReason; }
 
-    public void closeCase(String reason) {
-        if (this.status == IncidentStatus.CLOSED) {
+    public void closeCase(CaseStatus closureState, String reason) {
+        if (isClosed()) {
             throw new IllegalStateException("Case is already closed");
         }
 
-        this.status = IncidentStatus.CLOSED;
+        this.status = closureState;
         this.closedAt = LocalDateTime.now();
-        this.closureReason = validate(reason, "closureReason");
+        this.closureReason = reason;
     }
 
-    public void closeCase(IncidentStatus closureStatus, String reason) {
-        if (closureStatus == null || (
-                closureStatus != IncidentStatus.CLOSED &&
-                closureStatus != IncidentStatus.CLOSED_CONVICTED &&
-                closureStatus != IncidentStatus.CLOSED_ACQUITTED &&
-                closureStatus != IncidentStatus.CLOSED_UNSOLVED)) {
-            throw new IllegalArgumentException("Invalid closure status");
-        }
-        if (this.status == IncidentStatus.CLOSED ||
-                this.status == IncidentStatus.CLOSED_CONVICTED ||
-                this.status == IncidentStatus.CLOSED_ACQUITTED ||
-                this.status == IncidentStatus.CLOSED_UNSOLVED) {
-            throw new IllegalStateException("Case is already closed");
-        }
-        this.status = closureStatus;
-        this.closedAt = LocalDateTime.now();
-        this.closureReason = validate(reason, "closureReason");
+
+
+    // ── Direct weak-entity collection accessors ────────────────────────────
+
+    public Set<CaseSuspect> getCaseSuspects() { return caseSuspects; }
+    public void setCaseSuspects(Set<CaseSuspect> caseSuspects) { this.caseSuspects = caseSuspects; }
+
+    public Set<CaseVictim> getCaseVictims() { return caseVictims; }
+    public void setCaseVictims(Set<CaseVictim> caseVictims) { this.caseVictims = caseVictims; }
+
+    public Set<CaseWitness> getCaseWitnesses() { return caseWitnesses; }
+    public void setCaseWitnesses(Set<CaseWitness> caseWitnesses) { this.caseWitnesses = caseWitnesses; }
+
+    // ── Convenience accessors returning Set<Person> (backward-compatible) ─
+
+    @Transient
+    public Set<Person> getSuspects() {
+        return caseSuspects.stream().map(CaseSuspect::getPerson).collect(Collectors.toSet());
     }
 
-    public String getRelatedCaseIds() { return relatedCaseIds; }
-    public void setRelatedCaseIds(String relatedCaseIds) {
-        this.relatedCaseIds = sanitize(relatedCaseIds);
+    @Transient
+    public Set<Person> getVictims() {
+        return caseVictims.stream().map(CaseVictim::getPerson).collect(Collectors.toSet());
     }
 
-    public Set<Person> getSuspects() { return suspects; }
-    public void setSuspects(Set<Person> suspects) { this.suspects = suspects; }
-    
+    @Transient
+    public Set<Person> getWitnesses() {
+        return caseWitnesses.stream().map(CaseWitness::getPerson).collect(Collectors.toSet());
+    }
+
+    // ── Convenience mutators (create weak entity internally) ─────────────
+
     public void addSuspect(Person person) {
         if (person != null) {
-            this.suspects.add(person);
+            this.caseSuspects.add(new CaseSuspect(this, person));
         }
     }
-
-    public Set<Person> getVictims() { return victims; }
-    public void setVictims(Set<Person> victims) { this.victims = victims; }
 
     public void addVictim(Person person) {
         if (person != null) {
-            this.victims.add(person);
+            this.caseVictims.add(new CaseVictim(this, person));
         }
     }
 
-    public Set<Person> getWitnesses() { return witnesses; }
-    public void setWitnesses(Set<Person> witnesses) { this.witnesses = witnesses; }
-
     public void addWitness(Person person) {
         if (person != null) {
-            this.witnesses.add(person);
+            this.caseWitnesses.add(new CaseWitness(this, person));
         }
     }
 

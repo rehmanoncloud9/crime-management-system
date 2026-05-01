@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import com.cms.model.enums.ArrestStatus;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "arrest_records",
@@ -13,6 +15,25 @@ import java.util.Objects;
                 @Index(name = "idx_arrest_officer", columnList = "arresting_officer_id")
         })
 public class ArrestRecord {
+
+    @Embeddable
+    public static class Charge {
+        @Column(name = "description", nullable = false, length = 500)
+        private String description;
+        @Column(name = "legal_section", length = 100)
+        private String legalSection;
+
+        public Charge() {}
+        public Charge(String description, String legalSection) {
+            this.description = description;
+            this.legalSection = legalSection;
+        }
+
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public String getLegalSection() { return legalSection; }
+        public void setLegalSection(String legalSection) { this.legalSection = legalSection; }
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,11 +64,30 @@ public class ArrestRecord {
     @Column(name = "custody_location", length = 255)
     private String custodyLocation;
 
+    @Column(name = "bail_amount", precision = 12, scale = 2)
+    private java.math.BigDecimal bailAmount;
+
+    @Column(name = "bail_status", length = 20)
+    private String bailStatus = "NOT_APPLICABLE";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     @Column(name = "booking_reference", length = 100, unique = true)
     private String bookingReference;
 
-    @Column(columnDefinition = "TEXT")
-    private String charges;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "arrest_charges", joinColumns = @JoinColumn(name = "arrest_record_id"))
+    private Set<Charge> charges = new HashSet<>();
+
+    /** Returns charges as a comma-separated string for TableView binding */
+    public String getChargesDisplay() {
+        if (charges == null || charges.isEmpty()) return "None";
+        return charges.stream()
+                .map(c -> c.getDescription() + (c.getLegalSection() != null ? " [" + c.getLegalSection() + "]" : ""))
+                .reduce((a, b) -> a + "; " + b).orElse("None");
+    }
 
     @Enumerated(EnumType.STRING)
     @Column(name = "arrest_status", nullable = false, length = 20)
@@ -103,18 +143,30 @@ public class ArrestRecord {
     }
 
     public String getCustodyLocation() { return custodyLocation; }
-    public void setCustodyLocation(String custodyLocation) {
-        this.custodyLocation = sanitize(custodyLocation);
-    }
+    public void setCustodyLocation(String custodyLocation) { this.custodyLocation = custodyLocation; }
+
+    public java.math.BigDecimal getBailAmount() { return bailAmount; }
+    public void setBailAmount(java.math.BigDecimal bailAmount) { this.bailAmount = bailAmount; }
+
+    public String getBailStatus() { return bailStatus; }
+    public void setBailStatus(String bailStatus) { this.bailStatus = bailStatus; }
+
+    public User getCreatedBy() { return createdBy; }
 
     public String getBookingReference() { return bookingReference; }
     public void setBookingReference(String bookingReference) {
         this.bookingReference = sanitize(bookingReference);
     }
 
-    public String getCharges() { return charges; }
-    public void setCharges(String charges) {
-        this.charges = sanitize(charges);
+    public Set<Charge> getCharges() { return charges; }
+    public void setCharges(Set<Charge> charges) { this.charges = charges; }
+
+    public void addCharge(String desc) {
+        this.addCharge(desc, "N/A");
+    }
+
+    public void addCharge(String desc, String section) {
+        this.charges.add(new Charge(desc, section));
     }
 
     public ArrestStatus getArrestStatus() { return arrestStatus; }

@@ -35,9 +35,23 @@ public class User {
     private String passwordHash;
 
     @NotBlank
-    @Size(max = 150)
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Size(max = 75)
+    @Column(name = "first_name", nullable = false, length = 75)
+    private String firstName;
+
+    @NotBlank
+    @Size(max = 75)
+    @Column(name = "last_name", nullable = false, length = 75)
+    private String lastName;
+
+    /**
+     * ERD Specialisation 1 — Overlapping (○), Partial: PERSONS → USERS.
+     * Joined-table strategy: a User IS-A Person. person_id links to the
+     * base PERSONS record. UNIQUE ensures one-to-one. Nullable = partial.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", unique = true)
+    private Person person;
 
     @Column(name = "officer_rank")
     private String officerRank;
@@ -170,7 +184,15 @@ public class User {
 
     public String getPasswordHash() { return passwordHash; }
 
-    public String getFullName() { return fullName; }
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
+
+    @Transient
+    public String getFullName() {
+        return (firstName != null ? firstName : "") + (lastName != null ? " " + lastName : "");
+    }
+
+    public Person getPerson() { return person; }
 
     public String getOfficerRank() { return officerRank; }
 
@@ -208,7 +230,17 @@ public class User {
     public void setId(Long id) { this.id = id; }
     public void setBadgeNumber(String badgeNumber) { this.badgeNumber = badgeNumber; }
     public void setUsername(String username) { this.username = username; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+
+    public void setLastName(String lastName) { this.lastName = lastName; }
+
+    public void setFullName(String fullName) {
+        if (fullName != null) {
+            String[] parts = fullName.split(" ", 2);
+            this.firstName = parts[0];
+            this.lastName = parts.length > 1 ? parts[1] : "";
+        }
+    }
     public void setOfficerRank(String officerRank) { this.officerRank = officerRank; }
     public void setRole(Role role) { this.role = role; }
     public void setDepartment(String department) { this.department = department; }
@@ -227,4 +259,11 @@ public class User {
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
     public void setLastActive(LocalDateTime lastActive) { this.lastActive = lastActive; }
+    public void setPerson(Person person) { this.person = person; }
+
+    @Override
+    public String toString() {
+        String name = getFullName();
+        return !name.isBlank() ? name : (username != null ? username : "User#" + id);
+    }
 }

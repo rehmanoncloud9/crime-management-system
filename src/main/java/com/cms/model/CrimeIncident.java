@@ -74,6 +74,13 @@ public class CrimeIncident {
     @Column(name = "reporter_contact", length = 100)
     private String reporterContact;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporter_person_id")
+    private Person reporterPerson;
+
+    @Column(name = "severity_level", length = 30)
+    private String severityLevel = "MEDIUM"; // LOW, MEDIUM, HIGH, CRITICAL
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private IncidentStatus status;
@@ -200,7 +207,13 @@ public class CrimeIncident {
     public void setReporterName(String reporterName) { this.reporterName = sanitize(reporterName); }
 
     public String getReporterContact() { return reporterContact; }
-    public void setReporterContact(String reporterContact) { this.reporterContact = sanitize(reporterContact); }
+    public void setReporterContact(String reporterContact) { this.reporterContact = reporterContact; }
+
+    public Person getReporterPerson() { return reporterPerson; }
+    public void setReporterPerson(Person reporterPerson) { this.reporterPerson = reporterPerson; }
+
+    public String getSeverityLevel() { return severityLevel; }
+    public void setSeverityLevel(String severityLevel) { this.severityLevel = severityLevel; }
 
     public IncidentStatus getStatus() { return status; }
 

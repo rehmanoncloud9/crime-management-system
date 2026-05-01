@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(
@@ -14,6 +16,24 @@ import java.time.LocalDateTime;
         }
 )
 public class Warrant {
+
+    @Embeddable
+    public static class Charge {
+        @Column(name = "description", nullable = false, length = 500)
+        private String description;
+        @Column(name = "legal_section", length = 100)
+        private String legalSection;
+
+        public Charge() {}
+        public Charge(String description, String legalSection) {
+            this.description = description;
+            this.legalSection = legalSection;
+        }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public String getLegalSection() { return legalSection; }
+        public void setLegalSection(String legalSection) { this.legalSection = legalSection; }
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +54,11 @@ public class Warrant {
 
     @NotBlank
     @Column(name = "issued_by", nullable = false)
-    private String issuedBy;
+    private String issuedBy; // Name of the Judge/Official
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "issuing_court_id")
+    private Court issuingCourt;
 
     @NotNull
     @Column(name = "issued_at", nullable = false)
@@ -44,9 +68,9 @@ public class Warrant {
     @Column(name = "expires_at")
     private LocalDate expiresAt;
 
-    @NotBlank
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String charges;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "warrant_charges", joinColumns = @JoinColumn(name = "warrant_id"))
+    private Set<Charge> charges = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private WarrantStatus status = WarrantStatus.ISSUED;
@@ -113,7 +137,7 @@ public class Warrant {
         if (suspect == null) {
             throw new IllegalStateException("Suspect is required");
         }
-        if (charges == null || charges.isBlank()) {
+        if (charges == null || charges.isEmpty()) {
             throw new IllegalStateException("Charges must be specified");
         }
     }
@@ -124,6 +148,12 @@ public class Warrant {
 
     public String getWarrantNumber() { return warrantNumber; }
 
+    public String getIssuedBy() { return issuedBy; }
+    public void setIssuedBy(String issuedBy) { this.issuedBy = issuedBy; }
+
+    public Court getIssuingCourt() { return issuingCourt; }
+    public void setIssuingCourt(Court issuingCourt) { this.issuingCourt = issuingCourt; }
+
     public Person getSuspect() { return suspect; }
 
     public WarrantStatus getStatus() { return status; }
@@ -132,7 +162,12 @@ public class Warrant {
 
     public LocalDate getExpiresAt() { return expiresAt; }
 
-    public String getCharges() { return charges; }
+    public Set<Charge> getCharges() { return charges; }
+    public void setCharges(Set<Charge> charges) { this.charges = charges; }
+
+    public void addCharge(String desc, String section) {
+        this.charges.add(new Charge(desc, section));
+    }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 

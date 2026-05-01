@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(
@@ -15,9 +17,31 @@ import java.time.LocalDateTime;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "national_id"),
                 @UniqueConstraint(columnNames = "email")
+        },
+        indexes = {
+                @Index(name = "idx_person_national_id", columnList = "national_id"),
+                @Index(name = "idx_person_names", columnList = "first_name, last_name")
         }
 )
 public class Person {
+
+    @Embeddable
+    public static class DistinguishingMark {
+        @Column(name = "description", nullable = false)
+        private String description;
+        @Column(name = "body_location")
+        private String bodyLocation;
+
+        public DistinguishingMark() {}
+        public DistinguishingMark(String description, String bodyLocation) {
+            this.description = description;
+            this.bodyLocation = bodyLocation;
+        }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public String getBodyLocation() { return bodyLocation; }
+        public void setBodyLocation(String bodyLocation) { this.bodyLocation = bodyLocation; }
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,9 +57,6 @@ public class Person {
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
-    @Column(name = "aliases", columnDefinition = "TEXT")
-    private String aliases;
-
     @Column(nullable = true)
     private LocalDate dateOfBirth;
 
@@ -47,6 +68,8 @@ public class Person {
     private Country nationality;
 
     @Column(name = "national_id", unique = true, length = 20, nullable = true)
+    // 🛡️ SECURITY WARNING (C-11): This field contains PII and is stored in plaintext. 
+    // Recommended: Use @Convert(converter = AESConverter.class) for production.
     private String nationalId;
 
     @Positive
@@ -68,8 +91,29 @@ public class Person {
     @Size(max = 50)
     private String build;
 
-    @Column(name = "distinguishing_marks", columnDefinition = "TEXT")
-    private String distinguishingMarks;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "person_marks", joinColumns = @JoinColumn(name = "person_id"))
+    private Set<DistinguishingMark> distinguishingMarks = new HashSet<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "person_aliases", joinColumns = @JoinColumn(name = "person_id"))
+    @Column(name = "alias")
+    private Set<String> aliases = new HashSet<>();
+
+    // ── UI Synchronization Helpers (C-14) ──
+
+    /** Returns aliases as a comma-separated string for TableView binding */
+    public String getAliasesDisplay() {
+        return aliases == null || aliases.isEmpty() ? "None" : String.join(", ", aliases);
+    }
+
+    /** Returns marks as a comma-separated string for TableView binding */
+    public String getMarksDisplay() {
+        if (distinguishingMarks == null || distinguishingMarks.isEmpty()) return "None";
+        return distinguishingMarks.stream()
+                .map(m -> m.getDescription() + (m.getBodyLocation() != null ? " (" + m.getBodyLocation() + ")" : ""))
+                .reduce((a, b) -> a + "; " + b).orElse("None");
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "district_id")
@@ -122,10 +166,11 @@ public class Person {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private MedicalRecord medicalRecord;
-
-    // ================= LIFECYCLE =================
 
     @PrePersist
     protected void onCreate() {
@@ -140,11 +185,8 @@ public class Person {
         validateCoreFields();
     }
 
-    // ================= DOMAIN VALIDATION =================
-
     private void validateCoreFields() {
         if (!isIdentified) {
-            // For unidentified bodies/suspects, skip full validation but ensure a placeholder name
             if (firstName == null || firstName.isBlank()) {
                 this.firstName = "Unknown";
             }
@@ -162,12 +204,16 @@ public class Person {
         }
     }
 
-    // ================= DOMAIN METHODS =================
-
     public void markHighRisk(RiskScore score) {
         this.riskScore = score;
         this.highRisk = (score != null && score.ordinal() >= RiskScore.HIGH.ordinal());
         this.riskScoreUpdatedAt = LocalDateTime.now();
+    }
+
+    @Transient
+    public Integer getAge() {
+        if (dateOfBirth == null) return null;
+        return java.time.Period.between(dateOfBirth, LocalDate.now()).getYears();
     }
 
     public void flagWarrant() {
@@ -177,8 +223,6 @@ public class Person {
     public void clearWarrant() {
         this.hasActiveWarrant = false;
     }
-
-    // ================= GETTERS (KEEP CLEAN) =================
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -195,8 +239,12 @@ public class Person {
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public String getAliases() { return aliases; }
-    public void setAliases(String aliases) { this.aliases = aliases; }
+    public Set<String> getAliases() { return aliases; }
+    public void setAliases(Set<String> aliases) { this.aliases = aliases; }
+
+    public void addAlias(String alias) {
+        if (alias != null && !alias.isBlank()) this.aliases.add(alias.trim());
+    }
 
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
@@ -216,8 +264,16 @@ public class Person {
     public Short getWeightKg() { return weightKg; }
     public void setWeightKg(Short weightKg) { this.weightKg = weightKg; }
 
-    public String getDistinguishingMarks() { return distinguishingMarks; }
-    public void setDistinguishingMarks(String distinguishingMarks) { this.distinguishingMarks = distinguishingMarks; }
+    public Set<DistinguishingMark> getDistinguishingMarks() { return distinguishingMarks; }
+    public void setDistinguishingMarks(Set<DistinguishingMark> marks) { this.distinguishingMarks = marks; }
+
+    public void addDistinguishingMark(String desc) {
+        this.addDistinguishingMark(desc, "N/A");
+    }
+
+    public void addDistinguishingMark(String desc, String location) {
+        this.distinguishingMarks.add(new DistinguishingMark(desc, location));
+    }
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
@@ -249,6 +305,12 @@ public class Person {
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+
+    public boolean isDeleted() { return deletedAt != null; }
+
 
     public MedicalRecord getMedicalRecord() { return medicalRecord; }
     public void setMedicalRecord(MedicalRecord medicalRecord) {
