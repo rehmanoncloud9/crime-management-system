@@ -141,12 +141,12 @@ public class PersonRegistrationController {
                 photoView.setImage(new Image(new java.io.ByteArrayInputStream(p.getPhoto())));
             if (p.getHeightCm() != null) heightField.setText(String.valueOf(p.getHeightCm()));
             if (p.getWeightKg() != null) weightField.setText(String.valueOf(p.getWeightKg()));
-            marksArea.setText(p.getDistinguishingMarks() != null ? p.getDistinguishingMarks() : "");
+            marksArea.setText(p.getMarksDisplay().equals("None") ? "" : p.getMarksDisplay().replace("; ", "\n"));
             districtCombo.setValue(p.getDistrict());
             cityCombo.setValue(p.getCity());
             areaCombo.setValue(p.getArea());
             addressArea.setText(p.getAddress() != null ? p.getAddress() : "");
-            aliasesField.setText(p.getAliases() != null ? p.getAliases() : "");
+            aliasesField.setText(p.getAliasesDisplay().equals("None") ? "" : p.getAliasesDisplay());
             gangField.setText(p.getGangAffiliation() != null ? p.getGangAffiliation() : "");
             warrantCheck.setSelected(p.isHasActiveWarrant());
             personStatusCombo.setValue(p.getPersonStatus());
@@ -187,8 +187,20 @@ public class PersonRegistrationController {
             person.setCity(cityCombo.getValue());
             person.setArea(areaCombo.getValue());
             person.setAddress(addressArea.getText().trim());
-            person.setDistinguishingMarks(marksArea.getText().trim());
-            person.setAliases(aliasesField.getText().trim());
+            person.getDistinguishingMarks().clear();
+            String marks = marksArea.getText().trim();
+            if (!marks.isEmpty()) {
+                for (String m : marks.split("\\n")) {
+                    if (!m.trim().isEmpty()) person.addDistinguishingMark(m.trim());
+                }
+            }
+            person.getAliases().clear();
+            String aliasText = aliasesField.getText().trim();
+            if (!aliasText.isEmpty()) {
+                for (String a : aliasText.split("[,;]")) {
+                    if (!a.trim().isEmpty()) person.addAlias(a.trim());
+                }
+            }
             person.setGangAffiliation(gangField.getText().trim());
             person.setHasActiveWarrant(warrantCheck.isSelected());
             person.setPersonStatus(personStatusCombo.getValue() != null ? personStatusCombo.getValue() : PersonStatus.UNKNOWN);

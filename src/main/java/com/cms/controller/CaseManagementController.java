@@ -116,8 +116,11 @@ public class CaseManagementController {
             startInvestigateBtn.setDisable(true);
             closeCaseBtn.setDisable(true);
         } else {
-            startInvestigateBtn.setDisable(selected.getStatus() != com.cms.model.enums.IncidentStatus.OPEN);
-            closeCaseBtn.setDisable(selected.getStatus() == com.cms.model.enums.IncidentStatus.CLOSED);
+            startInvestigateBtn.setDisable(selected.getStatus() != com.cms.model.enums.CaseStatus.OPEN);
+            boolean isClosed = selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_CONVICTED ||
+                               selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED ||
+                               selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED;
+            closeCaseBtn.setDisable(isClosed);
         }
 
         this.selectedCase = selected;
@@ -174,7 +177,10 @@ public class CaseManagementController {
             for (var ev : evidenceList) {
                 addTimelineItem("Evidence Collected: " + ev.getType(), ev.getCollectedAt(), "🔍");
             }
-            if (selected.getStatus() == com.cms.model.enums.IncidentStatus.CLOSED) {
+            boolean isClosed = selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_CONVICTED ||
+                               selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED ||
+                               selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED;
+            if (isClosed) {
                 addTimelineItem("Case Closed", selected.getClosedAt(), "✅");
             }
 
@@ -350,7 +356,7 @@ public class CaseManagementController {
             Task<Void> task = new Task<>() {
                 @Override
                 protected Void call() {
-                    caseService.updateCaseStatus(selected.getId(), com.cms.model.enums.IncidentStatus.CLOSED, reason);
+                    caseService.updateCaseStatus(selected.getId(), com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED, reason);
                     return null;
                 }
             };

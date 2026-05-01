@@ -546,7 +546,7 @@ public class StatisticalReportsController {
                 row.createCell(1).setCellValue(ar.getCaseFile() != null ? ar.getCaseFile().getCaseNumber() : "");
                 row.createCell(2).setCellValue(ar.getArrestedAt() != null ? ar.getArrestedAt().toLocalDate().toString() : "");
                 row.createCell(3).setCellValue(ar.getArrestingOfficer() != null ? ar.getArrestingOfficer().getFullName() : "");
-                row.createCell(4).setCellValue(ar.getCharges() != null ? ar.getCharges() : "");
+                row.createCell(4).setCellValue(ar.getChargesDisplay());
                 row.createCell(5).setCellValue(ar.getArrestLocation() != null ? ar.getArrestLocation() : "");
             }
         } catch (Exception e) {

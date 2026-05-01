@@ -87,8 +87,10 @@ public class EvidenceLogController {
                     // Prefer case suspects first, then fall back to all persons
                     CaseFile fresh = caseService.findAllCases().stream()
                         .filter(c -> c.getId().equals(cf.getId())).findFirst().orElse(cf);
-                    if (fresh.getSuspects() != null && !fresh.getSuspects().isEmpty())
-                        return List.copyOf(fresh.getSuspects());
+                    if (fresh.getCaseSuspects() != null && !fresh.getCaseSuspects().isEmpty())
+                        return fresh.getCaseSuspects().stream()
+                            .map(com.cms.model.CaseSuspect::getPerson)
+                            .collect(java.util.stream.Collectors.toList());
                 } catch (Exception ignore) {}
                 return personService.findAll(1000, 0);
             }

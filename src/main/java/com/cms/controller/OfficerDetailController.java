@@ -199,7 +199,10 @@ public class OfficerDetailController {
 
     private void updatePerformanceStats(List<CaseFile> cases) {
         int total = cases.size();
-        long closed = cases.stream().filter(c -> c.getStatus() == IncidentStatus.CLOSED).count();
+        long closed = cases.stream().filter(c -> 
+            c.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_CONVICTED || 
+            c.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED || 
+            c.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED).count();
         long active = total - closed;
         double efficiency = total > 0 ? (double) closed / total * 100 : 0;
 

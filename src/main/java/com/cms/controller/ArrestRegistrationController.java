@@ -81,8 +81,8 @@ public class ArrestRegistrationController {
         });
         colCharges.setCellValueFactory(cd -> {
             ArrestRecord ar = cd.getValue();
-            return new javafx.beans.property.SimpleStringProperty(
-                ar.getCharges() != null ? ar.getCharges() : "");
+            return new javafx.beans.property.SimpleStringProperty(ar.getChargesDisplay());
+
         });
         colDate.setCellValueFactory(cd -> {
             ArrestRecord ar = cd.getValue();

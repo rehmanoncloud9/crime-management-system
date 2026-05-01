@@ -117,7 +117,7 @@ public class PersonDetailController {
 
         heightLabel.setText(currentPerson.getHeightCm() != null ? currentPerson.getHeightCm() + " cm" : "N/A");
         weightLabel.setText(currentPerson.getWeightKg() != null ? currentPerson.getWeightKg() + " kg" : "N/A");
-        marksLabel.setText(currentPerson.getDistinguishingMarks() != null && !currentPerson.getDistinguishingMarks().isEmpty() ? currentPerson.getDistinguishingMarks() : "None Recorded");
+        marksLabel.setText(currentPerson.getMarksDisplay());
 
         StringBuilder addr = new StringBuilder();
         if (currentPerson.getArea() != null) addr.append(currentPerson.getArea().getName()).append(", ");
@@ -171,7 +171,11 @@ public class PersonDetailController {
                             .setParameter("id", currentPerson.getId())
                             .list();
 
-                    List<CaseFile> allCases = session.createQuery("FROM CaseFile c LEFT JOIN FETCH c.suspects LEFT JOIN FETCH c.victims LEFT JOIN FETCH c.witnesses", CaseFile.class).list();
+                    List<CaseFile> allCases = session.createQuery(
+                            "FROM CaseFile c " +
+                            "LEFT JOIN FETCH c.caseSuspects cs LEFT JOIN FETCH cs.person " +
+                            "LEFT JOIN FETCH c.caseVictims cv LEFT JOIN FETCH cv.person " +
+                            "LEFT JOIN FETCH c.caseWitnesses cw LEFT JOIN FETCH cw.person", CaseFile.class).list();
                     for (CaseFile cf : allCases) {
                         if (cf.getSuspects().contains(currentPerson)) data.cases.add(new CaseHistoryItem(cf, "SUSPECT"));
                         else if (cf.getVictims().contains(currentPerson)) data.cases.add(new CaseHistoryItem(cf, "VICTIM"));
