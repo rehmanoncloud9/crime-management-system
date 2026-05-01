@@ -411,9 +411,10 @@ public class CaseWorkflowService {
                 CaseStatus.ARRESTED, Set.of(CaseStatus.CHARGED),
                 CaseStatus.CHARGED, Set.of(CaseStatus.IN_TRIAL),
                 CaseStatus.IN_TRIAL, CASE_CLOSURE_STATES,
-                CaseStatus.CLOSED_UNSOLVED, Set.of(),
-                CaseStatus.CLOSED_ACQUITTED, Set.of(),
-                CaseStatus.CLOSED_CONVICTED, Set.of()
+                CaseStatus.CLOSED_UNSOLVED, Set.of(CaseStatus.REOPENED),
+                CaseStatus.CLOSED_ACQUITTED, Set.of(CaseStatus.REOPENED),
+                CaseStatus.CLOSED_CONVICTED, Set.of(CaseStatus.REOPENED),
+                CaseStatus.REOPENED, Set.of(CaseStatus.UNDER_INVESTIGATION)
         );
     }
 

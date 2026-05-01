@@ -128,14 +128,19 @@ public class CaseFile {
         Objects.requireNonNull(status, "status cannot be null");
 
         // Example rule: cannot reopen closed case without explicit logic
-        if (isClosed() && status != CaseStatus.CLOSED_CONVICTED && status != CaseStatus.CLOSED_ACQUITTED && status != CaseStatus.CLOSED_UNSOLVED) {
-            throw new IllegalStateException("Cannot change status of a closed case");
+        // Allow transition from closed to REOPENED
+        if (isClosed() && status != CaseStatus.REOPENED && !isClosedState(status)) {
+            throw new IllegalStateException("Cannot change status of a closed case except to REOPENED");
         }
 
         this.status = status;
     }
 
     public boolean isClosed() {
+        return isClosedState(this.status);
+    }
+
+    private boolean isClosedState(CaseStatus status) {
         return status == CaseStatus.CLOSED_CONVICTED || status == CaseStatus.CLOSED_ACQUITTED || status == CaseStatus.CLOSED_UNSOLVED;
     }
 
