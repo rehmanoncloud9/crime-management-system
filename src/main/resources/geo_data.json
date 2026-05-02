@@ -1,0 +1,590 @@
+{
+  "country": "Pakistan",
+  "countryCode": "PAK",
+  "crimeCategories": [
+    { "code": "HOM", "category": "Homicide", "penalCode": "PPC 302", "severity": "Critical" },
+    { "code": "ROB", "category": "Robbery", "penalCode": "PPC 392", "severity": "High" },
+    { "code": "THEFT", "category": "Theft", "penalCode": "PPC 378", "severity": "Medium" },
+    { "code": "BURG", "category": "Burglary", "penalCode": "PPC 457", "severity": "Medium" },
+    { "code": "KID", "category": "Kidnapping", "penalCode": "PPC 365", "severity": "High" },
+    { "code": "RAPE", "category": "Sexual Assault", "penalCode": "PPC 376", "severity": "Critical" },
+    { "code": "TER", "category": "Terrorism", "penalCode": "ATA 1997", "severity": "Critical" },
+    { "code": "DRUG", "category": "Drug Offences", "penalCode": "CNS Act 1997", "severity": "High" },
+    { "code": "CYB", "category": "Cybercrime", "penalCode": "PECA 2016", "severity": "Medium" },
+    { "code": "FIRE", "category": "Arson / Fire", "penalCode": "PPC 436", "severity": "High" },
+    { "code": "ASLT", "category": "Assault", "penalCode": "PPC 324", "severity": "Medium" },
+    { "code": "FRAUD", "category": "Fraud / Cheating", "penalCode": "PPC 420", "severity": "Medium" },
+    { "code": "BLASP", "category": "Blasphemy", "penalCode": "PPC 295-C", "severity": "Critical" }
+  ],
+  "provinces": [
+    {
+      "province": "Punjab",
+      "districts": [
+        {
+          "district": "Lahore",
+          "policeStations": [
+            { "stationName": "Model Town Police Station", "area": "Model Town", "latitude": 31.4806, "longitude": 74.3239, "contact": "042-99220254" },
+            { "stationName": "Gulberg Police Station", "area": "Gulberg III", "latitude": 31.5095, "longitude": 74.3483, "contact": "042-99220164" },
+            { "stationName": "Johar Town Police Station", "area": "Johar Town", "latitude": 31.4697, "longitude": 74.2728, "contact": "042-99220482" },
+            { "stationName": "Defence B Police Station", "area": "DHA Phase 5", "latitude": 31.4697, "longitude": 74.4509, "contact": "042-99220485" },
+            { "stationName": "Allama Iqbal Town Police Station", "area": "Allama Iqbal Town", "latitude": 31.5126, "longitude": 74.2868, "contact": "042-99220247" },
+            { "stationName": "Shadman Police Post", "area": "Shadman", "latitude": 31.5435, "longitude": 74.3280, "contact": "15" },
+            { "stationName": "Upper Mall Police Station", "area": "Upper Mall", "latitude": 31.5510, "longitude": 74.3600, "contact": "042-99220024" },
+            { "stationName": "Shahdara Police Station", "area": "Shahdara", "latitude": 31.6210, "longitude": 74.3020, "contact": "042-37960244" }
+          ],
+          "cities": [
+            {
+              "city": "Lahore",
+              "areas": [
+                { "area": "Model Town", "latitude": 31.4806, "longitude": 74.3239 },
+                { "area": "Gulberg I", "latitude": 31.5200, "longitude": 74.3450 },
+                { "area": "Gulberg II", "latitude": 31.5150, "longitude": 74.3400 },
+                { "area": "Gulberg III", "latitude": 31.5095, "longitude": 74.3483 },
+                { "area": "Johar Town", "latitude": 31.4697, "longitude": 74.2728 },
+                { "area": "Johar Town Phase 2", "latitude": 31.4600, "longitude": 74.2600 },
+                { "area": "Allama Iqbal Town", "latitude": 31.5126, "longitude": 74.2868 },
+                { "area": "Wapda Town", "latitude": 31.4011, "longitude": 74.2625 },
+                { "area": "DHA Phase 1", "latitude": 31.4800, "longitude": 74.3800 },
+                { "area": "DHA Phase 2", "latitude": 31.4750, "longitude": 74.3900 },
+                { "area": "DHA Phase 3", "latitude": 31.4650, "longitude": 74.3850 },
+                { "area": "DHA Phase 4", "latitude": 31.4550, "longitude": 74.4100 },
+                { "area": "DHA Phase 5", "latitude": 31.4697, "longitude": 74.4509 },
+                { "area": "DHA Phase 6", "latitude": 31.4423, "longitude": 74.4842 },
+                { "area": "DHA Phase 7", "latitude": 31.4200, "longitude": 74.5200 },
+                { "area": "DHA Phase 8 (Air Avenue)", "latitude": 31.4880, "longitude": 74.5200 },
+                { "area": "DHA Phase 9 Town", "latitude": 31.4100, "longitude": 74.4600 },
+                { "area": "Bahria Town (Sector A-F)", "latitude": 31.3664, "longitude": 74.1800 },
+                { "area": "Bahria Orchard", "latitude": 31.3200, "longitude": 74.2200 },
+                { "area": "Garden Town", "latitude": 31.5015, "longitude": 74.3228 },
+                { "area": "Faisal Town", "latitude": 31.4792, "longitude": 74.3072 },
+                { "area": "Township", "latitude": 31.4550, "longitude": 74.3050 },
+                { "area": "Green Town", "latitude": 31.4350, "longitude": 74.3000 },
+                { "area": "Valencia Town", "latitude": 31.4020, "longitude": 74.2400 },
+                { "area": "Sabzazar", "latitude": 31.5204, "longitude": 74.2638 },
+                { "area": "Samanabad", "latitude": 31.5401, "longitude": 74.3015 },
+                { "area": "Shadman", "latitude": 31.5435, "longitude": 74.3280 },
+                { "area": "Cavalry Ground", "latitude": 31.5100, "longitude": 74.3700 },
+                { "area": "Cantt (RA Bazaar)", "latitude": 31.5250, "longitude": 74.3850 },
+                { "area": "Garhi Shahu", "latitude": 31.5600, "longitude": 74.3500 },
+                { "area": "Mughalpura", "latitude": 31.5750, "longitude": 74.3850 },
+                { "area": "Baghbanpura", "latitude": 31.5850, "longitude": 74.3950 },
+                { "area": "Shahdara", "latitude": 31.6210, "longitude": 74.3020 },
+                { "area": "Walled City (Androon)", "latitude": 31.5880, "longitude": 74.3150 },
+                { "area": "Lake City", "latitude": 31.3550, "longitude": 74.2300 },
+                { "area": "State Life Housing Society", "latitude": 31.4400, "longitude": 74.4450 },
+                { "area": "Sukh Chayn Gardens", "latitude": 31.3800, "longitude": 74.1550 },
+                { "area": "Architects Society", "latitude": 31.4250, "longitude": 74.2850 },
+                { "area": "NFC Phase 1 & 2", "latitude": 31.4050, "longitude": 74.1950 },
+                { "area": "LDA Avenue 1", "latitude": 31.4150, "longitude": 74.2150 },
+                { "area": "Raiwind Road", "latitude": 31.3500, "longitude": 74.1500 },
+                { "area": "Chung", "latitude": 31.4150, "longitude": 74.1750 },
+                { "area": "Upper Mall", "latitude": 31.5510, "longitude": 74.3600 },
+                { "area": "Badami Bagh", "latitude": 31.5950, "longitude": 74.3280 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Rawalpindi",
+          "policeStations": [
+            { "stationName": "Saddar Police Station", "area": "Saddar", "latitude": 33.5950, "longitude": 73.0548, "contact": "051-9271380" },
+            { "stationName": "Satellite Town Police Station", "area": "Satellite Town", "latitude": 33.6339, "longitude": 73.0722, "contact": "051-9271375" },
+            { "stationName": "Chaklala Police Station", "area": "Chaklala Scheme 3", "latitude": 33.5857, "longitude": 73.0905, "contact": "051-9271345" }
+          ],
+          "cities": [
+            {
+              "city": "Rawalpindi",
+              "areas": [
+                { "area": "Saddar", "latitude": 33.5950, "longitude": 73.0548 },
+                { "area": "Satellite Town", "latitude": 33.6339, "longitude": 73.0722 },
+                { "area": "Bahria Town Phase 7", "latitude": 33.5284, "longitude": 73.1118 },
+                { "area": "Commercial Market", "latitude": 33.6358, "longitude": 73.0716 },
+                { "area": "Chaklala Scheme 3", "latitude": 33.5857, "longitude": 73.0905 },
+                { "area": "Westridge", "latitude": 33.6067, "longitude": 73.0234 },
+                { "area": "Peshawar Road", "latitude": 33.6105, "longitude": 73.0076 },
+                { "area": "Adiala Road", "latitude": 33.5415, "longitude": 73.0450 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Faisalabad",
+          "policeStations": [
+            { "stationName": "Civil Lines Police Station", "area": "Civil Lines", "latitude": 31.4190, "longitude": 73.0850, "contact": "041-9220333" },
+            { "stationName": "Peoples Colony Police Station", "area": "Peoples Colony No 1", "latitude": 31.4082, "longitude": 73.1042, "contact": "041-9220345" }
+          ],
+          "cities": [
+            {
+              "city": "Faisalabad",
+              "areas": [
+                { "area": "Clock Tower", "latitude": 31.4181, "longitude": 73.0776 },
+                { "area": "Peoples Colony No 1", "latitude": 31.4082, "longitude": 73.1042 },
+                { "area": "Madina Town", "latitude": 31.4230, "longitude": 73.1165 },
+                { "area": "Ghulam Muhammad Abad", "latitude": 31.4447, "longitude": 73.0543 },
+                { "area": "Civil Lines", "latitude": 31.4190, "longitude": 73.0850 },
+                { "area": "D-Type Colony", "latitude": 31.3910, "longitude": 73.0580 },
+                { "area": "Millat Town", "latitude": 31.4650, "longitude": 73.1020 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Multan",
+          "policeStations": [
+            { "stationName": "Multan Cantt Police Station", "area": "Multan Cantt", "latitude": 30.1813, "longitude": 71.4429, "contact": "061-9220114" },
+            { "stationName": "Gulgasht Police Station", "area": "Gulgasht Colony", "latitude": 30.2201, "longitude": 71.4649, "contact": "061-9220122" }
+          ],
+          "cities": [
+            {
+              "city": "Multan",
+              "areas": [
+                { "area": "Bosan Road", "latitude": 30.2265, "longitude": 71.4881 },
+                { "area": "Multan Cantt", "latitude": 30.1813, "longitude": 71.4429 },
+                { "area": "Gulgasht Colony", "latitude": 30.2201, "longitude": 71.4649 },
+                { "area": "Wapda Town (Multan)", "latitude": 30.1450, "longitude": 71.4320 },
+                { "area": "Shah Rukn-e-Alam Colony", "latitude": 30.2010, "longitude": 71.5030 },
+                { "area": "Model Town (Multan)", "latitude": 30.1550, "longitude": 71.5150 },
+                { "area": "DHA Multan", "latitude": 30.2750, "longitude": 71.5150 },
+                { "area": "New Multan", "latitude": 30.2100, "longitude": 71.4950 },
+                { "area": "Shamsabad", "latitude": 30.1980, "longitude": 71.4720 },
+                { "area": "Zakariya Town", "latitude": 30.2350, "longitude": 71.4900 },
+                { "area": "Buch Villas", "latitude": 30.2550, "longitude": 71.5050 },
+                { "area": "Royal Orchard", "latitude": 30.2620, "longitude": 71.4580 },
+                { "area": "Mumtazabad", "latitude": 30.1750, "longitude": 71.4850 },
+                { "area": "Hussain Agahi", "latitude": 30.1950, "longitude": 71.4550 },
+                { "area": "Delhi Gate", "latitude": 30.1985, "longitude": 71.4780 },
+                { "area": "Qasim Bela", "latitude": 30.1620, "longitude": 71.4250 },
+                { "area": "Sahu Chowk", "latitude": 30.2120, "longitude": 71.4810 },
+                { "area": "Askari Colony", "latitude": 30.1780, "longitude": 71.4380 },
+                { "area": "Officers Colony", "latitude": 30.2050, "longitude": 71.4650 },
+                { "area": "Gulshan-e-Market", "latitude": 30.2180, "longitude": 71.5020 },
+                { "area": "Peer Khursheed Colony", "latitude": 30.2150, "longitude": 71.4750 },
+                { "area": "Tughlaq Town", "latitude": 30.1850, "longitude": 71.5100 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Gujranwala",
+          "policeStations": [
+            { "stationName": "Model Town Police Station Gujranwala", "area": "Model Town", "latitude": 32.1850, "longitude": 74.1800, "contact": "055-9200114" }
+          ],
+          "cities": [
+            {
+              "city": "Gujranwala",
+              "areas": [
+                { "area": "Satellite Town", "latitude": 32.1640, "longitude": 74.1950 },
+                { "area": "Model Town", "latitude": 32.1850, "longitude": 74.1800 },
+                { "area": "Wapda Town", "latitude": 32.2200, "longitude": 74.1500 },
+                { "area": "DC Colony", "latitude": 32.2510, "longitude": 74.1720 },
+                { "area": "People's Colony", "latitude": 32.1520, "longitude": 74.1880 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Sialkot",
+          "policeStations": [
+            { "stationName": "Sialkot Cantt Police Station", "area": "Sialkot Cantt", "latitude": 32.5020, "longitude": 74.5240, "contact": "052-9250118" }
+          ],
+          "cities": [
+            {
+              "city": "Sialkot",
+              "areas": [
+                { "area": "Sialkot Cantt", "latitude": 32.5020, "longitude": 74.5240 },
+                { "area": "Paris Road", "latitude": 32.4950, "longitude": 74.5380 },
+                { "area": "Model Town", "latitude": 32.5180, "longitude": 74.5120 },
+                { "area": "Defence Road", "latitude": 32.4820, "longitude": 74.5450 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "province": "Sindh",
+      "districts": [
+        {
+          "district": "Karachi South",
+          "policeStations": [
+            { "stationName": "Clifton Police Station", "area": "Clifton", "latitude": 24.8138, "longitude": 67.0336, "contact": "021-99261871" },
+            { "stationName": "Saddar Police Station", "area": "Saddar", "latitude": 24.8596, "longitude": 67.0197, "contact": "021-99212841" },
+            { "stationName": "Defence Police Station", "area": "DHA Phase 6", "latitude": 24.8016, "longitude": 67.0548, "contact": "021-35846844" },
+            { "stationName": "Lyari Police Station", "area": "Lyari", "latitude": 24.8743, "longitude": 66.9890, "contact": "021-32750133" }
+          ],
+          "cities": [
+            {
+              "city": "Karachi",
+              "areas": [
+                { "area": "Clifton (Blocks 1-9)", "latitude": 24.8138, "longitude": 67.0336 },
+                { "area": "Saddar", "latitude": 24.8596, "longitude": 67.0197 },
+                { "area": "DHA Phase 1", "latitude": 24.8322, "longitude": 67.0624 },
+                { "area": "DHA Phase 2", "latitude": 24.8335, "longitude": 67.0725 },
+                { "area": "DHA Phase 4", "latitude": 24.8210, "longitude": 67.0650 },
+                { "area": "DHA Phase 5", "latitude": 24.8050, "longitude": 67.0580 },
+                { "area": "DHA Phase 6", "latitude": 24.8016, "longitude": 67.0548 },
+                { "area": "DHA Phase 7", "latitude": 24.7950, "longitude": 67.0750 },
+                { "area": "DHA Phase 8", "latitude": 24.7850, "longitude": 67.0850 },
+                { "area": "Lyari", "latitude": 24.8743, "longitude": 66.9890 },
+                { "area": "Garden West", "latitude": 24.8780, "longitude": 67.0210 },
+                { "area": "Kemari", "latitude": 24.8180, "longitude": 66.9740 },
+                { "area": "Kharadar", "latitude": 24.8510, "longitude": 67.0010 },
+                { "area": "Defence View", "latitude": 24.8450, "longitude": 67.0780 },
+                { "area": "Navy Housing Scheme", "latitude": 24.8150, "longitude": 67.0850 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Karachi East",
+          "policeStations": [
+            { "stationName": "Gulshan-e-Iqbal Police Station", "area": "Gulshan-e-Iqbal", "latitude": 24.9204, "longitude": 67.0882, "contact": "021-99261822" },
+            { "stationName": "PECHS Police Station", "area": "PECHS", "latitude": 24.8716, "longitude": 67.0594, "contact": "021-34551141" }
+          ],
+          "cities": [
+            {
+              "city": "Karachi",
+              "areas": [
+                { "area": "Gulshan-e-Iqbal (Blocks 1-20)", "latitude": 24.9204, "longitude": 67.0882 },
+                { "area": "Gulistan-e-Johar (Blocks 1-20)", "latitude": 24.9120, "longitude": 67.1230 },
+                { "area": "PECHS (Block 2 & 6)", "latitude": 24.8716, "longitude": 67.0594 },
+                { "area": "Tariq Road", "latitude": 24.8730, "longitude": 67.0581 },
+                { "area": "Bahadurabad", "latitude": 24.8820, "longitude": 67.0680 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Karachi Central",
+          "policeStations": [
+            { "stationName": "North Nazimabad Police Station", "area": "North Nazimabad", "latitude": 24.9423, "longitude": 67.0477, "contact": "021-99261803" },
+            { "stationName": "Federal B Area Police Station", "area": "Federal B Area", "latitude": 24.9350, "longitude": 67.0820, "contact": "021-36340068" }
+          ],
+          "cities": [
+            {
+              "city": "Karachi",
+              "areas": [
+                { "area": "North Nazimabad Block H", "latitude": 24.9423, "longitude": 67.0477 },
+                { "area": "North Nazimabad Block L", "latitude": 24.9350, "longitude": 67.0350 },
+                { "area": "Federal B Area Block 15", "latitude": 24.9350, "longitude": 67.0820 },
+                { "area": "North Karachi Sector 11", "latitude": 24.9850, "longitude": 67.0650 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Karachi West",
+          "policeStations": [
+            { "stationName": "Orangi Town Police Station", "area": "Orangi Town", "latitude": 24.9450, "longitude": 66.9650, "contact": "021-36650012" }
+          ],
+          "cities": [
+            {
+              "city": "Karachi",
+              "areas": [
+                { "area": "Orangi Town", "latitude": 24.9450, "longitude": 66.9650 },
+                { "area": "Baldia Town", "latitude": 24.9250, "longitude": 66.9750 },
+                { "area": "SITE Area", "latitude": 24.8950, "longitude": 67.0150 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Korangi",
+          "policeStations": [
+            { "stationName": "Korangi Industrial Area Police Station", "area": "Korangi Industrial Area", "latitude": 24.8420, "longitude": 67.1250, "contact": "021-35011308" }
+          ],
+          "cities": [
+            {
+              "city": "Karachi",
+              "areas": [
+                { "area": "Korangi Industrial Area", "latitude": 24.8420, "longitude": 67.1250 },
+                { "area": "Landhi", "latitude": 24.8520, "longitude": 67.1850 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Malir",
+          "policeStations": [
+            { "stationName": "Malir Cantt Police Station", "area": "Malir Cantt", "latitude": 24.9450, "longitude": 67.2050, "contact": "021-99261855" }
+          ],
+          "cities": [
+            {
+              "city": "Karachi",
+              "areas": [
+                { "area": "Malir Cantt", "latitude": 24.9450, "longitude": 67.2050 },
+                { "area": "Scheme 33", "latitude": 24.9750, "longitude": 67.1350 },
+                { "area": "Surjani Town", "latitude": 25.0250, "longitude": 67.0550 },
+                { "area": "Bahria Town Karachi", "latitude": 24.9950, "longitude": 67.3550 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Hyderabad",
+          "policeStations": [
+            { "stationName": "Cantt Police Station Hyderabad", "area": "Cantonment", "latitude": 25.3986, "longitude": 68.3533, "contact": "022-9200121" }
+          ],
+          "cities": [
+            {
+              "city": "Hyderabad",
+              "areas": [
+                { "area": "Latifabad", "latitude": 25.3585, "longitude": 68.3580 },
+                { "area": "Qasimabad", "latitude": 25.3995, "longitude": 68.3283 },
+                { "area": "Cantonment", "latitude": 25.3986, "longitude": 68.3533 },
+                { "area": "Hussainabad", "latitude": 25.3620, "longitude": 68.3410 },
+                { "area": "Hirabad", "latitude": 25.3910, "longitude": 68.3740 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Sukkur",
+          "policeStations": [
+            { "stationName": "New Sukkur Police Station", "area": "New Sukkur", "latitude": 27.7250, "longitude": 68.8230, "contact": "071-9310050" }
+          ],
+          "cities": [
+            {
+              "city": "Sukkur",
+              "areas": [
+                { "area": "Barrage Colony", "latitude": 27.6980, "longitude": 68.8520 },
+                { "area": "Military Road", "latitude": 27.7120, "longitude": 68.8410 },
+                { "area": "New Sukkur", "latitude": 27.7250, "longitude": 68.8230 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "province": "Khyber Pakhtunkhwa",
+      "districts": [
+        {
+          "district": "Peshawar",
+          "policeStations": [
+            { "stationName": "Hayatabad Police Station", "area": "Hayatabad", "latitude": 33.9782, "longitude": 71.4398, "contact": "091-9217258" },
+            { "stationName": "Cantt Police Station Peshawar", "area": "Peshawar Cantt", "latitude": 34.0044, "longitude": 71.5369, "contact": "091-9213096" }
+          ],
+          "cities": [
+            {
+              "city": "Peshawar",
+              "areas": [
+                { "area": "Hayatabad", "latitude": 33.9782, "longitude": 71.4398 },
+                { "area": "Peshawar Cantt", "latitude": 34.0044, "longitude": 71.5369 },
+                { "area": "University Town", "latitude": 33.9922, "longitude": 71.4883 },
+                { "area": "Qissa Khawani Bazaar", "latitude": 34.0052, "longitude": 71.5658 },
+                { "area": "Ring Road", "latitude": 33.9850, "longitude": 71.6020 },
+                { "area": "Gulbahar", "latitude": 34.0090, "longitude": 71.5810 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Abbottabad",
+          "policeStations": [
+            { "stationName": "Abbottabad City Police Station", "area": "Nawanshehr", "latitude": 34.1672, "longitude": 73.2505, "contact": "0992-9310044" }
+          ],
+          "cities": [
+            {
+              "city": "Abbottabad",
+              "areas": [
+                { "area": "Mandian", "latitude": 34.1841, "longitude": 73.2384 },
+                { "area": "Nawanshehr", "latitude": 34.1672, "longitude": 73.2505 },
+                { "area": "Supply Area", "latitude": 34.1520, "longitude": 73.2210 },
+                { "area": "Kakul Road", "latitude": 34.1810, "longitude": 73.2550 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Mardan",
+          "policeStations": [
+            { "stationName": "Mardan Cantt Police Station", "area": "Mardan Cantt", "latitude": 34.1980, "longitude": 72.0310, "contact": "0937-9230038" }
+          ],
+          "cities": [
+            {
+              "city": "Mardan",
+              "areas": [
+                { "area": "Sheikh Maltoon Town", "latitude": 34.1850, "longitude": 72.0120 },
+                { "area": "Mardan Cantt", "latitude": 34.1980, "longitude": 72.0310 },
+                { "area": "Hoti", "latitude": 34.2050, "longitude": 72.0550 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "province": "Balochistan",
+      "districts": [
+        {
+          "district": "Quetta",
+          "policeStations": [
+            { "stationName": "Quetta Cantt Police Station", "area": "Quetta Cantt", "latitude": 30.2078, "longitude": 67.0253, "contact": "081-9202595" },
+            { "stationName": "Satellite Town Police Station", "area": "Satellite Town", "latitude": 30.2238, "longitude": 66.9934, "contact": "081-2834355" }
+          ],
+          "cities": [
+            {
+              "city": "Quetta",
+              "areas": [
+                { "area": "Satellite Town", "latitude": 30.2238, "longitude": 66.9934 },
+                { "area": "Quetta Cantt", "latitude": 30.2078, "longitude": 67.0253 },
+                { "area": "Hazara Town", "latitude": 30.1659, "longitude": 66.9535 },
+                { "area": "Jinnah Road", "latitude": 30.1980, "longitude": 67.0120 },
+                { "area": "Sariab Road", "latitude": 30.1450, "longitude": 66.9850 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Gwadar",
+          "policeStations": [],
+          "cities": [
+            {
+              "city": "Gwadar",
+              "areas": [
+                { "area": "Sanghar Housing Scheme", "latitude": 25.1098, "longitude": 62.3387 },
+                { "area": "Gwadar Port Area", "latitude": 25.0970, "longitude": 62.3330 },
+                { "area": "New Town", "latitude": 25.1250, "longitude": 62.3450 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "province": "Islamabad Capital Territory",
+      "districts": [
+        {
+          "district": "Islamabad",
+          "policeStations": [
+            { "stationName": "Margalla Police Station (F-6)", "area": "Sector F-6", "latitude": 33.7297, "longitude": 73.0746, "contact": "051-9207462" },
+            { "stationName": "Aabpara Police Station (G-6)", "area": "Sector G-6", "latitude": 33.7150, "longitude": 73.0850, "contact": "051-9206366" },
+            { "stationName": "Industrial Area Police Station (I-9)", "area": "Sector I-9", "latitude": 33.6550, "longitude": 73.0450, "contact": "051-4433107" },
+            { "stationName": "Shalimar Police Station (F-10)", "area": "Sector F-10", "latitude": 33.6920, "longitude": 73.0080, "contact": "051-2299022" }
+          ],
+          "cities": [
+            {
+              "city": "Islamabad",
+              "areas": [
+                { "area": "Sector F-5", "latitude": 33.7350, "longitude": 73.0850 },
+                { "area": "Sector F-6/1", "latitude": 33.7297, "longitude": 73.0746 },
+                { "area": "Sector F-6/2", "latitude": 33.7320, "longitude": 73.0780 },
+                { "area": "Sector F-7/1", "latitude": 33.7212, "longitude": 73.0560 },
+                { "area": "Sector F-7/2", "latitude": 33.7240, "longitude": 73.0590 },
+                { "area": "Sector F-8/1", "latitude": 33.7125, "longitude": 73.0375 },
+                { "area": "Sector F-10/2", "latitude": 33.6920, "longitude": 73.0080 },
+                { "area": "Sector F-11/1", "latitude": 33.6840, "longitude": 72.9880 },
+                { "area": "Sector G-5", "latitude": 33.7220, "longitude": 73.0950 },
+                { "area": "Sector G-6/1", "latitude": 33.7150, "longitude": 73.0850 },
+                { "area": "Sector G-7/2", "latitude": 33.7050, "longitude": 73.0650 },
+                { "area": "Sector G-8/4", "latitude": 33.6950, "longitude": 73.0450 },
+                { "area": "Sector G-9/3", "latitude": 33.6850, "longitude": 73.0250 },
+                { "area": "Sector G-10/2", "latitude": 33.6780, "longitude": 73.0100 },
+                { "area": "Sector G-11/3", "latitude": 33.6749, "longitude": 72.9972 },
+                { "area": "Sector G-13/1", "latitude": 33.6520, "longitude": 72.9650 },
+                { "area": "Sector G-15", "latitude": 33.6350, "longitude": 72.9350 },
+                { "area": "Sector H-8", "latitude": 33.6750, "longitude": 73.0550 },
+                { "area": "Sector H-9", "latitude": 33.6650, "longitude": 73.0350 },
+                { "area": "Sector H-10", "latitude": 33.6550, "longitude": 73.0150 },
+                { "area": "Sector H-11", "latitude": 33.6450, "longitude": 73.0050 },
+                { "area": "Sector H-12 (NUST)", "latitude": 33.6450, "longitude": 72.9900 },
+                { "area": "Sector H-13", "latitude": 33.6361, "longitude": 72.9761 },
+                { "area": "Sector H-14", "latitude": 33.6250, "longitude": 72.9550 },
+                { "area": "Sector H-15", "latitude": 33.6150, "longitude": 72.9350 },
+                { "area": "Sector H-16", "latitude": 33.6050, "longitude": 72.9150 },
+                { "area": "Sector H-17", "latitude": 33.5950, "longitude": 72.8950 },
+                { "area": "Sector I-8/2", "latitude": 33.6687, "longitude": 73.0673 },
+                { "area": "Sector I-9", "latitude": 33.6550, "longitude": 73.0450 },
+                { "area": "Sector I-10", "latitude": 33.6450, "longitude": 73.0250 },
+                { "area": "Sector I-11", "latitude": 33.6350, "longitude": 73.0150 },
+                { "area": "Sector I-12", "latitude": 33.6250, "longitude": 73.0050 },
+                { "area": "Sector I-14", "latitude": 33.6150, "longitude": 72.9450 },
+                { "area": "Sector E-7", "latitude": 33.7350, "longitude": 73.0450 },
+                { "area": "Sector E-11", "latitude": 33.6950, "longitude": 72.9750 },
+                { "area": "Sector D-12", "latitude": 33.7050, "longitude": 72.9550 },
+                { "area": "Blue Area", "latitude": 33.7117, "longitude": 73.0683 },
+                { "area": "DHA Phase 1 (Islamabad)", "latitude": 33.5350, "longitude": 73.1050 },
+                { "area": "DHA Phase 2 (Islamabad)", "latitude": 33.5283, "longitude": 73.1517 },
+                { "area": "DHA Phase 3 (Islamabad)", "latitude": 33.5150, "longitude": 73.1850 },
+                { "area": "DHA Phase 4 (Islamabad)", "latitude": 33.5050, "longitude": 73.1250 },
+                { "area": "Bahria Town Phase 1-6 (Islamabad)", "latitude": 33.5450, "longitude": 73.0950 },
+                { "area": "Bahria Town Phase 7 (Islamabad)", "latitude": 33.5220, "longitude": 73.1010 },
+                { "area": "Bahria Town Phase 8 (Islamabad)", "latitude": 33.4950, "longitude": 73.0850 },
+                { "area": "Gulberg Greens", "latitude": 33.5950, "longitude": 73.1250 },
+                { "area": "Bani Gala", "latitude": 33.7050, "longitude": 73.1550 },
+                { "area": "Chak Shahzad", "latitude": 33.6850, "longitude": 73.1350 },
+                { "area": "Park Enclave", "latitude": 33.6900, "longitude": 73.1500 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "province": "Azad Jammu and Kashmir",
+      "districts": [
+        {
+          "district": "Muzaffarabad",
+          "policeStations": [],
+          "cities": [
+            {
+              "city": "Muzaffarabad",
+              "areas": [
+                { "area": "Upper Chattar", "latitude": 34.3520, "longitude": 73.4810 },
+                { "area": "Medina Market", "latitude": 34.3710, "longitude": 73.4720 },
+                { "area": "Plate Area", "latitude": 34.3640, "longitude": 73.4610 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Mirpur",
+          "policeStations": [],
+          "cities": [
+            {
+              "city": "Mirpur",
+              "areas": [
+                { "area": "Sector F-1", "latitude": 33.1480, "longitude": 73.7520 },
+                { "area": "New City", "latitude": 33.1250, "longitude": 73.7710 },
+                { "area": "Mian Mohammad Road", "latitude": 33.1510, "longitude": 73.7450 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "province": "Gilgit-Baltistan",
+      "districts": [
+        {
+          "district": "Gilgit",
+          "policeStations": [],
+          "cities": [
+            {
+              "city": "Gilgit",
+              "areas": [
+                { "area": "Jutial", "latitude": 35.9010, "longitude": 74.3450 },
+                { "area": "Danyore", "latitude": 35.9150, "longitude": 74.3820 },
+                { "area": "Khomer", "latitude": 35.9220, "longitude": 74.3210 }
+              ]
+            }
+          ]
+        },
+        {
+          "district": "Skardu",
+          "policeStations": [],
+          "cities": [
+            {
+              "city": "Skardu",
+              "areas": [
+                { "area": "Main Bazaar", "latitude": 35.2970, "longitude": 75.6330 },
+                { "area": "Hamid Garh", "latitude": 35.3120, "longitude": 75.6150 }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -7,43 +7,59 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true"  style="-fx-background-color: #07090F;" styleClass="scroll-pane"
+<ScrollPane fitToWidth="true" style="-fx-background-color: #080B14;" styleClass="scroll-pane"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cms.controller.ExecutiveDashboardController">
-    <VBox spacing="20" style="-fx-background-color: #07090F;">
-        <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
+    <VBox spacing="24" style="-fx-background-color: #080B14;">
+        <padding><Insets bottom="28" left="28" right="28" top="28"/></padding>
 
-        <Label text="Executive Dashboard" styleClass="heading-xl"/>
+        <!-- Header -->
+        <VBox spacing="4">
+            <Label text="Executive Dashboard" styleClass="heading-xl"/>
+            <Label text="Real-time KPIs and operational intelligence" styleClass="text-secondary"/>
+        </VBox>
 
-        <!-- KPI Cards -->
+        <!-- KPI Cards Row — all from DB -->
         <HBox spacing="16">
-            <VBox styleClass="stat-card, stat-card-green" spacing="4">
-                <Label text="Case Closure Rate" styleClass="stat-label"/>
-                <Label fx:id="closureRateLabel" text="0%" styleClass="stat-value"/>
+            <VBox styleClass="stat-card stat-card-green" spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="CASE CLOSURE RATE" styleClass="stat-label"/>
+                <Label fx:id="closureRateLabel" text="—" styleClass="stat-value"/>
+                <Label text="Resolved vs total cases" styleClass="text-muted"/>
             </VBox>
-            <VBox styleClass="stat-card, stat-card-blue" spacing="4">
-                <Label text="Total Incidents (MTD)" styleClass="stat-label"/>
-                <Label fx:id="totalIncidentsLabel" text="0" styleClass="stat-value"/>
+            <VBox styleClass="stat-card stat-card-blue" spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="INCIDENTS (MTD)" styleClass="stat-label"/>
+                <Label fx:id="totalIncidentsLabel" text="—" styleClass="stat-value"/>
+                <Label text="This month" styleClass="text-muted"/>
+            </VBox>
+            <VBox styleClass="stat-card stat-card-orange" spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="ACTIVE WARRANTS" styleClass="stat-label"/>
+                <Label fx:id="activeWarrantsLabel" text="—" styleClass="stat-value"/>
+                <Label text="Pending execution" styleClass="text-muted"/>
+            </VBox>
+            <VBox styleClass="stat-card stat-card-red" spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="HIGH PRIORITY CASES" styleClass="stat-label"/>
+                <Label fx:id="highPriorityCasesLabel" text="—" styleClass="stat-value"/>
+                <Label text="Requiring immediate action" styleClass="text-muted"/>
             </VBox>
         </HBox>
 
-        <!-- Charts -->
-        <HBox spacing="16" VBox.vgrow="ALWAYS">
-            <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
+        <!-- Charts Row -->
+        <HBox spacing="20" VBox.vgrow="ALWAYS">
+            <VBox spacing="14" styleClass="card" HBox.hgrow="ALWAYS">
                 <Label text="Crime Categories Distribution" styleClass="heading-md"/>
-                <PieChart fx:id="crimeDistributionChart" VBox.vgrow="ALWAYS" prefHeight="350"/>
+                <PieChart fx:id="crimeDistributionChart" VBox.vgrow="ALWAYS" prefHeight="320"
+                          style="-fx-background-color: transparent;"/>
             </VBox>
-            <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
-                <Label text="District-wise Crime Graph" styleClass="heading-md"/>
-                <BarChart fx:id="districtCrimeChart" VBox.vgrow="ALWAYS" prefHeight="350" legendVisible="false">
-                    <xAxis>
-                        <CategoryAxis label="District"/>
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis label="Incident Count"/>
-                    </yAxis>
+            <VBox spacing="14" styleClass="card" HBox.hgrow="ALWAYS">
+                <Label text="District-wise Crime Volume" styleClass="heading-md"/>
+                <BarChart fx:id="districtCrimeChart" VBox.vgrow="ALWAYS" prefHeight="320"
+                          legendVisible="false"
+                          style="-fx-background-color: transparent;">
+                    <xAxis><CategoryAxis label="District"/></xAxis>
+                    <yAxis><NumberAxis label="Count"/></yAxis>
                 </BarChart>
             </VBox>
         </HBox>
+
     </VBox>
 </ScrollPane>

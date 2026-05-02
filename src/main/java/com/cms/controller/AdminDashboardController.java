@@ -82,19 +82,19 @@ public class AdminDashboardController {
 
     // ─── QUICK ACTION HANDLERS (now actually navigate!) ───
 
-    @FXML private void onAddCase(MouseEvent event) {
+    @FXML private void onAddCase(javafx.event.ActionEvent event) {
         navigateToModule("CaseManagement");
     }
-    @FXML private void onAddOfficer(MouseEvent event) {
+    @FXML private void onAddOfficer(javafx.event.ActionEvent event) {
         navigateToModule("UserAdmin");
     }
-    @FXML private void onSearchCriminal(MouseEvent event) {
+    @FXML private void onSearchCriminal(javafx.event.ActionEvent event) {
         navigateToModule("CriminalSearch");
     }
-    @FXML private void onNewIncident(MouseEvent event) {
+    @FXML private void onNewIncident(javafx.event.ActionEvent event) {
         navigateToModule("IncidentRegistration");
     }
-    @FXML private void onAIAnalytics(MouseEvent event) {
+    @FXML private void onAIAnalytics(javafx.event.ActionEvent event) {
         navigateToModule("ChatbotView");
     }
 

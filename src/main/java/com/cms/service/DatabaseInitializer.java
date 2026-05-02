@@ -270,41 +270,93 @@ public class DatabaseInitializer {
                        .setParameter("n", r).executeUpdate();
             }
 
-            // Geography (Pakistan only if empty)
+            // Geography and Crime Data
             long distCount = session.createQuery("SELECT COUNT(d) FROM District d", Long.class).uniqueResult();
             if (distCount == 0) {
-                logger.info("Seeding mandatory geography data...");
-                Country pk = new Country();
-                pk.setName("Pakistan"); pk.setCode("PK");
-                session.persist(pk);
+                logger.info("Seeding mandatory geography and crime data from geo_data.json...");
+                try (InputStream is = DatabaseInitializer.class.getResourceAsStream("/geo_data.json")) {
+                    if (is != null) {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(is);
 
-                Province punjab = new Province();
-                punjab.setName("Punjab"); punjab.setCountry(pk);
-                session.persist(punjab);
+                        // Seed Geography
+                        Country country = new Country();
+                        country.setName(root.has("country") ? root.get("country").asText() : "Pakistan");
+                        country.setCode(root.has("countryCode") ? root.get("countryCode").asText() : "PK");
+                        session.persist(country);
 
-                String[] districts = { "Lahore", "Faisalabad", "Multan", "Rawalpindi",
-                        "Gujranwala", "Sargodha", "Sialkot", "Bahawalpur", "Sahiwal", "Sheikhupura" };
-                for (String dName : districts) {
-                    District d = new District();
-                    d.setName(dName); d.setProvince(punjab);
-                    session.persist(d);
-                    City c = new City();
-                    c.setName(dName + " City"); c.setDistrict(d);
-                    session.persist(c);
-                    Area a = new Area();
-                    a.setName(dName + " Center"); a.setCity(c);
-                    session.persist(a);
+                        if (root.has("provinces")) {
+                            for (com.fasterxml.jackson.databind.JsonNode provNode : root.get("provinces")) {
+                                Province province = new Province();
+                                province.setName(provNode.get("province").asText());
+                                province.setCountry(country);
+                                session.persist(province);
+
+                                if (provNode.has("districts")) {
+                                    for (com.fasterxml.jackson.databind.JsonNode distNode : provNode.get("districts")) {
+                                        District district = new District();
+                                        district.setName(distNode.get("district").asText());
+                                        district.setProvince(province);
+                                        session.persist(district);
+
+                                        if (distNode.has("cities")) {
+                                            for (com.fasterxml.jackson.databind.JsonNode cityNode : distNode.get("cities")) {
+                                                City city = new City();
+                                                city.setName(cityNode.get("city").asText());
+                                                city.setDistrict(district);
+                                                session.persist(city);
+
+                                                if (cityNode.has("areas")) {
+                                                    for (com.fasterxml.jackson.databind.JsonNode areaNode : cityNode.get("areas")) {
+                                                        Area area = new Area();
+                                                        area.setName(areaNode.get("area").asText());
+                                                        area.setCity(city);
+                                                        if (areaNode.has("latitude") && areaNode.has("longitude")) {
+                                                            area.setLatitude(new java.math.BigDecimal(areaNode.get("latitude").asText()));
+                                                            area.setLongitude(new java.math.BigDecimal(areaNode.get("longitude").asText()));
+                                                        }
+                                                        session.persist(area);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Seed Crime Categories
+                        if (root.has("crimeCategories")) {
+                            for (com.fasterxml.jackson.databind.JsonNode crimeNode : root.get("crimeCategories")) {
+                                String code = crimeNode.has("code") ? crimeNode.get("code").asText() : "";
+                                String category = crimeNode.has("category") ? crimeNode.get("category").asText() : "";
+                                String penalCode = crimeNode.has("penalCode") ? crimeNode.get("penalCode").asText() : "";
+                                
+                                session.createNativeQuery("INSERT IGNORE INTO crime_types (name, code, category, legal_reference) VALUES (:n, :c, :cat, :lr)")
+                                       .setParameter("n", category)
+                                       .setParameter("c", code)
+                                       .setParameter("cat", category)
+                                       .setParameter("lr", penalCode)
+                                       .executeUpdate();
+                            }
+                        }
+                    } else {
+                        logger.warn("geo_data.json not found in resources!");
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to seed from geo_data.json", e);
                 }
-            }
-
-            // Crime types
-            String[] crimes = { "ROBBERY", "MURDER", "CYBER_FRAUD", "KIDNAPPING",
-                    "ASSAULT", "EXTORTION", "NARCOTICS", "TERRORISM" };
-            for (String c : crimes) {
-                session.createNativeQuery("INSERT IGNORE INTO crime_types (name, code) VALUES (:n, :c)")
-                       .setParameter("n", c)
-                       .setParameter("c", c.substring(0, Math.min(3, c.length())))
-                       .executeUpdate();
+            } else {
+                long crimeCount = ((Number) session.createNativeQuery("SELECT COUNT(*) FROM crime_types").getSingleResult()).longValue();
+                if (crimeCount == 0) {
+                     String[] crimes = { "ROBBERY", "MURDER", "CYBER_FRAUD", "KIDNAPPING", "ASSAULT", "EXTORTION", "NARCOTICS", "TERRORISM" };
+                     for (String c : crimes) {
+                         session.createNativeQuery("INSERT IGNORE INTO crime_types (name, code) VALUES (:n, :c)")
+                                .setParameter("n", c)
+                                .setParameter("c", c.substring(0, Math.min(3, c.length())))
+                                .executeUpdate();
+                     }
+                }
             }
 
             // Warrant and hearing types

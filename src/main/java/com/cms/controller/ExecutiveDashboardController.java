@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 public class ExecutiveDashboardController {
 
     @FXML private Label    closureRateLabel;
+    @FXML private Label    activeWarrantsLabel;
+    @FXML private Label    highPriorityCasesLabel;
     @FXML private Label    totalIncidentsLabel;
     @FXML private PieChart crimeDistributionChart;
     @FXML private BarChart<String,Number> districtCrimeChart;
@@ -102,6 +104,18 @@ public class ExecutiveDashboardController {
             long[] d = t.getValue();
             long total = d[0], closed = d[1], mtd = d[2];
             if (totalIncidentsLabel != null) totalIncidentsLabel.setText(String.valueOf(mtd));
+            if (activeWarrantsLabel != null) {
+                try {
+                    Long aw = HibernateUtil.executeTransaction(s -> s.createQuery("SELECT COUNT(w) FROM Warrant w WHERE w.status = 'PENDING'", Long.class).getSingleResult());
+                    activeWarrantsLabel.setText(String.valueOf(aw));
+                } catch(Exception ig) { activeWarrantsLabel.setText("—"); }
+            }
+            if (highPriorityCasesLabel != null) {
+                try {
+                    Long hp = HibernateUtil.executeTransaction(s -> s.createQuery("SELECT COUNT(c) FROM CaseFile c WHERE c.priority = 'HIGH' AND c.status NOT IN ('CLOSED_CONVICTED','CLOSED_ACQUITTED','CLOSED_UNSOLVED')", Long.class).getSingleResult());
+                    highPriorityCasesLabel.setText(String.valueOf(hp));
+                } catch(Exception ig) { highPriorityCasesLabel.setText("—"); }
+            }
             if (closureRateLabel != null)
                 closureRateLabel.setText(total > 0 ? String.format("%.1f%%", (double)closed/total*100) : "0%");
         });

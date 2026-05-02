@@ -1,143 +1,164 @@
-/* 
-   CMS v5.0 — Premium Military Dark Login 
-   Theme: Dark Navy #0d1b2a, Cyan #00d4ff, White, Gray
-*/
+/* ═══════════════════════════════════════════════════════════════
+   CMS v6.0 — OBSIDIAN GLASS Login
+   Split: Branding (left) + Glass Form (right)
+   ═══════════════════════════════════════════════════════════════ */
 
-.root { 
-    -fx-font-family: "Segoe UI", "Outfit", "Inter", sans-serif;
-    -fx-background-color: #0d1b2a;
+.root {
+    -fx-font-family: "Outfit", "Segoe UI", sans-serif;
+    -fx-background-color: #04060D;
 }
 
 .main-container {
-    -fx-background-color: #0d1b2a;
+    -fx-background-color: #04060D;
 }
 
-/* ── LEFT PANEL: Branding (50%) ── */
+/* ── LEFT PANEL: Brand Identity ── */
 .left-panel {
-    -fx-background-color: radial-gradient(center 50% 50%, radius 100%, #162a3f 0%, #0d1b2a 100%);
+    -fx-background-color: linear-gradient(
+        to bottom right,
+        #06091A,
+        #04060D
+    );
     -fx-alignment: CENTER;
-    -fx-padding: 40;
+    -fx-padding: 48;
 }
 
 .logo-shield {
-    -fx-effect: dropshadow(gaussian, #00d4ff, 25, 0.4, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(0,229,255,0.55), 32, 0.25, 0, 0);
 }
 
 .logo-text {
     -fx-text-fill: white;
-    -fx-font-size: 80px;
+    -fx-font-size: 76px;
     -fx-font-weight: 900;
+    -fx-effect: dropshadow(gaussian, rgba(0,229,255,0.4), 20, 0, 0, 0);
 }
 
 .logo-subtitle {
-    -fx-text-fill: #00d4ff;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-letter-spacing: 2px;
+    -fx-text-fill: rgba(0,229,255,0.85);
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 3px;
 }
 
 .version-label {
-    -fx-text-fill: #8899aa;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
+    -fx-text-fill: rgba(255,255,255,0.25);
+    -fx-font-size: 11px;
 }
 
-/* ── RIGHT PANEL: Form (50%) ── */
+/* ── RIGHT PANEL: Glass Form ── */
 .right-panel {
-    -fx-background-color: #0f2238; /* Slightly lighter navy */
+    -fx-background-color: linear-gradient(
+        to bottom,
+        rgba(8,12,24,0.98),
+        rgba(6,9,16,0.98)
+    );
     -fx-padding: 60;
     -fx-alignment: CENTER;
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-width: 0 0 0 1;
 }
 
 .heading {
-    -fx-font-size: 38px;
-    -fx-font-weight: 700;
+    -fx-font-size: 36px;
+    -fx-font-weight: 800;
     -fx-text-fill: white;
 }
 
 .subtext {
-    -fx-font-size: 14px;
-    -fx-text-fill: #8899aa;
+    -fx-font-size: 13px;
+    -fx-text-fill: rgba(255,255,255,0.38);
 }
 
 .field-label {
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #00d4ff;
-    -fx-letter-spacing: 1px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-text-fill: rgba(255,255,255,0.45);
+    -fx-letter-spacing: 1.5px;
 }
 
+/* Glass input container */
 .input-container {
-    -fx-background-color: #08121e;
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    -fx-border-color: #1e3a5f;
-    -fx-border-width: 1.5;
+    -fx-background-color: rgba(255,255,255,0.05);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(255,255,255,0.12);
+    -fx-border-width: 1;
     -fx-alignment: CENTER_LEFT;
-    -fx-padding: 0 16 0 16;
+    -fx-padding: 0 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 2);
 }
 
 .input-container:focused-within {
-    -fx-border-color: #00d4ff;
-    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.3), 15, 0, 0, 0);
+    -fx-border-color: rgba(0,229,255,0.55);
+    -fx-background-color: rgba(0,229,255,0.04);
+    -fx-effect: dropshadow(gaussian, rgba(0,229,255,0.28), 18, 0, 0, 0);
 }
 
 .input-field {
     -fx-background-color: transparent;
-    -fx-padding: 16 0 16 0;
-    -fx-font-size: 15px;
+    -fx-padding: 16 0;
+    -fx-font-size: 14px;
     -fx-text-fill: white;
-    -fx-prompt-text-fill: #556677;
+    -fx-prompt-text-fill: rgba(255,255,255,0.28);
+    -fx-border-color: transparent;
 }
 
 .eye-icon {
-    -fx-fill: #556677;
+    -fx-fill: rgba(255,255,255,0.3);
     -fx-cursor: hand;
 }
-
 .eye-icon:hover {
-    -fx-fill: #00d4ff;
+    -fx-fill: #00E5FF;
 }
 
+/* Liquid auth button */
 .auth-btn {
-    -fx-background-color: #00d4ff;
-    -fx-text-fill: #0d1b2a;
+    -fx-background-color: linear-gradient(to right, #00B4D8, #00E5FF);
+    -fx-text-fill: #04060D;
     -fx-font-weight: 800;
-    -fx-font-size: 15px;
-    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+    -fx-background-radius: 12;
     -fx-padding: 18;
     -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-effect:
+        dropshadow(gaussian, rgba(0,229,255,0.6), 24, 0, 0, 6),
+        dropshadow(gaussian, rgba(0,0,0,0.4), 6, 0, 0, 2);
 }
-
 .auth-btn:hover {
-    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.5), 20, 0, 0, 0);
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
+    -fx-background-color: linear-gradient(to right, #00CDEF, #33EEFF);
+    -fx-effect:
+        dropshadow(gaussian, rgba(0,229,255,0.9), 36, 0, 0, 0),
+        dropshadow(gaussian, rgba(0,0,0,0.4), 6, 0, 0, 2);
+    -fx-scale-x: 1.015;
+    -fx-scale-y: 1.015;
 }
-
 .auth-btn:pressed {
-    -fx-scale-x: 0.98;
-    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.985;
+    -fx-scale-y: 0.985;
+    -fx-effect: dropshadow(gaussian, rgba(0,229,255,0.35), 10, 0, 0, 0);
 }
 
 .error-label {
-    -fx-text-fill: #ff5555;
-    -fx-font-size: 13px;
+    -fx-text-fill: #F43F5E;
+    -fx-font-size: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(244,63,94,0.4), 6, 0, 0, 0);
 }
 
 /* ── FOOTER ── */
 .footer-text {
-    -fx-text-fill: #8899aa;
-    -fx-font-size: 13px;
+    -fx-text-fill: rgba(255,255,255,0.35);
+    -fx-font-size: 12px;
 }
-
 .footer-link {
-    -fx-text-fill: #00d4ff;
+    -fx-text-fill: #00E5FF;
     -fx-underline: false;
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
     -fx-padding: 0;
+    -fx-border-color: transparent;
 }
-
 .footer-link:hover {
-    -fx-text-fill: #33eeff;
+    -fx-text-fill: #33EEFF;
+    -fx-effect: dropshadow(gaussian, rgba(0,229,255,0.4), 5, 0, 0, 0);
 }

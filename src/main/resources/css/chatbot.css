@@ -1,34 +1,33 @@
-/* CMS v5.0 — Elite Dark Chatbot */
-.chatbot-container { -fx-background-color: #07090F; }
+/* CMS v6.0 — AI Chatbot Glass Theme */
+
+.chat-root {
+    -fx-background-color: #080B14;
+}
 .chat-header {
-    -fx-background-color: #060A14; -fx-padding: 15 24;
-    -fx-border-color: rgba(0,212,255,0.12); -fx-border-width: 0 0 1 0;
+    -fx-background-color: rgba(255,255,255,0.04);
+    -fx-border-color: rgba(255,255,255,0.07);
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 16 20;
 }
-.chat-scroll { -fx-background: transparent; -fx-background-color: transparent; }
-.chat-messages-container { -fx-padding: 24; }
-.chat-input-area {
-    -fx-background-color: #060A14; -fx-padding: 16 24;
-    -fx-border-color: rgba(0,212,255,0.12); -fx-border-width: 1 0 0 0;
+.chat-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: white;
 }
-.chat-input-field {
-    -fx-background-color: #0A0E1A; -fx-text-fill: #00D4FF;
-    -fx-border-color: rgba(0,212,255,0.25); -fx-border-radius: 20; -fx-background-radius: 20;
-    -fx-padding: 12 18; -fx-prompt-text-fill: rgba(0,212,255,0.3);
+.chat-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(255,255,255,0.35);
 }
-.chat-input-field:focused {
-    -fx-border-color: #00D4FF;
-    -fx-effect: dropshadow(gaussian, rgba(0,212,255,0.4), 12, 0, 0, 0);
+.chat-messages-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
-.message-bubble-user {
-    -fx-background-color: linear-gradient(to right, #00AACC, #00D4FF);
-    -fx-text-fill: #07090F; -fx-font-weight: bold;
-    -fx-background-radius: 18 18 2 18; -fx-padding: 12 18;
-    -fx-effect: dropshadow(gaussian, rgba(0,212,255,0.35), 8, 0, 0, 2);
+.chat-messages-pane > .viewport {
+    -fx-background-color: transparent;
 }
-.message-bubble-ai {
-    -fx-background-color: #0A1020; -fx-text-fill: #00D4FF;
-    -fx-background-radius: 18 18 18 2; -fx-padding: 12 18;
-    -fx-border-color: rgba(0,212,255,0.2); -fx-border-width: 1;
+.chat-input-bar {
+    -fx-background-color: rgba(255,255,255,0.03);
+    -fx-border-color: rgba(255,255,255,0.07);
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 14 20;
 }
-.chat-timestamp { -fx-text-fill: #2A4A5A; -fx-font-size: 9px; -fx-padding: 4 0 0 0; }
-.label { -fx-text-fill: #00D4FF; }

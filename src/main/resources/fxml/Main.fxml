@@ -4,27 +4,27 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cms.controller.MainController"
-            style="-fx-background-color: #07090F;">
+            style="-fx-background-color: #080B14;">
 
-    <!-- TOP: Session Header -->
+    <!-- TOP: Frosted glass header -->
     <top>
         <fx:include source="SessionHeader.fxml"/>
     </top>
 
     <!-- BODY -->
     <center>
-        <HBox style="-fx-background-color: #07090F;" alignment="TOP_LEFT">
+        <HBox style="-fx-background-color: #080B14;" alignment="TOP_LEFT">
 
-            <!-- SIDEBAR: with ScrollPane for independent scrolling -->
-            <ScrollPane fx:id="sidebarScroll" 
-                        fitToWidth="true" 
-                        hbarPolicy="NEVER" 
+            <!-- SIDEBAR -->
+            <ScrollPane fx:id="sidebarScroll"
+                        fitToWidth="true"
+                        hbarPolicy="NEVER"
                         vbarPolicy="AS_NEEDED"
-                        style="-fx-background-color: #060A14; -fx-border-color: transparent;"
+                        style="-fx-background-color: #060910; -fx-border-color: transparent;"
                         styleClass="sidebar-scroll">
                 <VBox fx:id="sideMenu"
                       prefWidth="240" minWidth="240"
-                      style="-fx-background-color: #060A14;"
+                      style="-fx-background-color: #060910;"
                       styleClass="sidebar">
                     <VBox styleClass="sidebar-brand">
                         <Label text="🛡 CMS" styleClass="brand-title"/>
@@ -35,13 +35,13 @@
                 </VBox>
             </ScrollPane>
 
-            <!-- MAIN CONTENT AREA: Independent scrolling -->
+            <!-- MAIN CONTENT AREA -->
             <ScrollPane fitToWidth="true" fitToHeight="true" HBox.hgrow="ALWAYS"
                         style="-fx-background-color: transparent; -fx-border-color: transparent;"
                         hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
                         styleClass="main-content-scroll">
                 <StackPane fx:id="contentArea"
-                           style="-fx-background-color: #07090F; -fx-padding: 0;"/>
+                           style="-fx-background-color: #080B14; -fx-padding: 0;"/>
             </ScrollPane>
 
         </HBox>

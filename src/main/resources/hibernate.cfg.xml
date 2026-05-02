@@ -8,7 +8,7 @@
         <!-- NOTE: These values are overridden at runtime by HibernateUtil from db.properties -->
         <!-- Edit db.properties (in src/main/resources) to set your actual credentials -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/cms_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;createDatabaseIfNotExist=true</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/cms_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;createDatabaseIfNotExist=true&amp;nullCatalogMeansCurrent=true</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password">SET_IN_DB_PROPERTIES</property>
 
@@ -21,7 +21,7 @@
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
         <property name="hibernate.show_sql">false</property>
         <property name="hibernate.format_sql">true</property>
-        <property name="hibernate.hbm2ddl.auto">validate</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
 
         <!-- Mapping classes will be added here -->
         <mapping class="com.cms.model.User"/>

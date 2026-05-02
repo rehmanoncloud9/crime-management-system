@@ -24,16 +24,20 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Properties;
 
-
 public class LoginController {
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
     private final AuthService authService = new AuthService();
 
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private TextField passwordTextField; // For show/hide toggle
-    @FXML private Label errorLabel;
-    @FXML private Button loginButton;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private TextField passwordTextField; // For show/hide toggle
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private Button loginButton;
 
     @FXML
     public void initialize() {
@@ -61,7 +65,7 @@ public class LoginController {
     @FXML
     private void handleLogin(ActionEvent event) {
         String username = usernameField.getText();
-        
+
         // Retrieve password from whichever field is currently active/visible
         String password = passwordField.isVisible() ? passwordField.getText() : passwordTextField.getText();
 
@@ -74,7 +78,8 @@ public class LoginController {
         errorLabel.setText("Authenticating...");
         errorLabel.getStyleClass().removeAll("error-text");
         errorLabel.getStyleClass().add("text-secondary");
-        if (loginButton != null) loginButton.setDisable(true);
+        if (loginButton != null)
+            loginButton.setDisable(true);
 
         javafx.concurrent.Task<User> authTask = new javafx.concurrent.Task<>() {
             @Override
@@ -87,7 +92,8 @@ public class LoginController {
             User user = authTask.getValue();
             logger.info("User logged in: {} ({})", user.getUsername(), user.getRole());
             if (user.isMustChangePassword()) {
-                logger.info("User '{}' must change password — redirecting to change-password screen.", user.getUsername());
+                logger.info("User '{}' must change password — redirecting to change-password screen.",
+                        user.getUsername());
                 navigateToChangePassword(event);
             } else {
                 navigateToMain(event);
@@ -99,7 +105,7 @@ public class LoginController {
             logger.error("Login failed: {}", ex != null ? ex.toString() : "Unknown error");
             errorLabel.getStyleClass().removeAll("text-secondary");
             errorLabel.getStyleClass().add("error-text");
-            
+
             String errorMessage = "Authentication service unavailable.";
             if (ex != null) {
                 if (ex.getMessage() != null && !ex.getMessage().isBlank()) {
@@ -112,7 +118,8 @@ public class LoginController {
             }
             errorLabel.setText(errorMessage);
             logger.error("AUTHENTICATION FAILED", ex);
-            if (loginButton != null) loginButton.setDisable(false);
+            if (loginButton != null)
+                loginButton.setDisable(false);
             // Shake password field on error
             AnimationHelper.shake(passwordField);
             AnimationHelper.shake(errorLabel);
@@ -159,9 +166,8 @@ public class LoginController {
             stage.show();
 
             ParallelTransition entrance = new ParallelTransition(root,
-                createFade(root, 0, 1, 450),
-                createScale(root, 0.96, 1.0, 450)
-            );
+                    createFade(root, 0, 1, 450),
+                    createScale(root, 0.96, 1.0, 450));
             entrance.setInterpolator(Interpolator.EASE_OUT);
             entrance.play();
 
@@ -173,7 +179,9 @@ public class LoginController {
 
     private FadeTransition createFade(Node node, double from, double to, int ms) {
         FadeTransition ft = new FadeTransition(Duration.millis(ms), node);
-        ft.setFromValue(from); ft.setToValue(to); return ft;
+        ft.setFromValue(from);
+        ft.setToValue(to);
+        return ft;
     }
 
     @FXML
@@ -199,17 +207,24 @@ public class LoginController {
 
     private ScaleTransition createScale(Node node, double from, double to, int ms) {
         ScaleTransition st = new ScaleTransition(Duration.millis(ms), node);
-        st.setFromX(from); st.setFromY(from); st.setToX(to); st.setToY(to); return st;
+        st.setFromX(from);
+        st.setFromY(from);
+        st.setToX(to);
+        st.setToY(to);
+        return st;
     }
 
     @FXML
     private void handleContactAdmin(ActionEvent event) {
-        // Contact info is read from config.properties (app.support.email or app.support.url).
+        // Contact info is read from config.properties (app.support.email or
+        // app.support.url).
         // Fallback: show a plain dialog so there is no hardcoded personal number.
         Properties props = new Properties();
         try (java.io.InputStream in = getClass().getResourceAsStream("/config.properties")) {
-            if (in != null) props.load(in);
-        } catch (Exception ignored) {}
+            if (in != null)
+                props.load(in);
+        } catch (Exception ignored) {
+        }
 
         String supportUrl = props.getProperty("app.support.url", "");
         String supportEmail = props.getProperty("app.support.email", "");
@@ -224,11 +239,11 @@ public class LoginController {
         }
 
         String msg = supportEmail.isBlank()
-            ? "Please contact your system administrator for technical support."
-            : "For technical support, email: " + supportEmail;
+                ? "Please contact your system administrator for technical support."
+                : "For technical support, email: " + supportEmail;
 
         javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-            javafx.scene.control.Alert.AlertType.INFORMATION, msg);
+                javafx.scene.control.Alert.AlertType.INFORMATION, msg);
         alert.setHeaderText("Technical Support");
         alert.showAndWait();
     }
