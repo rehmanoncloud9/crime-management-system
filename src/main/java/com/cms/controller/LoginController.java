@@ -145,4 +145,15 @@ public class LoginController {
         ScaleTransition st = new ScaleTransition(Duration.millis(ms), node);
         st.setFromX(from); st.setFromY(from); st.setToX(to); st.setToY(to); return st;
     }
+
+    @FXML
+    private void handleContactAdmin(ActionEvent event) {
+        try {
+            // Opening WhatsApp link in the default system browser
+            java.awt.Desktop.getDesktop().browse(new java.net.URI("https://wa.me/923487453067"));
+        } catch (Exception e) {
+            logger.error("Failed to open WhatsApp link", e);
+            errorLabel.setText("Error opening browser. Link: https://wa.me/923487453067");
+        }
+    }
 }
