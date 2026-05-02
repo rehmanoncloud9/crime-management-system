@@ -1,4 +1,4 @@
-# Crime Management System v5.0
+# Crime Management System
 
 A desktop application built for Pakistani law enforcement, developed as a semester project using Java, JavaFX, Hibernate, and MariaDB (via XAMPP).
 
