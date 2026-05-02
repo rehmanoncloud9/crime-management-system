@@ -35,10 +35,12 @@ mysqldump -u root -p cms_db > cms_db_backup_$(date +%Y%m%d).sql
 ```
 
 ### 2. Apply Schema Enhancements
+The app will auto-apply `schema_enhanced.sql` on first run if the schema is missing.
+You can also apply it manually:
 ```bash
-mysql -u root -p cms_db < schema.sql
+mysql -u root -p cms_db < schema_enhanced.sql
 ```
-✓ Safe to re-run (idempotent)
+✓ Safe for a fresh DB (uses CREATE/IF NOT EXISTS)
 
 ### 3. Copy Updated Java Files
 Copy these 3 files to your project:
@@ -58,6 +60,10 @@ mvn test
 ```bash
 mvn javafx:run
 ```
+
+### Database Defaults
+`db.properties` is the default source for MySQL connection details. If it is missing,
+the app falls back to `config.properties` or `CMS_DB_*` environment variables.
 
 ---
 

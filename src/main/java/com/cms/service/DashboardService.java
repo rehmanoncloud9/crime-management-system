@@ -1,6 +1,6 @@
 package com.cms.service;
 
-import com.cms.model.enums.IncidentStatus;
+import com.cms.model.enums.CaseStatus;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +18,11 @@ public class DashboardService {
             // Active cases (any non-closed status)
             try { stats.put("activeCases",
                 session.createQuery(
-                    "SELECT COUNT(c) FROM CaseFile c WHERE c.status = :s", Long.class)
-                    .setParameter("s", IncidentStatus.OPEN).getSingleResult());
+                    "SELECT COUNT(c) FROM CaseFile c WHERE c.status NOT IN (:s1,:s2,:s3)", Long.class)
+                    .setParameter("s1", CaseStatus.CLOSED_CONVICTED)
+                    .setParameter("s2", CaseStatus.CLOSED_ACQUITTED)
+                    .setParameter("s3", CaseStatus.CLOSED_UNSOLVED)
+                    .getSingleResult());
             } catch (Exception e) { stats.put("activeCases", 0L); }
 
             // Officers count
@@ -30,11 +33,10 @@ public class DashboardService {
             // Closed cases (all closed statuses)
             try { stats.put("closedCases",
                 session.createQuery(
-                    "SELECT COUNT(c) FROM CaseFile c WHERE c.status IN (:s1,:s2,:s3,:s4)", Long.class)
-                    .setParameter("s1", IncidentStatus.CLOSED)
-                    .setParameter("s2", IncidentStatus.CLOSED_CONVICTED)
-                    .setParameter("s3", IncidentStatus.CLOSED_ACQUITTED)
-                    .setParameter("s4", IncidentStatus.CLOSED_UNSOLVED)
+                    "SELECT COUNT(c) FROM CaseFile c WHERE c.status IN (:s1,:s2,:s3)", Long.class)
+                    .setParameter("s1", CaseStatus.CLOSED_CONVICTED)
+                    .setParameter("s2", CaseStatus.CLOSED_ACQUITTED)
+                    .setParameter("s3", CaseStatus.CLOSED_UNSOLVED)
                     .getSingleResult());
             } catch (Exception e) { stats.put("closedCases", 0L); }
 

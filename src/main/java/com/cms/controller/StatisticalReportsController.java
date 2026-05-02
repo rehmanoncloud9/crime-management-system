@@ -58,12 +58,16 @@ public class StatisticalReportsController {
     private void styleCharts() {
         if (crimeTrendChart != null) {
             crimeTrendChart.setStyle("-fx-background-color: transparent;");
-            crimeTrendChart.setCreateSymbols(true);
+            crimeTrendChart.setCreateSymbols(false);
             crimeTrendChart.setLegendVisible(false);
+            crimeTrendChart.setAnimated(false);
         }
         if (districtChart != null) {
             districtChart.setStyle("-fx-background-color: transparent;");
             districtChart.setLegendVisible(false);
+            districtChart.setAnimated(false);
+            districtChart.setBarGap(6);
+            districtChart.setCategoryGap(18);
             // Rotate district names on x-axis for readability
             if (districtChart.getXAxis() instanceof CategoryAxis catAxis) {
                 catAxis.setTickLabelRotation(45);
@@ -123,9 +127,10 @@ public class StatisticalReportsController {
                 try {
                     List<Object[]> rows = HibernateUtil.executeTransaction(session ->
                         session.createQuery(
-                            "SELECT d.name, COUNT(i) FROM CrimeIncident i JOIN i.district d " +
+                            "SELECT COALESCE(d.name, 'Unknown'), COUNT(i) FROM CrimeIncident i " +
+                            "LEFT JOIN i.district d " +
                             "WHERE i.occurredAt >= :start AND i.occurredAt <= :end " +
-                            "GROUP BY d.name ORDER BY COUNT(i) DESC", Object[].class)
+                            "GROUP BY COALESCE(d.name, 'Unknown') ORDER BY COUNT(i) DESC", Object[].class)
                         .setParameter("start", start.atStartOfDay())
                         .setParameter("end", end.plusDays(1).atStartOfDay())
                         .setMaxResults(10).list()
@@ -192,10 +197,10 @@ public class StatisticalReportsController {
                 try {
                     List<Object[]> rows = HibernateUtil.executeTransaction(session ->
                         session.createQuery(
-                            "SELECT d.name, COUNT(a) FROM ArrestRecord a " +
-                            "JOIN a.caseFile cf JOIN cf.incident i JOIN i.district d " +
+                            "SELECT COALESCE(d.name, 'Unknown'), COUNT(a) FROM ArrestRecord a " +
+                            "JOIN a.caseFile cf JOIN cf.incident i LEFT JOIN i.district d " +
                             "WHERE a.arrestedAt >= :start AND a.arrestedAt <= :end " +
-                            "GROUP BY d.name ORDER BY COUNT(a) DESC", Object[].class)
+                            "GROUP BY COALESCE(d.name, 'Unknown') ORDER BY COUNT(a) DESC", Object[].class)
                         .setParameter("start", start.atStartOfDay())
                         .setParameter("end", end.plusDays(1).atStartOfDay())
                         .setMaxResults(10).list()
@@ -295,10 +300,9 @@ public class StatisticalReportsController {
                         session.createQuery(
                             "SELECT u.fullName, COUNT(cf) FROM CaseFile cf " +
                             "JOIN cf.primaryInvestigator u " +
-                            "WHERE cf.status IN (com.cms.model.enums.IncidentStatus.CLOSED, " +
-                            "com.cms.model.enums.IncidentStatus.CLOSED_CONVICTED, " +
-                            "com.cms.model.enums.IncidentStatus.CLOSED_ACQUITTED, " +
-                            "com.cms.model.enums.IncidentStatus.CLOSED_UNSOLVED) " +
+                            "WHERE cf.status IN (com.cms.model.enums.CaseStatus.CLOSED_CONVICTED, " +
+                            "com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED, " +
+                            "com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED) " +
                             "GROUP BY u.fullName ORDER BY COUNT(cf) DESC", Object[].class)
                         .setMaxResults(10).list()
                     );
