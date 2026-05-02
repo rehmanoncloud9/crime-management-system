@@ -147,19 +147,29 @@ public class DatabaseInitializer {
                 if (line.endsWith(delimiter)) {
                     String sql = statement.toString().trim();
                     sql = sql.substring(0, sql.lastIndexOf(delimiter)).trim();
-                    if (!sql.isBlank()) stmt.execute(sql);
+                    if (!sql.isBlank()) executeStatement(stmt, sql);
                     statement.setLength(0);
                 }
             }
 
             String remaining = statement.toString().trim();
-            if (!remaining.isBlank()) stmt.execute(remaining);
+            if (!remaining.isBlank()) executeStatement(stmt, remaining);
+        }
+    }
+
+    private static void executeStatement(Statement stmt, String sql) throws java.sql.SQLException {
+        try {
+            stmt.execute(sql);
+        } catch (java.sql.SQLException ex) {
+            String preview = sql.length() > 120 ? sql.substring(0, 120) + "..." : sql;
+            logger.error("Schema statement failed: {}", preview, ex);
+            throw ex;
         }
     }
 
     private static String extractDatabaseName(String dbUrl) {
         try {
-            String withoutJdbc = dbUrl.substring("jdbc:".length());
+            String withoutJdbc = dbUrl.startsWith("jdbc:") ? dbUrl.substring("jdbc:".length()) : dbUrl;
             java.net.URI uri = java.net.URI.create(withoutJdbc);
             String path = uri.getPath();
             if (path != null && path.length() > 1) {
@@ -179,7 +189,7 @@ public class DatabaseInitializer {
 
     private static String buildServerUrl(String dbUrl) {
         try {
-            String withoutJdbc = dbUrl.substring("jdbc:".length());
+            String withoutJdbc = dbUrl.startsWith("jdbc:") ? dbUrl.substring("jdbc:".length()) : dbUrl;
             java.net.URI uri = java.net.URI.create(withoutJdbc);
             String host = uri.getHost();
             int port = uri.getPort();

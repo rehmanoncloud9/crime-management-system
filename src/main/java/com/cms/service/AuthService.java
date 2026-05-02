@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class AuthService {
 
@@ -157,10 +158,14 @@ public class AuthService {
     }
 
     private boolean constantTimeEquals(String a, String b) {
-        return MessageDigest.isEqual(
-                a.getBytes(StandardCharsets.UTF_8),
-                b.getBytes(StandardCharsets.UTF_8)
-        );
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] aHash = digest.digest(a.getBytes(StandardCharsets.UTF_8));
+            byte[] bHash = digest.digest(b.getBytes(StandardCharsets.UTF_8));
+            return MessageDigest.isEqual(aHash, bHash);
+        } catch (NoSuchAlgorithmException e) {
+            return a.equals(b);
+        }
     }
 
     private record PasswordCheckResult(boolean matched, boolean requiresRehash) {
