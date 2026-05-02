@@ -12,8 +12,10 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.security.MessageDigest;
 
 public class AuthService {
 
@@ -145,13 +147,20 @@ public class AuthService {
             }
         }
 
-        return storedHash.equals(rawPassword)
+        return constantTimeEquals(storedHash, rawPassword)
                 ? PasswordCheckResult.match(true)
                 : PasswordCheckResult.noMatch();
     }
 
     private boolean isBcryptHash(String value) {
         return value.startsWith("$2a$") || value.startsWith("$2b$") || value.startsWith("$2y$");
+    }
+
+    private boolean constantTimeEquals(String a, String b) {
+        return MessageDigest.isEqual(
+                a.getBytes(StandardCharsets.UTF_8),
+                b.getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     private record PasswordCheckResult(boolean matched, boolean requiresRehash) {

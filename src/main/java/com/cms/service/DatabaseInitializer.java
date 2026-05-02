@@ -94,9 +94,12 @@ public class DatabaseInitializer {
     }
 
     private static boolean schemaExists(Connection conn, String dbName) {
-        String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'users'";
+        String sql = "SELECT COUNT(*) FROM information_schema.tables " +
+                     "WHERE table_schema = ? AND table_name IN (?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dbName);
+            ps.setString(2, "users");
+            ps.setString(3, "crime_incidents");
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() && rs.getLong(1) > 0;
             }
@@ -106,7 +109,7 @@ public class DatabaseInitializer {
         }
     }
 
-    private static void executeSqlScript(Connection conn, String script) throws Exception {
+    private static void executeSqlScript(Connection conn, String script) throws java.sql.SQLException {
         String delimiter = ";";
         StringBuilder statement = new StringBuilder();
         boolean inBlockComment = false;
@@ -144,17 +147,13 @@ public class DatabaseInitializer {
                 if (line.endsWith(delimiter)) {
                     String sql = statement.toString().trim();
                     sql = sql.substring(0, sql.lastIndexOf(delimiter)).trim();
-                    if (!sql.isBlank()) {
-                        stmt.execute(sql);
-                    }
+                    if (!sql.isBlank()) stmt.execute(sql);
                     statement.setLength(0);
                 }
             }
 
             String remaining = statement.toString().trim();
-            if (!remaining.isBlank()) {
-                stmt.execute(remaining);
-            }
+            if (!remaining.isBlank()) stmt.execute(remaining);
         }
     }
 
@@ -164,9 +163,17 @@ public class DatabaseInitializer {
             java.net.URI uri = java.net.URI.create(withoutJdbc);
             String path = uri.getPath();
             if (path != null && path.length() > 1) {
-                return path.substring(1);
+                String name = path.substring(1);
+                int idx = name.indexOf('?');
+                return idx >= 0 ? name.substring(0, idx) : name;
             }
         } catch (Exception ignore) { }
+        int slash = dbUrl.lastIndexOf('/');
+        if (slash >= 0) {
+            String tail = dbUrl.substring(slash + 1);
+            int q = tail.indexOf('?');
+            return q >= 0 ? tail.substring(0, q) : tail;
+        }
         return "cms_db";
     }
 
