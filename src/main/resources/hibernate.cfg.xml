@@ -8,8 +8,8 @@
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <!-- Credentials are PLACEHOLDERS - loaded programmatically from db.properties by HibernateUtil -->
         <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/cms_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;createDatabaseIfNotExist=true</property>
-        <property name="hibernate.connection.username">admin</property>
-        <property name="hibernate.connection.password">placeholder</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password">potassium</property>
 
         <!-- HikariCP Connection Pool -->
         <property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>

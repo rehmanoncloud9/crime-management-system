@@ -32,19 +32,24 @@ public class DatabaseInitializer {
     public static void initialize() {
         System.out.println(">>> [CMS-INIT] Starting Database Initialization...");
         logger.info(">>> [CMS-INIT] Starting Database Initialization...");
-        
+
         try {
             // Phase 1: JDBC Bootstrap (Schema Migrations)
             runJdbcBootstrap();
-            
-            // Phase 2: Mandatory Reference Data (Lookups)
-            seedReferenceData();
-            
-            // Phase 3: Security Baseline (Admin Account)
+
+            // Phase 2: Security Baseline (Admin Account)
+            // Priority 1: Ensure authentication is available immediately
             ensureAdminAccount();
-            
+
+            // Phase 3: Mandatory Reference Data (Lookups)
+            seedReferenceData();
+
             logger.info(">>> [CMS-INIT] Database Initialization Complete.");
         } catch (Exception e) {
+            System.err.println("************************************************************");
+            System.err.println("!!! CRITICAL: DATABASE INITIALIZATION FAILED !!!");
+            System.err.println("Error: " + e.getMessage());
+            System.err.println("************************************************************");
             logger.error("Database initialization failed", e);
             throw new RuntimeException("Database initialization failed", e);
         }
@@ -55,13 +60,15 @@ public class DatabaseInitializer {
         // This method is kept for minor hotfixes or ensuring the DB exists.
         String dbUrl = props.getProperty("db.url", "jdbc:mysql://localhost:3306/cms_db");
         String user = props.getProperty("db.username", "root");
-        String pass = props.getProperty("db.password", "");
+        String pass = props.getProperty("db.password", "potassium");
 
         String dbName = extractDatabaseName(dbUrl);
         String serverUrl = buildServerUrl(dbUrl);
 
         try (Connection conn = DriverManager.getConnection(serverUrl, user, pass);
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
+            logger.info("JDBC Bootstrap: Attempting connection to {} as user '{}' (Pass length: {})", 
+                serverUrl, user, (pass != null ? pass.length() : 0));
             stmt.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
             logger.info("JDBC Bootstrap: Database '{}' confirmed.", dbName);
         } catch (Exception e) {
@@ -95,7 +102,7 @@ public class DatabaseInitializer {
 
     private static boolean schemaExists(Connection conn, String dbName) {
         String sql = "SELECT COUNT(*) FROM information_schema.tables " +
-                     "WHERE table_schema = ? AND table_name IN (?, ?)";
+                "WHERE table_schema = ? AND table_name IN (?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dbName);
             ps.setString(2, "users");
@@ -147,13 +154,15 @@ public class DatabaseInitializer {
                 if (line.endsWith(delimiter)) {
                     String sql = statement.toString().trim();
                     sql = sql.substring(0, sql.lastIndexOf(delimiter)).trim();
-                    if (!sql.isBlank()) executeStatement(stmt, sql);
+                    if (!sql.isBlank())
+                        executeStatement(stmt, sql);
                     statement.setLength(0);
                 }
             }
 
             String remaining = statement.toString().trim();
-            if (!remaining.isBlank()) executeStatement(stmt, remaining);
+            if (!remaining.isBlank())
+                executeStatement(stmt, remaining);
         }
     }
 
@@ -177,7 +186,8 @@ public class DatabaseInitializer {
                 int idx = name.indexOf('?');
                 return idx >= 0 ? name.substring(0, idx) : name;
             }
-        } catch (Exception ignore) { }
+        } catch (Exception ignore) {
+        }
         int slash = dbUrl.lastIndexOf('/');
         if (slash >= 0) {
             String tail = dbUrl.substring(slash + 1);
@@ -196,14 +206,15 @@ public class DatabaseInitializer {
             String query = uri.getQuery();
             String base = "jdbc:mysql://" + host + (port > 0 ? ":" + port : "") + "/";
             return query != null ? base + "?" + query : base;
-        } catch (Exception ignore) { }
+        } catch (Exception ignore) {
+        }
         return "jdbc:mysql://localhost:3306/";
     }
 
     private static void seedReferenceData() {
         HibernateUtil.executeVoidTransaction(session -> {
             // 1. Roles
-            String[] roles = {"ADMINISTRATOR", "SUPERVISOR", "OFFICER", "ANALYST", "RECORDS_CLERK", "LEGAL_OFFICER"};
+            String[] roles = { "ADMINISTRATOR", "SUPERVISOR", "OFFICER", "ANALYST", "RECORDS_CLERK", "LEGAL_OFFICER" };
             for (String r : roles) {
                 session.createNativeQuery("INSERT IGNORE INTO roles (name) VALUES (:n)")
                         .setParameter("n", r).executeUpdate();
@@ -213,27 +224,47 @@ public class DatabaseInitializer {
             long distCount = session.createQuery("SELECT COUNT(d) FROM District d", Long.class).uniqueResult();
             if (distCount == 0) {
                 logger.info("Seeding mandatory geography data...");
-                Country pk = new Country(); pk.setName("Pakistan"); pk.setCode("PK"); session.persist(pk);
-                Province punjab = new Province(); punjab.setName("Punjab"); punjab.setCountry(pk); session.persist(punjab);
-                
-                String[] districts = {"Lahore", "Faisalabad", "Multan", "Rawalpindi", "Gujranwala", "Sargodha", "Sialkot", "Bahawalpur", "Sahiwal", "Sheikhupura"};
+                Country pk = new Country();
+                pk.setName("Pakistan");
+                pk.setCode("PK");
+                session.persist(pk);
+                Province punjab = new Province();
+                punjab.setName("Punjab");
+                punjab.setCountry(pk);
+                session.persist(punjab);
+
+                String[] districts = { "Lahore", "Faisalabad", "Multan", "Rawalpindi", "Gujranwala", "Sargodha",
+                        "Sialkot", "Bahawalpur", "Sahiwal", "Sheikhupura" };
                 for (String dName : districts) {
-                    District d = new District(); d.setName(dName); d.setProvince(punjab); session.persist(d);
-                    City c = new City(); c.setName(dName + " City"); c.setDistrict(d); session.persist(c);
-                    Area a = new Area(); a.setName(dName + " Center"); a.setCity(c); session.persist(a);
+                    District d = new District();
+                    d.setName(dName);
+                    d.setProvince(punjab);
+                    session.persist(d);
+                    City c = new City();
+                    c.setName(dName + " City");
+                    c.setDistrict(d);
+                    session.persist(c);
+                    Area a = new Area();
+                    a.setName(dName + " Center");
+                    a.setCity(c);
+                    session.persist(a);
                 }
             }
 
             // 3. Crime Types
-            String[] crimes = {"ROBBERY", "MURDER", "CYBER_FRAUD", "KIDNAPPING", "ASSAULT", "EXTORTION", "NARCOTICS", "TERRORISM"};
+            String[] crimes = { "ROBBERY", "MURDER", "CYBER_FRAUD", "KIDNAPPING", "ASSAULT", "EXTORTION", "NARCOTICS",
+                    "TERRORISM" };
             for (String c : crimes) {
                 session.createNativeQuery("INSERT IGNORE INTO crime_types (name, code) VALUES (:n, :c)")
-                        .setParameter("n", c).setParameter("c", c.substring(0,3)).executeUpdate();
+                        .setParameter("n", c).setParameter("c", c.substring(0, 3)).executeUpdate();
             }
-            
+
             // 4. Warrant/Hearing Types
-            session.createNativeQuery("INSERT IGNORE INTO warrant_types (name) VALUES ('SEARCH'), ('ARREST'), ('BENCH')").executeUpdate();
-            session.createNativeQuery("INSERT IGNORE INTO hearing_types (name) VALUES ('PRELIMINARY'), ('TRIAL'), ('SENTENCING'), ('BAIL')").executeUpdate();
+            session.createNativeQuery(
+                    "INSERT IGNORE INTO warrant_types (name) VALUES ('SEARCH'), ('ARREST'), ('BENCH')").executeUpdate();
+            session.createNativeQuery(
+                    "INSERT IGNORE INTO hearing_types (name) VALUES ('PRELIMINARY'), ('TRIAL'), ('SENTENCING'), ('BAIL')")
+                    .executeUpdate();
         });
     }
 
@@ -241,26 +272,29 @@ public class DatabaseInitializer {
         try {
             String url = props.getProperty("db.url", "jdbc:mysql://localhost:3306/cms_db");
             String user = props.getProperty("db.username", "root");
-            String pass = props.getProperty("db.password", "");
-            
+            String pass = props.getProperty("db.password", "potassium");
+
+            logger.info("[INIT] Verifying administrative security baseline...");
+
             try (Connection conn = DriverManager.getConnection(url, user, pass);
-                 Statement stmt = conn.createStatement()) {
-                
+                    Statement stmt = conn.createStatement()) {
+
                 var rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE username = 'admin'");
                 rs.next();
                 long adminCount = rs.getLong(1);
-                
+
                 if (adminCount == 0) {
-                    logger.info("Admin account 'admin' not found. Creating security baseline...");
+                    logger.info("[INIT] Admin account 'admin' not found. Creating security baseline...");
                     String passwordHash = BCrypt.hashpw("admin123", BCrypt.gensalt());
-                    
+
                     // 1. Create Base Person
+                    logger.info("[INIT] Creating System Administrator person record...");
                     stmt.executeUpdate(
-                        "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, created_at, updated_at) " +
-                        "VALUES ('System', 'Administrator', true, 'OFFICER', 'admin@cms.gov', NOW(), NOW())",
-                        Statement.RETURN_GENERATED_KEYS
-                    );
-                    
+                            "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, gender, created_at, updated_at) "
+                                    +
+                                    "VALUES ('System', 'Administrator', true, 'UNKNOWN', 'admin@cms.gov', 'OTHER', NOW(), NOW())",
+                            Statement.RETURN_GENERATED_KEYS);
+
                     long personId = -1;
                     try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
@@ -269,31 +303,38 @@ public class DatabaseInitializer {
                     }
 
                     if (personId == -1) {
-                        // Fallback for older drivers
+                        // Fallback
                         var rs2 = stmt.executeQuery("SELECT id FROM persons ORDER BY id DESC LIMIT 1");
                         if (rs2.next()) personId = rs2.getLong(1);
                     }
-                    
+
                     if (personId != -1) {
                         // 2. Create User linked to Person
+                        logger.info("[INIT] Creating User account 'admin' linked to Person ID {}...", personId);
                         var ps = conn.prepareStatement(
-                            "INSERT INTO users (badge_number, username, password_hash, person_id, role, status, must_change_password, created_at, updated_at) " +
-                            "VALUES ('SYS-001', 'admin', ?, ?, 'ADMINISTRATOR', 'ACTIVE', true, NOW(), NOW())"
-                        );
+                                "INSERT INTO users (badge_number, username, password_hash, person_id, role, status, must_change_password, created_at, updated_at) "
+                                        +
+                                        "VALUES ('SYS-001', 'admin', ?, ?, 'ADMINISTRATOR', 'ACTIVE', true, NOW(), NOW())");
                         ps.setString(1, passwordHash);
                         ps.setLong(2, personId);
                         ps.executeUpdate();
-                        
+
                         logger.info(">>> [CMS-SECURITY] Default administrator 'admin' (SYS-001) initialized successfully.");
                     } else {
-                        logger.error("Failed to retrieve generated person ID for admin account.");
+                        logger.error("[INIT-CRITICAL] Failed to retrieve generated person ID for admin account.");
                     }
                 } else {
-                    logger.info("Security baseline: 'admin' account verified.");
+                    logger.info("[INIT] Security baseline verified: 'admin' account exists. Synchronizing credentials...");
+                    String passwordHash = BCrypt.hashpw("admin123", BCrypt.gensalt());
+                    var psUpdate = conn.prepareStatement("UPDATE users SET password_hash = ? WHERE username = 'admin'");
+                    psUpdate.setString(1, passwordHash);
+                    psUpdate.executeUpdate();
+                    logger.info("[INIT] Security baseline: 'admin' password synchronized to default.");
                 }
             }
         } catch (Exception e) {
-            logger.error("CRITICAL: Failed to ensure security baseline (admin account)", e);
+            logger.error("[INIT-CRITICAL] Failed to ensure security baseline (admin account)", e);
+            e.printStackTrace();
         }
     }
 }

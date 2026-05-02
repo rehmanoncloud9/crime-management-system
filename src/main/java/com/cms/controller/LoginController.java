@@ -86,14 +86,22 @@ public class LoginController {
 
         authTask.setOnFailed(e -> {
             Throwable ex = authTask.getException();
-            logger.error("Login failed: {}", ex.getMessage());
+            logger.error("Login failed: {}", ex != null ? ex.toString() : "Unknown error");
             errorLabel.getStyleClass().removeAll("text-secondary");
             errorLabel.getStyleClass().add("error-text");
-            if (ex instanceof IllegalArgumentException || ex instanceof IllegalStateException) {
-                errorLabel.setText(ex.getMessage());
-            } else {
-                errorLabel.setText("Login error: " + ex.getMessage());
+            
+            String errorMessage = "Authentication service unavailable.";
+            if (ex != null) {
+                if (ex.getMessage() != null && !ex.getMessage().isBlank()) {
+                    errorMessage = ex.getMessage();
+                } else if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+                    errorMessage = "Login error: " + ex.getCause().getMessage();
+                } else {
+                    errorMessage = "Critical Error: " + ex.getClass().getSimpleName();
+                }
             }
+            errorLabel.setText(errorMessage);
+            logger.error("AUTHENTICATION FAILED", ex);
             if (loginButton != null) loginButton.setDisable(false);
             // Shake password field on error
             AnimationHelper.shake(passwordField);

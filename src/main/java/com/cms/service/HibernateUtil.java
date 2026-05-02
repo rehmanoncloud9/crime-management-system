@@ -40,6 +40,8 @@ public class HibernateUtil {
                 if (dbProperties.containsKey("db.password")) configuration.setProperty("hibernate.connection.password", dbProperties.getProperty("db.password"));
                 if (dbProperties.containsKey("db.driver")) configuration.setProperty("hibernate.connection.driver_class", dbProperties.getProperty("db.driver"));
             }
+            
+            logger.info("[DB-CONNECT] Using URL: {}", configuration.getProperty("hibernate.connection.url"));
 
             // Insecure logging removed for C-26
             SessionFactory sf = configuration.buildSessionFactory();
@@ -72,8 +74,12 @@ public class HibernateUtil {
 
     private static void loadProperties(String resourceName, Properties target) {
         try (InputStream input = HibernateUtil.class.getClassLoader().getResourceAsStream(resourceName)) {
-            if (input == null) return;
+            if (input == null) {
+                logger.error("[DB-CONFIG] Resource not found: {}", resourceName);
+                return;
+            }
             target.load(input);
+            logger.info("[DB-CONFIG] Successfully loaded {} with {} keys.", resourceName, target.size());
         } catch (IOException e) {
             logger.warn("Failed to load {}", resourceName, e);
         }
@@ -95,7 +101,7 @@ public class HibernateUtil {
         }
 
         if (!props.containsKey("db.password")) {
-            props.setProperty("db.password", configProps.getProperty("db.password", ""));
+            props.setProperty("db.password", configProps.getProperty("db.password", "potassium"));
         }
 
         if (!props.containsKey("db.driver")) {
