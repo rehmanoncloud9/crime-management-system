@@ -12,8 +12,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class AuthService {
 
@@ -77,6 +80,8 @@ public class AuthService {
 
         User user = userOpt.get();
 
+        normalizeLockState(user, userRepository);
+
         if (isLocked(user)) {
             logger.warn("Locked user login attempt: {}", identifier);
             throw new IllegalStateException("Account disabled");
@@ -87,7 +92,12 @@ public class AuthService {
             throw new IllegalStateException("Account disabled");
         }
 
-        if (passwordMatches(password, user.getPasswordHash())) {
+        PasswordCheckResult result = verifyPassword(password, user.getPasswordHash());
+        if (result.matched()) {
+            if (result.requiresRehash()) {
+                user.setPasswordHash(hashPassword(password));
+                userRepository.update(user);
+            }
             resetLoginState(user, userRepository);
 
             if (sessionEnabled) {
@@ -109,13 +119,63 @@ public class AuthService {
                 user.getLockedUntil().isAfter(LocalDateTime.now());
     }
 
+    private void normalizeLockState(User user, UserRepository userRepository) {
+        if (user.getStatus() == UserStatus.LOCKED && user.getLockedUntil() != null
+                && user.getLockedUntil().isBefore(LocalDateTime.now())) {
+            user.setStatus(UserStatus.ACTIVE);
+            user.setLockedUntil(null);
+            userRepository.update(user);
+        }
+    }
+
     private boolean isActive(User user) {
         return user.getStatus() == UserStatus.ACTIVE;
     }
 
-    private boolean passwordMatches(String rawPassword, String hashedPassword) {
-        if (hashedPassword == null) return false;
-        return BCrypt.checkpw(rawPassword, hashedPassword);
+    private PasswordCheckResult verifyPassword(String rawPassword, String storedHash) {
+        if (storedHash == null || storedHash.isBlank()) {
+            return PasswordCheckResult.noMatch();
+        }
+
+        if (isBcryptHash(storedHash)) {
+            try {
+                return BCrypt.checkpw(rawPassword, storedHash)
+                        ? PasswordCheckResult.match(false)
+                        : PasswordCheckResult.noMatch();
+            } catch (IllegalArgumentException e) {
+                logger.warn("Invalid stored hash format");
+                return PasswordCheckResult.noMatch();
+            }
+        }
+
+        return constantTimeEquals(storedHash, rawPassword)
+                ? PasswordCheckResult.match(true)
+                : PasswordCheckResult.noMatch();
+    }
+
+    private boolean isBcryptHash(String value) {
+        return value.startsWith("$2a$") || value.startsWith("$2b$") || value.startsWith("$2y$");
+    }
+
+    private boolean constantTimeEquals(String a, String b) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] aHash = digest.digest(a.getBytes(StandardCharsets.UTF_8));
+            byte[] bHash = digest.digest(b.getBytes(StandardCharsets.UTF_8));
+            return MessageDigest.isEqual(aHash, bHash);
+        } catch (NoSuchAlgorithmException e) {
+            return a.equals(b);
+        }
+    }
+
+    private record PasswordCheckResult(boolean matched, boolean requiresRehash) {
+        static PasswordCheckResult match(boolean needsRehash) {
+            return new PasswordCheckResult(true, needsRehash);
+        }
+
+        static PasswordCheckResult noMatch() {
+            return new PasswordCheckResult(false, false);
+        }
     }
 
     private void resetLoginState(User user, UserRepository userRepository) {

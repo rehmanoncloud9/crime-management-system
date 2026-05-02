@@ -11,6 +11,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
@@ -54,11 +55,28 @@ public class AIAnalyticsController {
     @FXML
     public void initialize() {
         setupTable();
+        styleCharts();
         loadDataAsync();
 
         // Hide loading indicator initially
         if (chatLoadingIndicator != null) {
             chatLoadingIndicator.setVisible(false);
+        }
+    }
+
+    private void styleCharts() {
+        if (riskPieChart != null) {
+            riskPieChart.setLegendVisible(true);
+            riskPieChart.setLegendSide(Side.RIGHT);
+            riskPieChart.setLabelsVisible(true);
+            riskPieChart.setStartAngle(90);
+            riskPieChart.setAnimated(false);
+        }
+        if (patternChart != null) {
+            patternChart.setLegendVisible(false);
+            patternChart.setAnimated(false);
+            patternChart.setBarGap(6);
+            patternChart.setCategoryGap(18);
         }
     }
 

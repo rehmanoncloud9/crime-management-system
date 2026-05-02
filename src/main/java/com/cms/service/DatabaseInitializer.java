@@ -9,8 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -47,17 +53,151 @@ public class DatabaseInitializer {
     private static void runJdbcBootstrap() {
         // We now favor the schema_enhanced.sql for the baseline.
         // This method is kept for minor hotfixes or ensuring the DB exists.
-        String url = props.getProperty("db.url", "jdbc:mysql://localhost:3306/?createDatabaseIfNotExist=true");
+        String dbUrl = props.getProperty("db.url", "jdbc:mysql://localhost:3306/cms_db");
         String user = props.getProperty("db.username", "root");
         String pass = props.getProperty("db.password", "");
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        String dbName = extractDatabaseName(dbUrl);
+        String serverUrl = buildServerUrl(dbUrl);
+
+        try (Connection conn = DriverManager.getConnection(serverUrl, user, pass);
              Statement stmt = conn.createStatement()) {
-            stmt.execute("CREATE DATABASE IF NOT EXISTS cms_db");
-            logger.info("JDBC Bootstrap: Database 'cms_db' confirmed.");
+            stmt.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
+            logger.info("JDBC Bootstrap: Database '{}' confirmed.", dbName);
         } catch (Exception e) {
             logger.error("JDBC Bootstrap failed: {}", e.getMessage());
+            return;
         }
+
+        applySchemaIfMissing(dbUrl, user, pass, dbName);
+    }
+
+    private static void applySchemaIfMissing(String dbUrl, String user, String pass, String dbName) {
+        try (Connection conn = DriverManager.getConnection(dbUrl, user, pass)) {
+            if (schemaExists(conn, dbName)) {
+                logger.info("Schema already present. Skipping auto-apply.");
+                return;
+            }
+
+            Path schemaPath = Paths.get(System.getProperty("user.dir"), "schema_enhanced.sql");
+            if (!Files.exists(schemaPath)) {
+                logger.warn("Schema file not found at {}", schemaPath);
+                return;
+            }
+
+            String sql = Files.readString(schemaPath, StandardCharsets.UTF_8);
+            executeSqlScript(conn, sql);
+            logger.info("Schema auto-apply completed.");
+        } catch (Exception e) {
+            logger.error("Schema auto-apply failed", e);
+        }
+    }
+
+    private static boolean schemaExists(Connection conn, String dbName) {
+        String sql = "SELECT COUNT(*) FROM information_schema.tables " +
+                     "WHERE table_schema = ? AND table_name IN (?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dbName);
+            ps.setString(2, "users");
+            ps.setString(3, "crime_incidents");
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getLong(1) > 0;
+            }
+        } catch (Exception e) {
+            logger.warn("Schema check failed", e);
+            return false;
+        }
+    }
+
+    private static void executeSqlScript(Connection conn, String script) throws java.sql.SQLException {
+        String delimiter = ";";
+        StringBuilder statement = new StringBuilder();
+        boolean inBlockComment = false;
+
+        try (Statement stmt = conn.createStatement()) {
+            for (String rawLine : script.split("\n")) {
+                String line = rawLine.trim();
+
+                if (inBlockComment) {
+                    if (line.endsWith("*/")) {
+                        inBlockComment = false;
+                    }
+                    continue;
+                }
+
+                if (line.startsWith("/*")) {
+                    if (!line.endsWith("*/")) {
+                        inBlockComment = true;
+                    }
+                    continue;
+                }
+
+                if (line.isEmpty() || line.startsWith("--") || line.startsWith("*")) {
+                    continue;
+                }
+
+                if (line.toUpperCase(Locale.ROOT).startsWith("DELIMITER")) {
+                    delimiter = line.substring("DELIMITER".length()).trim();
+                    statement.setLength(0);
+                    continue;
+                }
+
+                statement.append(rawLine).append('\n');
+
+                if (line.endsWith(delimiter)) {
+                    String sql = statement.toString().trim();
+                    sql = sql.substring(0, sql.lastIndexOf(delimiter)).trim();
+                    if (!sql.isBlank()) executeStatement(stmt, sql);
+                    statement.setLength(0);
+                }
+            }
+
+            String remaining = statement.toString().trim();
+            if (!remaining.isBlank()) executeStatement(stmt, remaining);
+        }
+    }
+
+    private static void executeStatement(Statement stmt, String sql) throws java.sql.SQLException {
+        try {
+            stmt.execute(sql);
+        } catch (java.sql.SQLException ex) {
+            String preview = sql.length() > 120 ? sql.substring(0, 120) + "..." : sql;
+            logger.error("Schema statement failed: {}", preview, ex);
+            throw ex;
+        }
+    }
+
+    private static String extractDatabaseName(String dbUrl) {
+        try {
+            String withoutJdbc = dbUrl.startsWith("jdbc:") ? dbUrl.substring("jdbc:".length()) : dbUrl;
+            java.net.URI uri = java.net.URI.create(withoutJdbc);
+            String path = uri.getPath();
+            if (path != null && path.length() > 1) {
+                String name = path.substring(1);
+                int idx = name.indexOf('?');
+                return idx >= 0 ? name.substring(0, idx) : name;
+            }
+        } catch (Exception ignore) { }
+        int slash = dbUrl.lastIndexOf('/');
+        if (slash >= 0) {
+            String tail = dbUrl.substring(slash + 1);
+            int q = tail.indexOf('?');
+            return q >= 0 ? tail.substring(0, q) : tail;
+        }
+        return "cms_db";
+    }
+
+    private static String buildServerUrl(String dbUrl) {
+        try {
+            String withoutJdbc = dbUrl.startsWith("jdbc:") ? dbUrl.substring("jdbc:".length()) : dbUrl;
+            java.net.URI uri = java.net.URI.create(withoutJdbc);
+            String host = uri.getHost();
+            int port = uri.getPort();
+            String query = uri.getQuery();
+            String base = "jdbc:mysql://" + host + (port > 0 ? ":" + port : "") + "/";
+            return query != null ? base + "?" + query : base;
+        } catch (Exception ignore) { }
+        return "jdbc:mysql://localhost:3306/";
     }
 
     private static void seedReferenceData() {

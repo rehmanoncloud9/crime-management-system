@@ -1,6 +1,6 @@
 package com.cms.controller;
 
-import com.cms.model.enums.IncidentStatus;
+import com.cms.model.enums.CaseStatus;
 import com.cms.service.HibernateUtil;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -10,6 +10,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.geometry.Side;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -59,10 +60,16 @@ public class ExecutiveDashboardController {
             crimeDistributionChart.setStyle("-fx-background-color: transparent;");
             crimeDistributionChart.setLegendVisible(true);
             crimeDistributionChart.setLabelsVisible(true);
+            crimeDistributionChart.setLegendSide(Side.RIGHT);
+            crimeDistributionChart.setStartAngle(90);
+            crimeDistributionChart.setAnimated(false);
         }
         if (districtCrimeChart != null) {
             districtCrimeChart.setStyle("-fx-background-color: transparent;");
             districtCrimeChart.setLegendVisible(false);
+            districtCrimeChart.setAnimated(false);
+            districtCrimeChart.setBarGap(6);
+            districtCrimeChart.setCategoryGap(18);
             // Rotate district names on bar chart for proper readability
             if (districtCrimeChart.getXAxis() instanceof javafx.scene.chart.CategoryAxis catAxis) {
                 catAxis.setTickLabelRotation(45);
@@ -76,11 +83,10 @@ public class ExecutiveDashboardController {
                 return HibernateUtil.executeTransaction(session -> {
                     long total = session.createQuery("SELECT COUNT(cf) FROM CaseFile cf", Long.class).uniqueResult();
                     long closed = session.createQuery(
-                        "SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status IN (:s1,:s2,:s3,:s4)", Long.class)
-                        .setParameter("s1", IncidentStatus.CLOSED)
-                        .setParameter("s2", IncidentStatus.CLOSED_CONVICTED)
-                        .setParameter("s3", IncidentStatus.CLOSED_ACQUITTED)
-                        .setParameter("s4", IncidentStatus.CLOSED_UNSOLVED)
+                        "SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status IN (:s1,:s2,:s3)", Long.class)
+                        .setParameter("s1", CaseStatus.CLOSED_CONVICTED)
+                        .setParameter("s2", CaseStatus.CLOSED_ACQUITTED)
+                        .setParameter("s3", CaseStatus.CLOSED_UNSOLVED)
                         .uniqueResult();
                     LocalDate now = LocalDate.now();
                     long mtd = session.createQuery(
@@ -158,8 +164,9 @@ public class ExecutiveDashboardController {
                 try {
                     List<Object[]> rows = HibernateUtil.executeTransaction(session ->
                         session.createQuery(
-                            "SELECT d.name, COUNT(i) FROM CrimeIncident i JOIN i.district d " +
-                            "GROUP BY d.name ORDER BY COUNT(i) DESC", Object[].class)
+                            "SELECT COALESCE(d.name, 'Unknown'), COUNT(i) FROM CrimeIncident i " +
+                            "LEFT JOIN i.district d GROUP BY COALESCE(d.name, 'Unknown') " +
+                            "ORDER BY COUNT(i) DESC", Object[].class)
                         .setMaxResults(10).list()
                     );
                     if (!rows.isEmpty()) {
