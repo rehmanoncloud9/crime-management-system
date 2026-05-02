@@ -251,30 +251,49 @@ public class DatabaseInitializer {
                 long adminCount = rs.getLong(1);
                 
                 if (adminCount == 0) {
+                    logger.info("Admin account 'admin' not found. Creating security baseline...");
                     String passwordHash = BCrypt.hashpw("admin123", BCrypt.gensalt());
                     
+                    // 1. Create Base Person
                     stmt.executeUpdate(
-                        "INSERT INTO persons (first_name, last_name, is_identified, person_status, created_at, updated_at) " +
-                        "VALUES ('System', 'Administrator', true, 'OFFICER', NOW(), NOW())"
+                        "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, created_at, updated_at) " +
+                        "VALUES ('System', 'Administrator', true, 'OFFICER', 'admin@cms.gov', NOW(), NOW())",
+                        Statement.RETURN_GENERATED_KEYS
                     );
                     
-                    var rs2 = stmt.executeQuery("SELECT id FROM persons ORDER BY id DESC LIMIT 1");
-                    rs2.next();
-                    long personId = rs2.getLong(1);
+                    long personId = -1;
+                    try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            personId = generatedKeys.getLong(1);
+                        }
+                    }
+
+                    if (personId == -1) {
+                        // Fallback for older drivers
+                        var rs2 = stmt.executeQuery("SELECT id FROM persons ORDER BY id DESC LIMIT 1");
+                        if (rs2.next()) personId = rs2.getLong(1);
+                    }
                     
-                    var ps = conn.prepareStatement(
-                        "INSERT INTO users (badge_number, username, password_hash, person_id, role, status, must_change_password, created_at, updated_at) " +
-                        "VALUES ('SYS-001', 'admin', ?, ?, 'ADMINISTRATOR', 'ACTIVE', true, NOW(), NOW())"
-                    );
-                    ps.setString(1, passwordHash);
-                    ps.setLong(2, personId);
-                    ps.executeUpdate();
-                    
-                    logger.info("Default administrator 'admin' initialized.");
+                    if (personId != -1) {
+                        // 2. Create User linked to Person
+                        var ps = conn.prepareStatement(
+                            "INSERT INTO users (badge_number, username, password_hash, person_id, role, status, must_change_password, created_at, updated_at) " +
+                            "VALUES ('SYS-001', 'admin', ?, ?, 'ADMINISTRATOR', 'ACTIVE', true, NOW(), NOW())"
+                        );
+                        ps.setString(1, passwordHash);
+                        ps.setLong(2, personId);
+                        ps.executeUpdate();
+                        
+                        logger.info(">>> [CMS-SECURITY] Default administrator 'admin' (SYS-001) initialized successfully.");
+                    } else {
+                        logger.error("Failed to retrieve generated person ID for admin account.");
+                    }
+                } else {
+                    logger.info("Security baseline: 'admin' account verified.");
                 }
             }
         } catch (Exception e) {
-            logger.error("Error in ensureAdminAccount", e);
+            logger.error("CRITICAL: Failed to ensure security baseline (admin account)", e);
         }
     }
 }

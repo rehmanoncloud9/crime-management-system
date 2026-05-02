@@ -34,8 +34,9 @@ public class MainApp extends Application {
         // 2) Always try to load UI
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
-            Scene scene = new Scene(root, 960, 620);
-            scene.getStylesheets().add(getClass().getResource("/css/application.css").toExternalForm());
+            Scene scene = new Scene(root, 1024, 680);
+            // application.css is intentionally omitted here to prevent conflicts with the Login theme
+            // It will be added in the Main dashboard navigation.
 
             primaryStage.setTitle("Crime Management System v5.0");
             primaryStage.setScene(scene);
