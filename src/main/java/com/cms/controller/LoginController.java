@@ -31,6 +31,7 @@ public class LoginController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
+    @FXML private TextField passwordTextField; // For show/hide toggle
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
 
@@ -60,7 +61,9 @@ public class LoginController {
     @FXML
     private void handleLogin(ActionEvent event) {
         String username = usernameField.getText();
-        String password = passwordField.getText();
+        
+        // Retrieve password from whichever field is currently active/visible
+        String password = passwordField.isVisible() ? passwordField.getText() : passwordTextField.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
             errorLabel.setText("Please enter both username and password.");
@@ -171,6 +174,27 @@ public class LoginController {
     private FadeTransition createFade(Node node, double from, double to, int ms) {
         FadeTransition ft = new FadeTransition(Duration.millis(ms), node);
         ft.setFromValue(from); ft.setToValue(to); return ft;
+    }
+
+    @FXML
+    private void togglePasswordVisibility() {
+        if (passwordField.isVisible()) {
+            passwordTextField.setText(passwordField.getText());
+            passwordField.setVisible(false);
+            passwordField.setManaged(false);
+            passwordTextField.setVisible(true);
+            passwordTextField.setManaged(true);
+            passwordTextField.requestFocus();
+            passwordTextField.positionCaret(passwordTextField.getText().length());
+        } else {
+            passwordField.setText(passwordTextField.getText());
+            passwordTextField.setVisible(false);
+            passwordTextField.setManaged(false);
+            passwordField.setVisible(true);
+            passwordField.setManaged(true);
+            passwordField.requestFocus();
+            passwordField.positionCaret(passwordField.getText().length());
+        }
     }
 
     private ScaleTransition createScale(Node node, double from, double to, int ms) {

@@ -153,4 +153,32 @@ public class DashboardController {
         if (SessionManager.getInstance().getCurrentUser().getRole() == Role.ADMINISTRATOR)
             NavigationService.getInstance().navigateTo("Officer Management", "/fxml/modules/UserAdmin.fxml");
     }
+
+    @FXML private void handleReports() {
+        NavigationService.getInstance().navigateTo("Statistical Reports", "/fxml/modules/StatisticalReports.fxml");
+    }
+
+    @FXML private void handleSettings() {
+        if (SessionManager.getInstance().getCurrentUser().getRole() == Role.ADMINISTRATOR)
+            NavigationService.getInstance().navigateTo("System Config", "/fxml/modules/Config.fxml");
+    }
+
+    @FXML private void handleAudit() {
+        if (SessionManager.getInstance().getCurrentUser().getRole() == Role.ADMINISTRATOR)
+            NavigationService.getInstance().navigateTo("Audit Logs", "/fxml/modules/AuditDashboard.fxml");
+    }
+
+    @FXML private void handleViewAlert() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.INFORMATION, "Opening full alert details...");
+        alert.setHeaderText("Alert System");
+        alert.show();
+    }
+
+    @FXML private void handleResolveAlert() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.CONFIRMATION, "Mark this alert as resolved?");
+        alert.setHeaderText("Resolve Alert");
+        alert.show();
+    }
 }

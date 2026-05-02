@@ -114,6 +114,19 @@
 }
 .btn-danger:hover { -fx-effect: dropshadow(gaussian, rgba(255,71,87,0.5), 12, 0, 0, 0); }
 
+.btn-logout {
+    -fx-background-color: #CC2233;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+}
+.btn-logout:hover {
+    -fx-background-color: #991122;
+    -fx-effect: dropshadow(gaussian, rgba(204,34,51,0.4), 10, 0, 0, 0);
+}
+
 .btn-outline {
     -fx-background-color: transparent;
     -fx-border-color: #00D4FF; -fx-border-width: 1.5;
@@ -204,10 +217,12 @@
     -fx-border-color: rgba(0,212,255,0.25); -fx-border-width: 0 0 0 2;
 }
 .sidebar-btn-active {
-    -fx-background-color: rgba(0,212,255,0.15);
-    -fx-text-fill: #00D4FF; -fx-font-weight: bold;
-    -fx-border-color: #00D4FF; -fx-border-width: 0 0 0 3;
-    -fx-effect: dropshadow(gaussian, rgba(0,212,255,0.15), 10, 0, 0, 0);
+    -fx-background-color: rgba(0,212,255,0.18);
+    -fx-text-fill: white; 
+    -fx-font-weight: bold;
+    -fx-border-color: #00D4FF; 
+    -fx-border-width: 0 0 0 5;
+    -fx-effect: dropshadow(gaussian, rgba(0,212,255,0.25), 12, 0, 0, 0);
 }
 
 /* ── HEADER ── */
@@ -237,6 +252,22 @@
 .role-badge-default { -fx-background-color: #1D2E4A; -fx-text-fill: #6BBFCC; }
 .header-clock { -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #00D4FF; }
 .header-date  { -fx-font-size: 11px; -fx-text-fill: #6BBFCC; }
+.header-module-title {
+    -fx-text-fill: #00D4FF;
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1px;
+    -fx-padding: 0 0 0 15;
+}
+
+.notif-badge {
+    -fx-background-color: #FF4757;
+    -fx-background-radius: 10;
+    -fx-min-width: 16;
+    -fx-min-height: 16;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(gaussian, rgba(255,71,87,0.5), 5, 0, 0, 0);
+}
 
 /* ── BREADCRUMBS ── */
 .breadcrumb-container { -fx-padding: 0 0 0 8; }

@@ -60,7 +60,9 @@ public class HeaderController implements NavigationService.NavigationObserver {
                           " #" + (user.getBadgeNumber() != null ? user.getBadgeNumber() : "");
             officerRankLabel.setText(rank.trim());
             roleBadge.setText(user.getRole().name());
-            precinctLabel.setText(user.getPrecinct() != null ? user.getPrecinct() : "");
+            if (precinctLabel != null) {
+                precinctLabel.setText(user.getPrecinct() != null ? user.getPrecinct() : "");
+            }
 
             if (user.getProfilePhoto() != null && user.getProfilePhoto().length > 0) {
                 try {

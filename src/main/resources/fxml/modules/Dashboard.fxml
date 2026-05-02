@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 <?import javafx.geometry.Insets?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cms.controller.DashboardController"
-            fitToWidth="true" style="-fx-background-color: transparent;"
+            fitToWidth="true" styleClass="dashboard-scroll"
             stylesheets="@../../css/dashboard.css">
 
     <VBox spacing="30" styleClass="container">
@@ -16,92 +17,161 @@
             <Label fx:id="userGreeting" text="Welcome back, Administrator" styleClass="desc"/>
         </VBox>
 
-        <!-- STATS CARDS -->
+        <!-- STATS CARDS (Top Row) -->
         <HBox spacing="20">
-
-            <VBox styleClass="card" HBox.hgrow="ALWAYS">
-                <Label text="Total Criminals" styleClass="card-title"/>
-                <Label fx:id="criminalCount" text="0" styleClass="card-value"/>
+            <!-- Total Criminals -->
+            <VBox styleClass="card card-criminals" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🔴" style="-fx-font-size: 16px;"/>
+                    <Label text="Total Criminals" styleClass="card-title"/>
+                </HBox>
+                <HBox alignment="BOTTOM_LEFT" spacing="10">
+                    <Label fx:id="criminalCount" text="1,284" styleClass="card-value"/>
+                    <Label text="▲ 12%" styleClass="trend-up" style="-fx-padding: 0 0 8 0;"/>
+                </HBox>
             </VBox>
 
-            <VBox styleClass="card" HBox.hgrow="ALWAYS">
-                <Label text="Active Cases" styleClass="card-title" style="-fx-text-fill: #00D4FF;"/>
-                <Label fx:id="caseCount" text="0" styleClass="card-value"/>
+            <!-- Active Cases -->
+            <VBox styleClass="card card-cases" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🔵" style="-fx-font-size: 16px;"/>
+                    <Label text="Active Cases" styleClass="card-title"/>
+                </HBox>
+                <HBox alignment="BOTTOM_LEFT" spacing="10">
+                    <Label fx:id="caseCount" text="452" styleClass="card-value"/>
+                    <Label text="▼ 5%" styleClass="trend-down" style="-fx-padding: 0 0 8 0;"/>
+                </HBox>
             </VBox>
 
-            <VBox styleClass="card" HBox.hgrow="ALWAYS">
-                <Label text="Officers" styleClass="card-title"/>
-                <Label fx:id="officerCount" text="0" styleClass="card-value"/>
+            <!-- Officers -->
+            <VBox styleClass="card card-officers" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🟢" style="-fx-font-size: 16px;"/>
+                    <Label text="Officers" styleClass="card-title"/>
+                </HBox>
+                <HBox alignment="BOTTOM_LEFT" spacing="10">
+                    <Label fx:id="officerCount" text="86" styleClass="card-value"/>
+                    <Label text="▲ 2" styleClass="trend-up" style="-fx-padding: 0 0 8 0;"/>
+                </HBox>
             </VBox>
 
-            <VBox styleClass="card" HBox.hgrow="ALWAYS">
-                <Label text="Closed Cases" styleClass="card-title" style="-fx-text-fill: #2ECC71;"/>
-                <Label fx:id="closedCases" text="0" styleClass="card-value"/>
+            <!-- Closed Cases -->
+            <VBox styleClass="card card-closed" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="⚪" style="-fx-font-size: 16px;"/>
+                    <Label text="Closed Cases" styleClass="card-title"/>
+                </HBox>
+                <HBox alignment="BOTTOM_LEFT" spacing="10">
+                    <Label fx:id="closedCases" text="2,105" styleClass="card-value"/>
+                    <Label text="▲ 18%" styleClass="trend-up" style="-fx-padding: 0 0 8 0;"/>
+                </HBox>
             </VBox>
-
         </HBox>
 
         <!-- MAIN CONTENT GRID -->
         <HBox spacing="25">
 
-            <!-- LEFT SIDE (MAIN) -->
+            <!-- LEFT SIDE (Recent Activity & Quick Actions) -->
             <VBox spacing="25" HBox.hgrow="ALWAYS">
 
                 <!-- RECENT ACTIVITY -->
-                <VBox styleClass="card" spacing="15">
-                    <Label text="Recent Activity" styleClass="section-title"/>
+                <VBox styleClass="card" spacing="0">
+                    <Label text="Recent Activity" styleClass="section-title">
+                        <VBox.margin>
+                            <Insets bottom="15"/>
+                        </VBox.margin>
+                    </Label>
 
-                    <VBox fx:id="recentActivityList" spacing="12">
-                        <Label text="Loading activity..." style="-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size:12px;"/>
-                    </VBox>
+                    <ScrollPane fitToWidth="true" maxHeight="300" minHeight="200" 
+                                styleClass="internal-scroll" vbarPolicy="AS_NEEDED">
+                        <VBox fx:id="recentActivityList" spacing="12">
+                            <Label text="Loading activity..." styleClass="text-muted"/>
+                        </VBox>
+                    </ScrollPane>
+                    
+                    <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                        <Hyperlink text="View All Activity" onAction="#handleAudit" styleClass="footer-link"/>
+                    </HBox>
                 </VBox>
 
                 <!-- QUICK ACTIONS -->
                 <VBox styleClass="card" spacing="20">
                     <Label text="Quick Actions" styleClass="section-title"/>
 
-                    <HBox spacing="15">
-                        <Button text="+ Add Criminal" onAction="#handleAddCriminal" styleClass="action-btn"/>
-                        <Button text="+ Register Case" onAction="#handleAddCase" styleClass="action-btn"/>
-                        <Button text="+ Add Officer" onAction="#handleAddOfficer" styleClass="action-btn"/>
-                    </HBox>
+                    <GridPane hgap="15" vgap="15">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.3"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.3"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.3"/>
+                        </columnConstraints>
+                        
+                        <Button text="📂 Add Case" onAction="#handleAddCase" 
+                                styleClass="quick-action-btn" maxWidth="Infinity" GridPane.columnIndex="0"/>
+                        <Button text="👤 Add Criminal" onAction="#handleAddCriminal" 
+                                styleClass="quick-action-btn" maxWidth="Infinity" GridPane.columnIndex="1"/>
+                        <Button text="👮 Add Officer" onAction="#handleAddOfficer" 
+                                styleClass="quick-action-btn" maxWidth="Infinity" GridPane.columnIndex="2"/>
+                        <Button text="📊 Reports" onAction="#handleReports" 
+                                styleClass="quick-action-btn" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <Button text="⚙ Settings" onAction="#handleSettings" 
+                                styleClass="quick-action-btn" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Button text="🛡 Audit" onAction="#handleAudit" 
+                                styleClass="quick-action-btn" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    </GridPane>
                 </VBox>
 
             </VBox>
 
-            <!-- RIGHT SIDE (SIDEBAR) -->
-            <VBox spacing="25" prefWidth="320">
+            <!-- RIGHT SIDE (Alerts & System Status) -->
+            <VBox spacing="25" prefWidth="350">
 
-                <!-- ALERTS -->
+                <!-- CRITICAL ALERTS -->
                 <VBox styleClass="card" spacing="15">
                     <Label text="Critical Alerts" styleClass="section-title"/>
 
-                    <VBox spacing="10">
-                        <HBox styleClass="alert-item">
-                            <Label text="⚠ High priority case pending audit" styleClass="alert-text"/>
-                        </HBox>
-                        <HBox styleClass="alert-item">
-                            <Label text="⚠ Missing evidence in Case #774" styleClass="alert-text"/>
-                        </HBox>
+                    <VBox spacing="12">
+                        <!-- High Priority Alert -->
+                        <VBox styleClass="alert-card alert-high">
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="🛑" style="-fx-font-size: 14px;"/>
+                                <Label text="High priority case pending audit" styleClass="alert-text"/>
+                            </HBox>
+                            <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                                <Button text="View" onAction="#handleViewAlert" styleClass="btn-primary-xs"/>
+                                <Button text="Resolve" onAction="#handleResolveAlert" styleClass="btn-success-xs"/>
+                            </HBox>
+                        </VBox>
+                        
+                        <!-- Medium Priority Alert -->
+                        <VBox styleClass="alert-card alert-med">
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="⚠" style="-fx-font-size: 14px;"/>
+                                <Label text="Missing evidence in Case #774" styleClass="alert-text"/>
+                            </HBox>
+                            <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                                <Button text="View" onAction="#handleViewAlert" styleClass="btn-primary-xs"/>
+                                <Button text="Resolve" onAction="#handleResolveAlert" styleClass="btn-success-xs"/>
+                            </HBox>
+                        </VBox>
                     </VBox>
                 </VBox>
 
-                <!-- SYSTEM STATUS -->
+                <!-- SYSTEM INTEGRITY -->
                 <VBox styleClass="card" spacing="15">
                     <Label text="System Integrity" styleClass="section-title"/>
 
                     <VBox spacing="12">
-                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="status-indicator">
-                            <Label text="✔" styleClass="status-text"/>
-                            <Label text="Database: Connected" styleClass="status-text"/>
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="status-row">
+                            <Label text="✔" styleClass="status-icon-ok"/>
+                            <Label text="Database: Connected" styleClass="status-label"/>
                         </HBox>
-                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="status-indicator">
-                            <Label text="✔" styleClass="status-text"/>
-                            <Label text="Secure Server: Active" styleClass="status-text"/>
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="status-row">
+                            <Label text="✔" styleClass="status-icon-ok"/>
+                            <Label text="Secure Server: Active" styleClass="status-label"/>
                         </HBox>
-                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="status-indicator" style="-fx-background-color: rgba(0,212,255,0.06); -fx-border-color: rgba(0,212,255,0.15);">
-                            <Label text="🕒" style="-fx-text-fill: #6BBFCC; -fx-font-size: 11px;"/>
-                            <Label text="🔄 Last Sync: Active" style="-fx-text-fill: #6BBFCC; -fx-font-size: 11px;"/>
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="status-row status-sync">
+                            <Label text="🔄" styleClass="status-icon-sync"/>
+                            <Label text="Last Sync: Active (2m ago)" styleClass="status-label"/>
                         </HBox>
                     </VBox>
                 </VBox>

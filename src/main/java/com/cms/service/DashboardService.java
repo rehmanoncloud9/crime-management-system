@@ -10,9 +10,12 @@ public class DashboardService {
         return HibernateUtil.executeTransaction(session -> {
             Map<String, Long> stats = new HashMap<>();
 
-            // Total persons/criminals
+            // Total Criminals (only those with status CRIMINAL or IN_CUSTODY)
             try { stats.put("totalCriminals",
-                session.createQuery("SELECT COUNT(p) FROM Person p", Long.class).getSingleResult());
+                session.createQuery("SELECT COUNT(p) FROM Person p WHERE p.status IN (:s1, :s2)", Long.class)
+                    .setParameter("s1", com.cms.model.enums.PersonStatus.CRIMINAL)
+                    .setParameter("s2", com.cms.model.enums.PersonStatus.IN_CUSTODY)
+                    .getSingleResult());
             } catch (Exception e) { stats.put("totalCriminals", 0L); }
 
             // Active cases (any non-closed status)

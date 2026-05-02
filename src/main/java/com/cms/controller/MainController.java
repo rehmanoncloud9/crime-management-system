@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
@@ -23,6 +24,7 @@ public class MainController {
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @FXML private VBox      sideMenu;
+    @FXML private ScrollPane sidebarScroll;
     @FXML private StackPane contentArea;
 
     private Button  activeButton;
@@ -43,21 +45,21 @@ public class MainController {
             buildSidebar(user);
 
             Platform.runLater(() -> {
-                sideMenu.setPrefWidth(0);
-                sideMenu.setMinWidth(0);
-                sideMenu.setOpacity(0);
+                sidebarScroll.setPrefWidth(0);
+                sidebarScroll.setMinWidth(0);
+                sidebarScroll.setOpacity(0);
                 Timeline slideIn = new Timeline(
                     new KeyFrame(Duration.ZERO,
-                        new KeyValue(sideMenu.prefWidthProperty(), 0),
-                        new KeyValue(sideMenu.opacityProperty(), 0)
+                        new KeyValue(sidebarScroll.prefWidthProperty(), 0),
+                        new KeyValue(sidebarScroll.opacityProperty(), 0)
                     ),
                     new KeyFrame(Duration.millis(420),
-                        new KeyValue(sideMenu.prefWidthProperty(), EXPANDED, Interpolator.EASE_OUT),
-                        new KeyValue(sideMenu.opacityProperty(), 1, Interpolator.EASE_OUT)
+                        new KeyValue(sidebarScroll.prefWidthProperty(), EXPANDED, Interpolator.EASE_OUT),
+                        new KeyValue(sidebarScroll.opacityProperty(), 1, Interpolator.EASE_OUT)
                     )
                 );
                 slideIn.setOnFinished(e -> {
-                    sideMenu.setMinWidth(EXPANDED);
+                    sidebarScroll.setMinWidth(EXPANDED);
                     sidebarExpanded = true;
                     List<Node> btns = new ArrayList<>();
                     for (Node n : sideMenu.getChildren())
@@ -80,34 +82,34 @@ public class MainController {
     }
 
     private void expandSidebar() {
-        sideMenu.setVisible(true);
-        sideMenu.setManaged(true);
+        sidebarScroll.setVisible(true);
+        sidebarScroll.setManaged(true);
         Timeline t = new Timeline(
             new KeyFrame(Duration.ZERO,
-                new KeyValue(sideMenu.prefWidthProperty(), 0),
-                new KeyValue(sideMenu.opacityProperty(), 0)
+                new KeyValue(sidebarScroll.prefWidthProperty(), 0),
+                new KeyValue(sidebarScroll.opacityProperty(), 0)
             ),
             new KeyFrame(Duration.millis(300),
-                new KeyValue(sideMenu.prefWidthProperty(), EXPANDED, Interpolator.EASE_OUT),
-                new KeyValue(sideMenu.opacityProperty(), 1, Interpolator.EASE_OUT)
+                new KeyValue(sidebarScroll.prefWidthProperty(), EXPANDED, Interpolator.EASE_OUT),
+                new KeyValue(sidebarScroll.opacityProperty(), 1, Interpolator.EASE_OUT)
             )
         );
-        t.setOnFinished(e -> sideMenu.setMinWidth(EXPANDED));
+        t.setOnFinished(e -> sidebarScroll.setMinWidth(EXPANDED));
         t.play();
     }
 
     private void collapseSidebar() {
         Timeline t = new Timeline(
             new KeyFrame(Duration.ZERO,
-                new KeyValue(sideMenu.prefWidthProperty(), EXPANDED),
-                new KeyValue(sideMenu.opacityProperty(), 1)
+                new KeyValue(sidebarScroll.prefWidthProperty(), EXPANDED),
+                new KeyValue(sidebarScroll.opacityProperty(), 1)
             ),
             new KeyFrame(Duration.millis(280),
-                new KeyValue(sideMenu.prefWidthProperty(), 0, Interpolator.EASE_OUT),
-                new KeyValue(sideMenu.opacityProperty(), 0, Interpolator.EASE_IN)
+                new KeyValue(sidebarScroll.prefWidthProperty(), 0, Interpolator.EASE_OUT),
+                new KeyValue(sidebarScroll.opacityProperty(), 0, Interpolator.EASE_IN)
             )
         );
-        t.setOnFinished(e -> sideMenu.setMinWidth(0));
+        t.setOnFinished(e -> sidebarScroll.setMinWidth(0));
         t.play();
     }
 
