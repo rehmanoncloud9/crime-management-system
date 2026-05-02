@@ -27,7 +27,7 @@ public class MainApp extends Application {
             System.out.println(">>> [CMS-BOOT] System initialized.");
         } catch (Throwable e) {
             System.err.println(">>> [CMS-BOOT-ERROR] Initialization CRITICAL FAILURE!");
-            e.printStackTrace();
+            logger.error("Application error", e);
             logger.error("Database initialization failed", e);
         }
 
@@ -55,7 +55,7 @@ public class MainApp extends Application {
 
         } catch (Exception e) {
             logger.error("Failed to start application UI", e);
-            e.printStackTrace();
+            logger.error("Application error", e);
         }
     }
 

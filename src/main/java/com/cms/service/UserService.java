@@ -68,15 +68,34 @@ public class UserService {
         });
     }
 
+    /**
+     * Clears the must_change_password flag after a user successfully sets their own password.
+     * Called by ChangePasswordController after a successful password change.
+     */
+    public void clearMustChangePassword(Long userId) {
+        HibernateUtil.executeVoidTransaction(session -> {
+            User managed = session.find(User.class, userId);
+            if (managed != null) {
+                managed.setMustChangePassword(false);
+                session.merge(managed);
+                logger.info("Cleared must_change_password for user: {}", managed.getUsername());
+            }
+        });
+    }
+
+    /**
+     * Admin-initiated password reset. Sets must_change_password = true so the
+     * officer is forced to choose their own password on next login.
+     */
     public void resetPassword(Long userId, String newPassword) {
         HibernateUtil.executeVoidTransaction(session -> {
             User managed = session.find(User.class, userId);
             if (managed != null) {
-                // Always BCrypt-hash the password before storing
                 String hashed = org.mindrot.jbcrypt.BCrypt.hashpw(newPassword, org.mindrot.jbcrypt.BCrypt.gensalt());
                 managed.setPasswordHash(hashed);
+                managed.setMustChangePassword(true); // Force change on next login
                 session.merge(managed);
-                logger.info("Password reset for user: {}", managed.getUsername());
+                logger.info("Password reset by admin for user: {}", managed.getUsername());
             }
         });
     }

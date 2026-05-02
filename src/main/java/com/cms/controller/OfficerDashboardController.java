@@ -2,6 +2,8 @@ package com.cms.controller;
 
 import com.cms.model.CrimeIncident;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -14,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class OfficerDashboardController {
+    private static final Logger logger = LoggerFactory.getLogger(OfficerDashboardController.class);
     @FXML private ListView<String> assignedCasesList;
     @FXML private ListView<String> warrantsList;
     @FXML private TableView<CrimeIncident> incidentsTable;
@@ -76,7 +79,7 @@ public class OfficerDashboardController {
                 return null;
             }
         };
-        task.setOnFailed(e -> e.getSource().getException().printStackTrace());
+        task.setOnFailed(e -> logger.error("Dashboard load failed", task.getException()));
         Thread t = new Thread(task, "officer-dashboard-loader");
         t.setDaemon(true);
         t.start();

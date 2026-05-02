@@ -5,11 +5,12 @@
 <hibernate-configuration>
     <session-factory>
         <!-- Database connection settings -->
+        <!-- NOTE: These values are overridden at runtime by HibernateUtil from db.properties -->
+        <!-- Edit db.properties (in src/main/resources) to set your actual credentials -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <!-- Credentials are PLACEHOLDERS - loaded programmatically from db.properties by HibernateUtil -->
         <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/cms_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;createDatabaseIfNotExist=true</property>
         <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password">potassium</property>
+        <property name="hibernate.connection.password">SET_IN_DB_PROPERTIES</property>
 
         <!-- HikariCP Connection Pool -->
         <property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>

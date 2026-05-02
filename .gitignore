@@ -9,3 +9,7 @@ target/
 
 # Environment variables
 .env
+
+# Database credentials - never commit real passwords
+src/main/resources/db.properties
+db.properties

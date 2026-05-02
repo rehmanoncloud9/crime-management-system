@@ -40,7 +40,7 @@ public class AuditService {
                 log.setEntityType(entityType);
                 log.setEntityId(entityId);
                 log.setDescription(description);
-                log.setIpAddress("127.0.0.1");
+                log.setIpAddress("desktop-client");
                 log.setWorkstationId(System.getProperty("user.name", "workstation"));
                 session.persist(log);
             });

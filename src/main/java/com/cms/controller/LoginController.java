@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Properties;
+
 
 public class LoginController {
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
@@ -81,7 +83,12 @@ public class LoginController {
         authTask.setOnSucceeded(e -> {
             User user = authTask.getValue();
             logger.info("User logged in: {} ({})", user.getUsername(), user.getRole());
-            navigateToMain(event);
+            if (user.isMustChangePassword()) {
+                logger.info("User '{}' must change password — redirecting to change-password screen.", user.getUsername());
+                navigateToChangePassword(event);
+            } else {
+                navigateToMain(event);
+            }
         });
 
         authTask.setOnFailed(e -> {
@@ -109,6 +116,23 @@ public class LoginController {
         });
 
         new Thread(authTask).start();
+    }
+
+    private void navigateToChangePassword(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/ChangePassword.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root, 1200, 750);
+            String css = getClass().getResource("/css/login.css").toExternalForm();
+            scene.getStylesheets().add(css);
+            stage.setScene(scene);
+            stage.setTitle("Crime Management System v5.0 — Set New Password");
+            stage.centerOnScreen();
+            stage.show();
+        } catch (IOException e) {
+            logger.error("Failed to load change-password screen", e);
+            errorLabel.setText("Navigation failed. Check logs.");
+        }
     }
 
     private void navigateToMain(ActionEvent event) {
@@ -156,12 +180,32 @@ public class LoginController {
 
     @FXML
     private void handleContactAdmin(ActionEvent event) {
-        try {
-            // Opening WhatsApp link in the default system browser
-            java.awt.Desktop.getDesktop().browse(new java.net.URI("https://wa.me/923487453067"));
-        } catch (Exception e) {
-            logger.error("Failed to open WhatsApp link", e);
-            errorLabel.setText("Error opening browser. Link: https://wa.me/923487453067");
+        // Contact info is read from config.properties (app.support.email or app.support.url).
+        // Fallback: show a plain dialog so there is no hardcoded personal number.
+        Properties props = new Properties();
+        try (java.io.InputStream in = getClass().getResourceAsStream("/config.properties")) {
+            if (in != null) props.load(in);
+        } catch (Exception ignored) {}
+
+        String supportUrl = props.getProperty("app.support.url", "");
+        String supportEmail = props.getProperty("app.support.email", "");
+
+        if (!supportUrl.isBlank()) {
+            try {
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(supportUrl));
+                return;
+            } catch (Exception e) {
+                logger.error("Failed to open support URL", e);
+            }
         }
+
+        String msg = supportEmail.isBlank()
+            ? "Please contact your system administrator for technical support."
+            : "For technical support, email: " + supportEmail;
+
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.INFORMATION, msg);
+        alert.setHeaderText("Technical Support");
+        alert.showAndWait();
     }
 }

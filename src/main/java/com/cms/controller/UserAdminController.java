@@ -82,8 +82,7 @@ public class UserAdminController {
 
         task.setOnFailed(e -> {
             logger.error("Failed to load users", task.getException());
-            System.err.println(">>> [CMS-ERROR] Failed to load users!");
-            task.getException().printStackTrace();
+            logger.error("Failed to load users", task.getException());
             userFlowPane.getChildren().clear();
             userFlowPane.getChildren().add(new Label("Error loading data. Check database connection. See logs for details."));
         });
@@ -129,7 +128,10 @@ public class UserAdminController {
         newUser.setPhone(newPhoneField.getText().trim());
         newUser.setStatus(UserStatus.ACTIVE);
         newUser.setMustChangePassword(true);
-        newUser.setPasswordHash(authService.hashPassword(newUser.getBadgeNumber() + "123!"));
+        // Temporary password = badge number + random 4-digit pin
+        // User will be forced to change it on first login (mustChangePassword=true above)
+        String tempPassword = newUser.getBadgeNumber() + String.format("%04d", (int)(Math.random() * 10000));
+        newUser.setPasswordHash(authService.hashPassword(tempPassword));
 
         // Save image to local storage
         if (selectedPhotoFile != null) {
@@ -147,7 +149,12 @@ public class UserAdminController {
         task.setOnSucceeded(event -> {
             loadUsers();
             handleCancelNewUser();
-            new Alert(Alert.AlertType.INFORMATION, "User created successfully.\nUsername: " + newUser.getUsername() + "\nDefault Password: " + newUser.getBadgeNumber() + "123!").showAndWait();
+            new Alert(Alert.AlertType.INFORMATION,
+                "User created successfully.\n\n" +
+                "Username : " + newUser.getUsername() + "\n" +
+                "Temp Password: " + tempPassword + "\n\n" +
+                "The user will be required to change their\n" +
+                "password on first login.").showAndWait();
         });
         task.setOnFailed(event -> {
             Throwable ex = task.getException();

@@ -1,127 +1,146 @@
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\UserService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\ChatbotController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\EvidenceRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\ReportingService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\CourtManagementController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\geo\City.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\EvidenceService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\Gender.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\User.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\HearingStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\NotificationPopoverController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\EvidenceType.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\CourtStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\ArrestRecord.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\UserRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\ai\SimilarityEngine.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\ai\DialogueManager.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\MyCasesController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\WarrantStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\AuthService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\util\UIUtils.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\ImageStorageService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\AdminDashboardController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\MainApp.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\GeographyService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\EvidenceStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\CrimeType.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\UserAdminController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\NotificationType.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\Evidence.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\LoginSession.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\geo\CountryRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\UserStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\DashboardService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\NavigationService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\WarrantService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\IncidentRegistrationController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\AIAnalysisResult.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\CasePriority.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\geo\DistrictRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\ChatSession.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\PersonStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\StatisticalReportsController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\AnalysisType.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\CriminalSearchController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\CourtRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\BloodGroup.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\IncidentRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\NotificationRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\IncidentService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\EliteAIService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\components\ChatMessageController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\ArrestRegistrationController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\CrimeIncident.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\AuditAction.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\PersonService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\MedicalRecord.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\NotificationPriority.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\CaseWorkflowService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\CaseManagementController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\MOTimeOfDay.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\ai\ParsedQuery.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\IncidentStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\LoginController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\NotificationService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\CourtCase.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\CourtHearing.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\AuditLog.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\CrimeTypeRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\geo\Province.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\SessionManager.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\ChargeSheetsController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\ai\DialogueState.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\geo\Country.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\MainController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\Warrant.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\ArrestService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\LinkCaseController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\SampleDataService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\DashboardController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\Notification.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\SessionStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\CaseRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\ai\QueryParser.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\ConfigController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\OfficerEditController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\OfficerDashboardController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\DataInitializer.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\ArrestRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\AIChatService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\RelatedCase.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\AuditDashboardController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\PersonRegistrationController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\AIService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\HibernateUtil.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\geo\Area.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\InvestigatorDashboardController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\WarrantRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\PersonRegistryController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\AuditService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\OfficerDetailController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\Person.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\ChatMessage.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\CrimeTypeService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\geo\CityRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\ai\NLPEngine.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\CourtService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\AIRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\ModusOperandi.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\geo\AreaRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\EvidenceLogController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\geo\District.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\AIAnalyticsController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\PersonRole.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\PersonRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\Role.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\CaseService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\CaseFile.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\repository\geo\ProvinceRepository.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\HeaderController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\ExecutiveDashboardController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\controller\PersonDetailController.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\ArrestStatus.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\AnalyticsService.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\service\ai\QueryBuilder.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\util\AnimationHelper.java
-C:\Users\HP\Downloads\CMS_ENHANCED_FINAL\CMS_FIXED_ENHANCED\src\main\java\com\cms\model\enums\RiskScore.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\IncidentStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\Role.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\DashboardService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\User.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\MOTimeOfDay.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\LoginController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\CaseManagementController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\SessionStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\ai\SimilarityEngine.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CaseNote.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\MainController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\ai\ParsedQuery.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\geo\AreaRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\util\AnimationHelper.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\CriminalSearchController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\geo\Area.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\ModusOperandi.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\WarrantRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CourtCase.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\PersonRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\LinkCaseController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CaseSuspect.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\InvestigatorDashboardController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\ArrestStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Evidence.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\AuditAction.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\ai\QueryBuilder.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\PersonRegistrationController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\CaseWorkflowService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\dto\OfficerStatsDTO.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\geo\City.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\RoleEntity.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\AuditService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\DatabaseInitializer.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\HeaderController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Warrant.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\OfficerDetailController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CourtHearing.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\dto\GeoPointDTO.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\WarrantStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Permission.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Court.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CaseFile.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\util\DBTest.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\AIRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\OfficerDashboardController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\EvidenceRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\geo\District.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\CaseRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\MainApp.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\ChargeSheetsController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\ExecutiveDashboardController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\CourtRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\NotificationRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\IncidentRegistrationController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\PersonRole.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\NotificationType.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\AdminDashboardController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\geo\Country.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\ArrestRecord.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\HearingStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\NavigationService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\CrimeTypeService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\PersonRegistryController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\components\ChatMessageController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\AIAnalyticsController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\PersonService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\NotificationService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\HibernateUtil.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\MedicalRecord.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\util\DBCheck.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\AuditLog.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Appeal.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\DashboardController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CaseVictim.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\CourtStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\geo\CityRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CrimeType.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\AnalysisType.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\IncidentService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\ai\DialogueState.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\CasePriority.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\EvidenceService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\CaseStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Notification.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\ai\DialogueManager.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\geo\DistrictRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\EvidenceLogController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\CaseService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\SessionManager.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\geo\Province.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CasePersonId.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\ChatSession.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\PersonStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\ArrestService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\UserService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Civilian.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\util\SecurityUtils.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\ai\QueryParser.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\AIChatService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\WarrantType.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\EvidenceStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\AnalyticsService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\ReportingService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\geo\CountryRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\ChatMessage.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\ai\NLPEngine.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\AuthService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\CourtService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CaseWitness.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\NotificationPopoverController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\Gender.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\RiskScore.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\GeographyService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CourtCaseEvidence.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\UserStatus.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\UserAdminController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\AIAnalysisResult.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\EvidenceType.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\RelatedCase.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\MyCasesController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\AIService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\MediaFile.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\WarrantService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\CourtManagementController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\ArrestRegistrationController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CrimeIncident.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\AuditDashboardController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\NotificationPriority.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\HearingType.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\IncidentRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\enums\BloodGroup.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\ImageStorageService.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\OfficerEditController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\geo\ProvinceRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\ConfigController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\CrimeTypeRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\util\UIUtils.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\StatisticalReportsController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\ArrestRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\ChatbotController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Person.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\LoginSession.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\PersonDetailController.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\UserRepository.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\service\EliteAIService.java

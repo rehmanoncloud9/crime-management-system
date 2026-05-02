@@ -101,7 +101,8 @@ public class HibernateUtil {
         }
 
         if (!props.containsKey("db.password")) {
-            props.setProperty("db.password", configProps.getProperty("db.password", "potassium"));
+            // Read from config.properties — no hardcoded fallback. Set db.password in db.properties.
+            props.setProperty("db.password", configProps.getProperty("db.password", ""));
         }
 
         if (!props.containsKey("db.driver")) {

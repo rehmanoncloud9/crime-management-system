@@ -7,12 +7,12 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.time.LocalDate;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,55 +20,64 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * Enterprise-grade database initializer (Mini-Migration Engine).
- * 1. Runs Schema Migrations via JDBC (Bootstrap).
- * 2. Seeds Mandatory Lookup Data (Reference Data).
- * 3. Ensures Default Security Baseline.
+ * Database initializer.
+ *
+ * Phase 1 — JDBC bootstrap: creates the database if missing, applies schema.
+ * Phase 2 — Admin baseline: creates ONE default admin on first run only.
+ *            If an admin already exists, this phase is skipped entirely.
+ *            Admin credentials come from config.properties, never hardcoded.
+ * Phase 3 — Reference data: seeds lookup tables (roles, geography, crime types).
+ *
+ * User accounts for officers/analysts/etc are created by the admin through
+ * the User Management screen — never automatically by this class.
  */
 public class DatabaseInitializer {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializer.class);
-    private static final Properties props = HibernateUtil.getDbProperties();
+    private static final Properties dbProps = HibernateUtil.getDbProperties();
+    private static final Properties appConfig = loadAppConfig();
 
     public static void initialize() {
-        System.out.println(">>> [CMS-INIT] Starting Database Initialization...");
         logger.info(">>> [CMS-INIT] Starting Database Initialization...");
-
         try {
-            // Phase 1: JDBC Bootstrap (Schema Migrations)
             runJdbcBootstrap();
-
-            // Phase 2: Security Baseline (Admin Account)
-            // Priority 1: Ensure authentication is available immediately
             ensureAdminAccount();
-
-            // Phase 3: Mandatory Reference Data (Lookups)
             seedReferenceData();
-
             logger.info(">>> [CMS-INIT] Database Initialization Complete.");
         } catch (Exception e) {
-            System.err.println("************************************************************");
-            System.err.println("!!! CRITICAL: DATABASE INITIALIZATION FAILED !!!");
-            System.err.println("Error: " + e.getMessage());
-            System.err.println("************************************************************");
-            logger.error("Database initialization failed", e);
+            logger.error("!!! CRITICAL: DATABASE INITIALIZATION FAILED: {}", e.getMessage(), e);
             throw new RuntimeException("Database initialization failed", e);
         }
     }
 
-    private static void runJdbcBootstrap() {
-        // We now favor the schema_enhanced.sql for the baseline.
-        // This method is kept for minor hotfixes or ensuring the DB exists.
-        String dbUrl = props.getProperty("db.url", "jdbc:mysql://localhost:3306/cms_db");
-        String user = props.getProperty("db.username", "root");
-        String pass = props.getProperty("db.password", "potassium");
+    // ─────────────────────────────────────────────────────────────
+    // Config loading
+    // ─────────────────────────────────────────────────────────────
 
-        String dbName = extractDatabaseName(dbUrl);
+    private static Properties loadAppConfig() {
+        Properties props = new Properties();
+        try (InputStream in = DatabaseInitializer.class.getClassLoader()
+                .getResourceAsStream("config.properties")) {
+            if (in != null) props.load(in);
+        } catch (Exception e) {
+            logger.warn("Could not load config.properties for admin defaults: {}", e.getMessage());
+        }
+        return props;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Phase 1: JDBC Bootstrap
+    // ─────────────────────────────────────────────────────────────
+
+    private static void runJdbcBootstrap() {
+        String dbUrl  = dbProps.getProperty("db.url",      "jdbc:mysql://localhost:3306/cms_db");
+        String user   = dbProps.getProperty("db.username", "root");
+        String pass   = dbProps.getProperty("db.password", "");
+
+        String dbName    = extractDatabaseName(dbUrl);
         String serverUrl = buildServerUrl(dbUrl);
 
         try (Connection conn = DriverManager.getConnection(serverUrl, user, pass);
-                Statement stmt = conn.createStatement()) {
-            logger.info("JDBC Bootstrap: Attempting connection to {} as user '{}' (Pass length: {})", 
-                serverUrl, user, (pass != null ? pass.length() : 0));
+             Statement stmt  = conn.createStatement()) {
             stmt.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
             logger.info("JDBC Bootstrap: Database '{}' confirmed.", dbName);
         } catch (Exception e) {
@@ -85,13 +94,11 @@ public class DatabaseInitializer {
                 logger.info("Schema already present. Skipping auto-apply.");
                 return;
             }
-
             Path schemaPath = Paths.get(System.getProperty("user.dir"), "schema_enhanced.sql");
             if (!Files.exists(schemaPath)) {
-                logger.warn("Schema file not found at {}", schemaPath);
+                logger.warn("Schema file not found at {}. Skipping.", schemaPath);
                 return;
             }
-
             String sql = Files.readString(schemaPath, StandardCharsets.UTF_8);
             executeSqlScript(conn, sql);
             logger.info("Schema auto-apply completed.");
@@ -102,7 +109,7 @@ public class DatabaseInitializer {
 
     private static boolean schemaExists(Connection conn, String dbName) {
         String sql = "SELECT COUNT(*) FROM information_schema.tables " +
-                "WHERE table_schema = ? AND table_name IN (?, ?)";
+                     "WHERE table_schema = ? AND table_name IN (?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dbName);
             ps.setString(2, "users");
@@ -124,45 +131,31 @@ public class DatabaseInitializer {
         try (Statement stmt = conn.createStatement()) {
             for (String rawLine : script.split("\n")) {
                 String line = rawLine.trim();
-
                 if (inBlockComment) {
-                    if (line.endsWith("*/")) {
-                        inBlockComment = false;
-                    }
+                    if (line.endsWith("*/")) inBlockComment = false;
                     continue;
                 }
-
                 if (line.startsWith("/*")) {
-                    if (!line.endsWith("*/")) {
-                        inBlockComment = true;
-                    }
+                    if (!line.endsWith("*/")) inBlockComment = true;
                     continue;
                 }
-
-                if (line.isEmpty() || line.startsWith("--") || line.startsWith("*")) {
-                    continue;
-                }
+                if (line.isEmpty() || line.startsWith("--") || line.startsWith("*")) continue;
 
                 if (line.toUpperCase(Locale.ROOT).startsWith("DELIMITER")) {
                     delimiter = line.substring("DELIMITER".length()).trim();
                     statement.setLength(0);
                     continue;
                 }
-
                 statement.append(rawLine).append('\n');
-
                 if (line.endsWith(delimiter)) {
                     String sql = statement.toString().trim();
                     sql = sql.substring(0, sql.lastIndexOf(delimiter)).trim();
-                    if (!sql.isBlank())
-                        executeStatement(stmt, sql);
+                    if (!sql.isBlank()) executeStatement(stmt, sql);
                     statement.setLength(0);
                 }
             }
-
             String remaining = statement.toString().trim();
-            if (!remaining.isBlank())
-                executeStatement(stmt, remaining);
+            if (!remaining.isBlank()) executeStatement(stmt, remaining);
         }
     }
 
@@ -176,6 +169,158 @@ public class DatabaseInitializer {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Phase 2: Admin Baseline — FIRST RUN ONLY
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Creates a default admin account ONLY if no admin exists yet.
+     * Once created, this method never modifies the admin account again —
+     * password changes made through the UI are permanent.
+     *
+     * Credentials are read from config.properties:
+     *   app.admin.username        (default: admin)
+     *   app.admin.badge           (default: SYS-001)
+     *   app.admin.email           (default: admin@cms.local)
+     *   app.admin.default.password  (default: Admin@CMS2024!)
+     */
+    private static void ensureAdminAccount() {
+        String dbUrl  = dbProps.getProperty("db.url",      "jdbc:mysql://localhost:3306/cms_db");
+        String dbUser = dbProps.getProperty("db.username", "root");
+        String dbPass = dbProps.getProperty("db.password", "");
+
+        String adminUsername = appConfig.getProperty("app.admin.username",         "admin");
+        String adminBadge    = appConfig.getProperty("app.admin.badge",            "SYS-001");
+        String adminEmail    = appConfig.getProperty("app.admin.email",            "admin@cms.local");
+        String adminPassword = appConfig.getProperty("app.admin.default.password", "Admin@CMS2024!");
+
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+             Statement stmt  = conn.createStatement()) {
+
+            // Check if ANY admin-role user exists
+            ResultSet rs = stmt.executeQuery(
+                "SELECT COUNT(*) FROM users WHERE role = 'ADMINISTRATOR'");
+            rs.next();
+            long adminCount = rs.getLong(1);
+            rs.close();
+
+            if (adminCount > 0) {
+                // Admins already exist — do NOT touch passwords or accounts
+                logger.info("[INIT] Admin account(s) already exist. Skipping baseline creation.");
+                return;
+            }
+
+            // First run: create the default admin
+            logger.warn("[INIT] No admin found. Creating first-run admin account '{}'.", adminUsername);
+            String passwordHash = BCrypt.hashpw(adminPassword, BCrypt.gensalt());
+
+            // 1. Create person record
+            stmt.executeUpdate(
+                "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, gender, created_at, updated_at) " +
+                "VALUES ('System', 'Administrator', true, 'UNKNOWN', '" + adminEmail + "', 'OTHER', NOW(), NOW())",
+                Statement.RETURN_GENERATED_KEYS);
+
+            long personId = -1;
+            try (ResultSet keys = stmt.getGeneratedKeys()) {
+                if (keys.next()) personId = keys.getLong(1);
+            }
+
+            if (personId == -1) {
+                logger.error("[INIT] Could not retrieve person ID for admin. Admin creation aborted.");
+                return;
+            }
+
+            // 2. Create user account — must_change_password = true so admin sets their own password on first login
+            try (PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO users (badge_number, username, password_hash, person_id, role, status, " +
+                "must_change_password, created_at, updated_at) " +
+                "VALUES (?, ?, ?, ?, 'ADMINISTRATOR', 'ACTIVE', true, NOW(), NOW())")) {
+                ps.setString(1, adminBadge);
+                ps.setString(2, adminUsername);
+                ps.setString(3, passwordHash);
+                ps.setLong(4, personId);
+                ps.executeUpdate();
+            }
+
+            logger.warn("╔══════════════════════════════════════════════════╗");
+            logger.warn("║         CMS — FIRST RUN SETUP COMPLETE          ║");
+            logger.warn("║                                                  ║");
+            logger.warn("║  Username : {}                              ║", adminUsername);
+            logger.warn("║  Password : (set in config.properties)           ║");
+            logger.warn("║                                                  ║");
+            logger.warn("║  You will be required to change your password    ║");
+            logger.warn("║  on first login.                                 ║");
+            logger.warn("╚══════════════════════════════════════════════════╝");
+
+        } catch (Exception e) {
+            logger.error("[INIT] Failed to ensure admin account", e);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Phase 3: Reference / Lookup Data
+    // ─────────────────────────────────────────────────────────────
+
+    private static void seedReferenceData() {
+        HibernateUtil.executeVoidTransaction(session -> {
+            // Roles
+            String[] roles = { "ADMINISTRATOR", "SUPERVISOR", "OFFICER", "ANALYST", "RECORDS_CLERK", "LEGAL_OFFICER" };
+            for (String r : roles) {
+                session.createNativeQuery("INSERT IGNORE INTO roles (name) VALUES (:n)")
+                       .setParameter("n", r).executeUpdate();
+            }
+
+            // Geography (Pakistan only if empty)
+            long distCount = session.createQuery("SELECT COUNT(d) FROM District d", Long.class).uniqueResult();
+            if (distCount == 0) {
+                logger.info("Seeding mandatory geography data...");
+                Country pk = new Country();
+                pk.setName("Pakistan"); pk.setCode("PK");
+                session.persist(pk);
+
+                Province punjab = new Province();
+                punjab.setName("Punjab"); punjab.setCountry(pk);
+                session.persist(punjab);
+
+                String[] districts = { "Lahore", "Faisalabad", "Multan", "Rawalpindi",
+                        "Gujranwala", "Sargodha", "Sialkot", "Bahawalpur", "Sahiwal", "Sheikhupura" };
+                for (String dName : districts) {
+                    District d = new District();
+                    d.setName(dName); d.setProvince(punjab);
+                    session.persist(d);
+                    City c = new City();
+                    c.setName(dName + " City"); c.setDistrict(d);
+                    session.persist(c);
+                    Area a = new Area();
+                    a.setName(dName + " Center"); a.setCity(c);
+                    session.persist(a);
+                }
+            }
+
+            // Crime types
+            String[] crimes = { "ROBBERY", "MURDER", "CYBER_FRAUD", "KIDNAPPING",
+                    "ASSAULT", "EXTORTION", "NARCOTICS", "TERRORISM" };
+            for (String c : crimes) {
+                session.createNativeQuery("INSERT IGNORE INTO crime_types (name, code) VALUES (:n, :c)")
+                       .setParameter("n", c)
+                       .setParameter("c", c.substring(0, Math.min(3, c.length())))
+                       .executeUpdate();
+            }
+
+            // Warrant and hearing types
+            session.createNativeQuery(
+                "INSERT IGNORE INTO warrant_types (name) VALUES ('SEARCH'), ('ARREST'), ('BENCH')")
+                .executeUpdate();
+            session.createNativeQuery(
+                "INSERT IGNORE INTO hearing_types (name) VALUES ('PRELIMINARY'), ('TRIAL'), ('SENTENCING'), ('BAIL')")
+                .executeUpdate();
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // URL helpers
+    // ─────────────────────────────────────────────────────────────
+
     private static String extractDatabaseName(String dbUrl) {
         try {
             String withoutJdbc = dbUrl.startsWith("jdbc:") ? dbUrl.substring("jdbc:".length()) : dbUrl;
@@ -186,8 +331,7 @@ public class DatabaseInitializer {
                 int idx = name.indexOf('?');
                 return idx >= 0 ? name.substring(0, idx) : name;
             }
-        } catch (Exception ignore) {
-        }
+        } catch (Exception ignore) {}
         int slash = dbUrl.lastIndexOf('/');
         if (slash >= 0) {
             String tail = dbUrl.substring(slash + 1);
@@ -201,140 +345,12 @@ public class DatabaseInitializer {
         try {
             String withoutJdbc = dbUrl.startsWith("jdbc:") ? dbUrl.substring("jdbc:".length()) : dbUrl;
             java.net.URI uri = java.net.URI.create(withoutJdbc);
-            String host = uri.getHost();
-            int port = uri.getPort();
+            String host  = uri.getHost();
+            int    port  = uri.getPort();
             String query = uri.getQuery();
-            String base = "jdbc:mysql://" + host + (port > 0 ? ":" + port : "") + "/";
+            String base  = "jdbc:mysql://" + host + (port > 0 ? ":" + port : "") + "/";
             return query != null ? base + "?" + query : base;
-        } catch (Exception ignore) {
-        }
+        } catch (Exception ignore) {}
         return "jdbc:mysql://localhost:3306/";
-    }
-
-    private static void seedReferenceData() {
-        HibernateUtil.executeVoidTransaction(session -> {
-            // 1. Roles
-            String[] roles = { "ADMINISTRATOR", "SUPERVISOR", "OFFICER", "ANALYST", "RECORDS_CLERK", "LEGAL_OFFICER" };
-            for (String r : roles) {
-                session.createNativeQuery("INSERT IGNORE INTO roles (name) VALUES (:n)")
-                        .setParameter("n", r).executeUpdate();
-            }
-
-            // 2. Mandatory Geography Check
-            long distCount = session.createQuery("SELECT COUNT(d) FROM District d", Long.class).uniqueResult();
-            if (distCount == 0) {
-                logger.info("Seeding mandatory geography data...");
-                Country pk = new Country();
-                pk.setName("Pakistan");
-                pk.setCode("PK");
-                session.persist(pk);
-                Province punjab = new Province();
-                punjab.setName("Punjab");
-                punjab.setCountry(pk);
-                session.persist(punjab);
-
-                String[] districts = { "Lahore", "Faisalabad", "Multan", "Rawalpindi", "Gujranwala", "Sargodha",
-                        "Sialkot", "Bahawalpur", "Sahiwal", "Sheikhupura" };
-                for (String dName : districts) {
-                    District d = new District();
-                    d.setName(dName);
-                    d.setProvince(punjab);
-                    session.persist(d);
-                    City c = new City();
-                    c.setName(dName + " City");
-                    c.setDistrict(d);
-                    session.persist(c);
-                    Area a = new Area();
-                    a.setName(dName + " Center");
-                    a.setCity(c);
-                    session.persist(a);
-                }
-            }
-
-            // 3. Crime Types
-            String[] crimes = { "ROBBERY", "MURDER", "CYBER_FRAUD", "KIDNAPPING", "ASSAULT", "EXTORTION", "NARCOTICS",
-                    "TERRORISM" };
-            for (String c : crimes) {
-                session.createNativeQuery("INSERT IGNORE INTO crime_types (name, code) VALUES (:n, :c)")
-                        .setParameter("n", c).setParameter("c", c.substring(0, 3)).executeUpdate();
-            }
-
-            // 4. Warrant/Hearing Types
-            session.createNativeQuery(
-                    "INSERT IGNORE INTO warrant_types (name) VALUES ('SEARCH'), ('ARREST'), ('BENCH')").executeUpdate();
-            session.createNativeQuery(
-                    "INSERT IGNORE INTO hearing_types (name) VALUES ('PRELIMINARY'), ('TRIAL'), ('SENTENCING'), ('BAIL')")
-                    .executeUpdate();
-        });
-    }
-
-    private static void ensureAdminAccount() {
-        try {
-            String url = props.getProperty("db.url", "jdbc:mysql://localhost:3306/cms_db");
-            String user = props.getProperty("db.username", "root");
-            String pass = props.getProperty("db.password", "potassium");
-
-            logger.info("[INIT] Verifying administrative security baseline...");
-
-            try (Connection conn = DriverManager.getConnection(url, user, pass);
-                    Statement stmt = conn.createStatement()) {
-
-                var rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE username = 'admin'");
-                rs.next();
-                long adminCount = rs.getLong(1);
-
-                if (adminCount == 0) {
-                    logger.info("[INIT] Admin account 'admin' not found. Creating security baseline...");
-                    String passwordHash = BCrypt.hashpw("admin123", BCrypt.gensalt());
-
-                    // 1. Create Base Person
-                    logger.info("[INIT] Creating System Administrator person record...");
-                    stmt.executeUpdate(
-                            "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, gender, created_at, updated_at) "
-                                    +
-                                    "VALUES ('System', 'Administrator', true, 'UNKNOWN', 'admin@cms.gov', 'OTHER', NOW(), NOW())",
-                            Statement.RETURN_GENERATED_KEYS);
-
-                    long personId = -1;
-                    try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                        if (generatedKeys.next()) {
-                            personId = generatedKeys.getLong(1);
-                        }
-                    }
-
-                    if (personId == -1) {
-                        // Fallback
-                        var rs2 = stmt.executeQuery("SELECT id FROM persons ORDER BY id DESC LIMIT 1");
-                        if (rs2.next()) personId = rs2.getLong(1);
-                    }
-
-                    if (personId != -1) {
-                        // 2. Create User linked to Person
-                        logger.info("[INIT] Creating User account 'admin' linked to Person ID {}...", personId);
-                        var ps = conn.prepareStatement(
-                                "INSERT INTO users (badge_number, username, password_hash, person_id, role, status, must_change_password, created_at, updated_at) "
-                                        +
-                                        "VALUES ('SYS-001', 'admin', ?, ?, 'ADMINISTRATOR', 'ACTIVE', true, NOW(), NOW())");
-                        ps.setString(1, passwordHash);
-                        ps.setLong(2, personId);
-                        ps.executeUpdate();
-
-                        logger.info(">>> [CMS-SECURITY] Default administrator 'admin' (SYS-001) initialized successfully.");
-                    } else {
-                        logger.error("[INIT-CRITICAL] Failed to retrieve generated person ID for admin account.");
-                    }
-                } else {
-                    logger.info("[INIT] Security baseline verified: 'admin' account exists. Synchronizing credentials...");
-                    String passwordHash = BCrypt.hashpw("admin123", BCrypt.gensalt());
-                    var psUpdate = conn.prepareStatement("UPDATE users SET password_hash = ? WHERE username = 'admin'");
-                    psUpdate.setString(1, passwordHash);
-                    psUpdate.executeUpdate();
-                    logger.info("[INIT] Security baseline: 'admin' password synchronized to default.");
-                }
-            }
-        } catch (Exception e) {
-            logger.error("[INIT-CRITICAL] Failed to ensure security baseline (admin account)", e);
-            e.printStackTrace();
-        }
     }
 }

@@ -35,6 +35,26 @@ public class AuthService {
         return BCrypt.hashpw(plainText, BCrypt.gensalt());
     }
 
+    /**
+     * Verifies a plain-text password against a stored hash.
+     * Used by the change-password screen to confirm the user knows their current password.
+     */
+    public boolean verifyCurrentPassword(String plainText, String storedHash) {
+        if (plainText == null || storedHash == null || storedHash.isBlank()) return false;
+        try {
+            if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$") || storedHash.startsWith("$2y$")) {
+                return BCrypt.checkpw(plainText, storedHash);
+            }
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] a = digest.digest(storedHash.getBytes(StandardCharsets.UTF_8));
+            byte[] b = digest.digest(plainText.getBytes(StandardCharsets.UTF_8));
+            return MessageDigest.isEqual(a, b);
+        } catch (Exception e) {
+            logger.warn("Password verification error", e);
+            return false;
+        }
+    }
+
     public User authenticate(String identifier, String password) throws Exception {
         if (identifier == null || password == null) {
             throw new IllegalArgumentException("Username/Email and password are required.");
@@ -203,7 +223,8 @@ public class AuthService {
             loginSession.setLoginAt(LocalDateTime.now());
             loginSession.setSessionStatus(SessionStatus.ACTIVE);
             loginSession.setWorkstationId(System.getProperty("user.name"));
-            loginSession.setIpAddress("127.0.0.1");
+            // IP address is not reliably available in a desktop app — record workstation name instead
+            loginSession.setIpAddress("desktop-client");
 
             session.persist(loginSession);
             SessionManager.getInstance().setCurrentSession(loginSession);

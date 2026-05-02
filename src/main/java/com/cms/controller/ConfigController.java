@@ -16,7 +16,25 @@ import java.util.Properties;
 
 public class ConfigController {
     private static final Logger logger = LoggerFactory.getLogger(ConfigController.class);
-    private static final String CONFIG_FILE = "src/main/resources/config.properties";
+
+    // Resolve config path relative to the JAR/classpath root so it works
+    // regardless of the working directory the app is launched from.
+    private static final String CONFIG_FILE = resolveConfigPath();
+
+    private static String resolveConfigPath() {
+        // First try: next to the running JAR (production layout)
+        java.net.URL url = ConfigController.class.getResource("/config.properties");
+        if (url != null) {
+            try {
+                return new java.io.File(url.toURI()).getAbsolutePath();
+            } catch (Exception ignored) {}
+        }
+        // Second try: Maven source layout (dev mode)
+        java.io.File devPath = new java.io.File("src/main/resources/config.properties");
+        if (devPath.exists()) return devPath.getAbsolutePath();
+        // Fallback: write next to working directory
+        return "config.properties";
+    }
 
     @FXML private TextField systemNameField;
     @FXML private TextField defaultPrecinctField;

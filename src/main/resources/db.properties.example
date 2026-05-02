@@ -1,16 +1,14 @@
 # ============================================================
-# CMS Database Configuration
+# CMS Database Configuration Template
 # ============================================================
-# Edit these values to match your local MySQL/MariaDB setup.
-# Do NOT commit this file to version control if it contains
-# real credentials. Add db.properties to your .gitignore.
+# Copy this file to db.properties and fill in your credentials.
+# db.properties is gitignored so your password stays local.
 # ============================================================
 
 db.url=jdbc:mysql://localhost:3306/cms_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
 db.username=root
-db.password=potassium
+db.password=YOUR_MYSQL_PASSWORD_HERE
 db.driver=com.mysql.cj.jdbc.Driver
 
-# App Config
 app.name=CMS v5.0
 app.env=development

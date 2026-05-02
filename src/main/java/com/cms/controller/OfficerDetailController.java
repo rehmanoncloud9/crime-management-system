@@ -174,7 +174,7 @@ public class OfficerDetailController {
                             .list();
                     });
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    logger.error("Operation failed", ex);
                     throw ex;
                 }
             }

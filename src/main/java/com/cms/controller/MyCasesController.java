@@ -4,6 +4,8 @@ import com.cms.model.CaseFile;
 import com.cms.model.User;
 
 import com.cms.service.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MyCasesController {
+    private static final Logger logger = LoggerFactory.getLogger(MyCasesController.class);
     @FXML private TableView<CaseFile> caseTable;
     @FXML private TableColumn<CaseFile, String> numberCol;
     @FXML private TableColumn<CaseFile, String> titleCol;
@@ -61,7 +64,7 @@ public class MyCasesController {
                 }
             };
             task.setOnSucceeded(e -> caseTable.setItems(FXCollections.observableArrayList(task.getValue())));
-            task.setOnFailed(e -> task.getException().printStackTrace());
+            task.setOnFailed(e -> logger.error("Cases load failed", task.getException()));
             new Thread(task).start();
         }
     }
