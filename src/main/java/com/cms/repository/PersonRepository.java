@@ -49,6 +49,42 @@ public class PersonRepository {
         return query.getResultList();
     }
 
+    public List<Person> findCriminals(int limit, int offset) {
+        TypedQuery<Person> query = entityManager.createQuery(
+                "SELECT p FROM Person p WHERE p.deletedAt IS NULL " +
+                "AND p.personStatus NOT IN ('OFFICER', 'ACTIVE', 'WITNESS', 'VICTIM') " +
+                "ORDER BY p.id DESC",
+                Person.class
+        );
+
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
+
+        return query.getResultList();
+    }
+
+    public List<Person> findCriminalsByName(String firstName, String lastName, int limit, int offset) {
+        if (firstName == null) firstName = "";
+        if (lastName == null) lastName = "";
+
+        TypedQuery<Person> query = entityManager.createQuery(
+                "SELECT p FROM Person p " +
+                        "WHERE p.deletedAt IS NULL " +
+                        "AND p.personStatus NOT IN ('OFFICER', 'ACTIVE', 'WITNESS', 'VICTIM') " +
+                        "AND (LOWER(p.firstName) LIKE LOWER(:fn) AND LOWER(p.lastName) LIKE LOWER(:ln)) " +
+                        "ORDER BY p.id DESC",
+                Person.class
+        );
+
+        query.setParameter("fn", "%" + firstName.trim() + "%");
+        query.setParameter("ln", "%" + lastName.trim() + "%");
+
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
+
+        return query.getResultList();
+    }
+
     public Optional<Person> findById(Long id) {
         if (id == null) {
             return Optional.empty();

@@ -132,7 +132,7 @@ public class CriminalSearchController {
         javafx.concurrent.Task<List<Person>> task = new javafx.concurrent.Task<>() {
             @Override
             protected List<Person> call() {
-                return personService.findAll(1000, 0);
+                return personService.findCriminals(1000, 0);
             }
         };
         task.setOnSucceeded(e -> resultsTable.setItems(FXCollections.observableArrayList(task.getValue())));
@@ -146,7 +146,7 @@ public class CriminalSearchController {
         javafx.concurrent.Task<List<Person>> task = new javafx.concurrent.Task<>() {
             @Override
             protected List<Person> call() {
-                List<Person> results = personService.findByName(name, name, 1000, 0); 
+                List<Person> results = personService.findCriminalsByName(name, name, 1000, 0); 
                 
                 // Filter by gender if selected
                 if (genderFilter.getValue() != null) {

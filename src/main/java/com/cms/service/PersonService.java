@@ -20,6 +20,16 @@ public class PersonService {
             new PersonRepository(session).findByName(firstName, lastName, limit, offset));
     }
 
+    public List<Person> findCriminals(int limit, int offset) {
+        return HibernateUtil.executeTransaction(session ->
+            new PersonRepository(session).findCriminals(limit, offset));
+    }
+
+    public List<Person> findCriminalsByName(String firstName, String lastName, int limit, int offset) {
+        return HibernateUtil.executeTransaction(session ->
+            new PersonRepository(session).findCriminalsByName(firstName, lastName, limit, offset));
+    }
+
     public List<Person> searchPersons(String keyword) {
         return HibernateUtil.<List<Person>>executeTransaction(session ->
             new PersonRepository(session).search(keyword));

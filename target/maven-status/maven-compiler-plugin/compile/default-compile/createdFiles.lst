@@ -129,6 +129,7 @@ com\cms\controller\OfficerDetailController$2.class
 com\cms\controller\PersonDetailController$4.class
 com\cms\util\UIUtils$1.class
 com\cms\service\CaseWorkflowService.class
+com\cms\controller\ChangePasswordController$1.class
 com\cms\service\ai\QueryParser.class
 com\cms\controller\CriminalSearchController$2.class
 com\cms\controller\CaseManagementController$6.class
@@ -156,6 +157,7 @@ com\cms\service\NavigationService$ControllerInitializer.class
 com\cms\model\ModusOperandi.class
 com\cms\repository\geo\CityRepository.class
 com\cms\controller\HeaderController.class
+com\cms\controller\ChangePasswordController.class
 com\cms\model\AIAnalysisResult.class
 com\cms\controller\LinkCaseController$3.class
 com\cms\controller\PersonDetailController$CaseHistoryItem.class

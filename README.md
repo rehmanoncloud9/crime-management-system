@@ -1,263 +1,212 @@
-# CMS Project - Enhancement Package
+# Crime Management System v5.0
 
-## 🎯 What's Included
-
-This package contains **complete fixes and database enhancements** for your Crime Management System course project:
-
-### ✅ Runtime Issues Fixed
-- **SQL Error 1048** (collected_at NULL) - Verified as resolved in code
-- **Connection closed during rollback** - Cascading error fixed
-
-### ✅ Code Improvements
-- **RelatedCase.java** (NEW) - 1NF normalization for related cases
-- **CaseFile.java** (UPDATED) - Added relatedCases collection mapping
-- **hibernate.cfg.xml** (UPDATED) - RelatedCase entity mapping
-
-### ✅ Database Enhancements (400+ lines)
-- **Normalization**: 1NF compliance via related_cases table
-- **Data Integrity**: 5 CHECK constraints matching Java enums
-- **Business Logic**: 2 Critical triggers (warrant expiry enforcement)
-- **Performance**: 7 Strategic indexes
-- **Analytics**: 4 Database views
-- **Procedures**: 2 Stored procedures
-
-### 📚 Documentation
-- **FIXES_APPLIED.md** - Complete technical guide (500+ lines)
-- **README.md** (this file) - Quick start instructions
+A desktop application built for Pakistani law enforcement, developed as a semester project using Java, JavaFX, Hibernate, and MariaDB (via XAMPP).
 
 ---
 
-## 🚀 Quick Start (5 Minutes)
+## What this system does
 
-### 1. Backup Your Database (FIRST!)
-```bash
-mysqldump -u root -p cms_db > cms_db_backup_$(date +%Y%m%d).sql
-```
-
-### 2. Apply Schema Enhancements
-The app will auto-apply `schema_enhanced.sql` on first run if the schema is missing.
-You can also apply it manually:
-```bash
-mysql -u root -p cms_db < schema_enhanced.sql
-```
-✓ Safe for a fresh DB (uses CREATE/IF NOT EXISTS)
-
-### 3. Copy Updated Java Files
-Copy these 3 files to your project:
-```
-src/main/java/com/cms/model/RelatedCase.java          [NEW]
-src/main/java/com/cms/model/CaseFile.java             [UPDATED]
-src/main/resources/hibernate.cfg.xml                  [UPDATED]
-```
-
-### 4. Rebuild Project
-```bash
-mvn clean compile
-mvn test
-```
-
-### 5. Run Application
-```bash
-mvn javafx:run
-```
-
-### Database Defaults
-`db.properties` is the default source for MySQL connection details. If it is missing,
-the app falls back to `config.properties` or `CMS_DB_*` environment variables.
+CMS is an internal tool for managing police operations — registering crime incidents, tracking case files, managing suspects and evidence, handling court proceedings, and generating reports. Access is role-based, so officers, investigators, supervisors, and administrators each see what's relevant to their job.
 
 ---
 
-## 📋 What Changed & Why
+## Getting started
 
-### Problem 1: SQL Error 1048 (collected_at NULL)
-**Status**: ✅ **Already fixed in your code**
+### What you need installed
 
-Your `Evidence.java` entity correctly sets `collectedAt` in:
-- Default constructor: `this.collectedAt = LocalDateTime.now();`
-- Parameterized constructor: `this.collectedAt = LocalDateTime.now();`
-- @PrePersist hook: provides additional safety
+- Java 21
+- Maven
+- XAMPP (for MariaDB — MySQL also works)
 
-**Verification**: Both Java and database ensure this never happens.
+### 1. Set up the database
+
+Open XAMPP Control Panel and start MySQL. That's it — the app will create the database automatically on first run.
+
+### 2. Set your database password
+
+Open `src/main/resources/db.properties` and put in your MySQL password:
+
+```properties
+db.url=jdbc:mysql://localhost:3306/cms_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
+db.username=root
+db.password=YOUR_PASSWORD_HERE
+db.driver=com.mysql.cj.jdbc.Driver
+```
+
+This is the only place you need to touch. Everything else reads from here.
+
+> **Note:** `db.properties` is in `.gitignore` so your password never gets pushed to GitHub.
+
+### 3. Run the app
+
+```bash
+mvn clean javafx:run
+```
+
+### First login
+
+On a fresh database, the app creates one default admin account automatically. The credentials are set in `config.properties`:
+
+```properties
+app.admin.username=admin
+app.admin.default.password=Admin@CMS2024!
+```
+
+You'll be asked to change the password immediately after your first login — you can't skip this step.
 
 ---
 
-### Problem 2: 1NF Violation (related_case_ids)
+## How user accounts work
 
-**Before** (violates 1NF):
+This system doesn't let anyone register themselves. All accounts are created by the admin through the User Management screen. Here's the flow:
+
+**Admin setup (first run)**
+The app checks if any admin exists in the database. If not, it creates one using the credentials in `config.properties`. This only ever happens once — restarts don't touch existing accounts or reset passwords.
+
+**Creating officer accounts**
+1. Log in as admin
+2. Go to User Management
+3. Fill in the officer's name, badge number, role, and precinct
+4. The system generates a temporary password (badge number + random 4-digit pin)
+5. A dialog shows you the temporary credentials to hand to the officer
+6. The officer logs in and is immediately prompted to set their own password before they can do anything else
+
+**Password resets**
+If an admin resets someone's password through User Management, that officer will be forced to set a new password on their next login — the admin-set password is only ever temporary.
+
+---
+
+## Project structure
+
 ```
-case_files.related_case_ids = "3,7,12"  ❌ Multi-valued attribute
+src/main/java/com/cms/
+├── controller/       JavaFX screen controllers
+├── model/            Hibernate entity classes
+├── repository/       Database query classes
+├── service/          Business logic
+└── util/             Helpers and utilities
+
+src/main/resources/
+├── fxml/             Screen layouts
+├── css/              Styling
+├── db.properties     Your database credentials (gitignored)
+├── config.properties App settings
+└── hibernate.cfg.xml Hibernate configuration
 ```
 
-**After** (1NF compliant):
+---
+
+## Configuration reference
+
+### `db.properties` — database connection
+| Key | What it does |
+|-----|-------------|
+| `db.url` | Full JDBC connection string |
+| `db.username` | MySQL username |
+| `db.password` | MySQL password — set this to yours |
+| `db.driver` | JDBC driver class |
+
+### `config.properties` — app settings
+| Key | What it does |
+|-----|-------------|
+| `app.admin.username` | Username for the first-run admin account |
+| `app.admin.badge` | Badge number for the first-run admin |
+| `app.admin.email` | Email for the first-run admin |
+| `app.admin.default.password` | Temporary password for first login |
+| `app.support.email` | Shown on the login screen under "Contact Administrator" |
+| `app.session.timeout.minutes` | How long before an inactive session expires |
+| `app.password.lockout.attempts` | Failed logins before account lockout |
+
+---
+
+## Roles
+
+| Role | What they can do |
+|------|-----------------|
+| Administrator | Everything — user management, config, all modules |
+| Supervisor | Case oversight, officer management, reports |
+| Officer | Register incidents, manage cases, log evidence |
+| Analyst | View data, run reports, AI analytics |
+| Records Clerk | Data entry, person registry |
+| Legal Officer | Court management, charge sheets |
+
+---
+
+## Troubleshooting
+
+**"Access denied for user root@localhost"**
+Your password in `db.properties` is wrong. Open XAMPP, start MySQL, and verify your password by connecting manually:
+```bash
+"C:\xampp\mysql\bin\mysql.exe" -u root -p
+```
+
+**"Unable to create requested service"**
+MySQL isn't running. Open XAMPP Control Panel and click Start next to MySQL.
+
+**App starts but login fails with a red error**
+Check that your database is running and that the schema was applied. Look at the console output for details — every error is logged there.
+
+**Forgot the admin password**
+Since the app no longer resets it automatically, you'll need to reset it directly in the database:
 ```sql
-CREATE TABLE related_cases (
-    case_id BIGINT,
-    related_id BIGINT,
-    relation_type VARCHAR(50),
-    PRIMARY KEY (case_id, related_id)
-);
+-- Connect to MySQL, then run:
+USE cms_db;
+UPDATE users SET password_hash = '$2a$10$...bcrypt_hash_here' WHERE username = 'admin';
 ```
-✓ Atomic values only
-✓ Indexed for fast queries
-✓ Referential integrity enforced
+Or just delete the admin user and let the app recreate it on next startup.
 
 ---
 
-### Problem 3: Missing Data Integrity
+## Tech stack
 
-**Added 5 CHECK Constraints**:
-- `chk_warrant_status` (5 values: ISSUED, EXECUTED, EXPIRED, CANCELLED, REVOKED)
-- `chk_court_case_status` (7 values: FILED, PENDING_HEARING, ONGOING_TRIAL, etc.)
-- `chk_person_gender` (4 values: MALE, FEMALE, OTHER, UNKNOWN)
-- `chk_user_role` (9 values: ADMINISTRATOR, SUPERVISOR, OFFICER, etc.)
-- `chk_evidence_status` (5 values: COLLECTED, IN_TRANSFER, STORED, etc.)
-
-✓ Matches Java enums exactly
-✓ Prevents invalid data at database layer
-✓ Fails fast → prevents data corruption
-
----
-
-### Problem 4: Missing Business Logic Triggers
-
-**Trigger 1**: Evidence date validation
-```sql
--- Prevents future-dated evidence (data entry error prevention)
-CREATE TRIGGER trg_evidence_collected_not_future
-```
-
-**Trigger 2**: Warrant expiry enforcement ⚠️ **CRITICAL**
-```sql
--- Prevents arrests on expired warrants (legal requirement)
-CREATE TRIGGER trg_warrant_not_expired
-```
+| Layer | Technology |
+|-------|-----------|
+| UI | JavaFX 21 |
+| ORM | Hibernate 6 |
+| Database | MariaDB 10.4 (via XAMPP) |
+| Connection pool | HikariCP |
+| Password hashing | BCrypt |
+| Build tool | Maven |
+| AI chatbot | Groq API (llama3-70b) with local fallback |
+| ML models | Weka (risk scoring) |
+| Reporting | JasperReports |
+| Logging | SLF4J + Logback |
 
 ---
 
-### Problem 5: No Query Performance Optimization
+## Environment variables (optional)
 
-**Added 7 Strategic Indexes**:
-- `idx_person_national_id` - Fast criminal lookups
-- `idx_incident_reported_at` - Historical queries
-- `idx_arrest_booking` - Booking reference searches
-- `idx_case_priority` - Dashboard filtering
-- `idx_evidence_case` - Case evidence queries
-- `idx_warrant_expires` - Valid warrant queries
-- `idx_court_case_status` - Active case queries
-
----
-
-### Bonus: Analytics & Reporting Views
-
-**4 Database Views** for complex reporting:
-
-1. **v_active_cases** - Active cases with progress metrics
-   - Evidence count, suspect count, investigation duration
-   - Perfect for dashboard displays
-
-2. **v_criminal_profile** - Suspect history aggregation
-   - Total cases, arrests, last arrested date
-   - Fast lookup for suspect investigation
-
-3. **v_closed_cases_summary** - Case closure analysis
-   - Investigation duration, closure reason, court decisions
-   - Perfect for statistics and KPI reporting
-
-4. **v_evidence_custody_chain** - Chain of custody tracking
-   - Collection location, storage location, collected by, status
-   - Critical for legal proceedings and audits
-
----
-
-## ✅ Verification
-
-After applying changes, verify everything with:
+If you'd rather not store credentials in a file at all, the app also reads from environment variables:
 
 ```bash
-# Check new table exists
-mysql -u root -p cms_db -e "SHOW TABLES LIKE 'related_cases';"
-
-# Check CHECK constraints
-mysql -u root -p cms_db -e "SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = 'cms_db';"
-
-# Check views
-mysql -u root -p cms_db -e "SHOW TABLES LIKE 'v_%';"
-
-# Check procedures
-mysql -u root -p cms_db -e "SHOW PROCEDURES;"
+CMS_DB_URL=jdbc:mysql://localhost:3306/cms_db
+CMS_DB_USER=root
+CMS_DB_PASSWORD=yourpassword
 ```
 
-Expected results:
-- ✓ related_cases table exists
-- ✓ 5 new CHECK constraints (chk_warrant_status, chk_court_case_status, etc.)
-- ✓ 4 views (v_active_cases, v_criminal_profile, v_closed_cases_summary, v_evidence_custody_chain)
-- ✓ 2 procedures (sp_close_case, sp_criminal_profile_report)
+These take priority over `db.properties` if set.
 
----
-
-## 📖 For Your Examiner
-
-This package demonstrates:
-
-| Topic | Implementation |
-|-------|-----------------|
-| **Normalization** | 1NF: related_cases table eliminates multi-valued attributes |
-| **Data Integrity** | CHECK constraints enforce domain restrictions |
-| **Business Logic** | Triggers prevent invalid operations (warrant expiry) |
-| **Performance** | Strategic indexes on lookup columns |
-| **Queries** | 4 Views provide complex reporting |
-| **Transactions** | Stored procedures with atomic operations |
-| **Design** | Composite keys, cascading deletes, foreign key constraints |
-
----
-
-## 🤔 FAQ
-
-### Q: Will this break my existing code?
-**A**: No. The legacy `relatedCaseIds` string field remains. New `relatedCases` collection coexists, allowing gradual migration.
-
-### Q: Can I migrate existing data?
-**A**: Yes, see FIXES_APPLIED.md section 7 "COMMON QUESTIONS" for migration SQL.
-
-### Q: What if something goes wrong?
-**A**: You have a backup (step 1)! Restore with:
+For the AI chatbot feature:
 ```bash
-mysql -u root -p cms_db < cms_db_backup_YYYYMMDD.sql
+GROQ_API_KEY=your_groq_api_key
 ```
-
-### Q: Do I need to change my application code significantly?
-**A**: No. RelatedCase is an optional enhancement. Existing code continues working. New code can use the `relatedCases` collection for cleaner implementation.
+Without this the chatbot falls back to a built-in local response engine — it still works, just without the LLM.
 
 ---
 
-## 📞 Implementation Support
+## Notes for the examiner
 
-All changes are:
-- ✓ Production-ready
-- ✓ Examination-ready
-- ✓ Backward compatible
-- ✓ Idempotent (safe to re-run)
-- ✓ Thoroughly documented
+This project demonstrates:
 
-See **FIXES_APPLIED.md** for complete technical details.
-
----
-
-## Summary
-
-**Before**: Runtime errors, normalization violations, missing constraints, no triggers, no indexes, no views.
-
-**After**: 
-- ✅ Runtime errors resolved
-- ✅ 1NF compliant schema
-- ✅ 5 Data integrity constraints
-- ✅ 2 Business logic triggers
-- ✅ 7 Performance indexes
-- ✅ 4 Analytical views
-- ✅ 2 Stored procedures
-
-**Result**: Production-grade database, examiner-ready documentation, exceptional course project.
+- **MVC architecture** — controllers, services, and repositories are cleanly separated
+- **ORM with Hibernate** — all database interactions go through entity mappings and HQL
+- **Role-based access control** — each user role sees a different dashboard and has different permissions
+- **Security fundamentals** — passwords are BCrypt-hashed, accounts lock after failed attempts, sessions expire
+- **Proper configuration management** — no credentials hardcoded anywhere in source code
+- **Audit trail** — every significant action is logged to the `audit_logs` table
+- **Normalization** — schema follows 1NF/2NF/3NF with proper foreign keys and junction tables
+- **Database integrity** — CHECK constraints, triggers for business rules, indexes on lookup columns
 
 ---
 
-**Happy coding!** 🎓
+*Built with JavaFX 21 · Hibernate 6 · MariaDB · Maven*

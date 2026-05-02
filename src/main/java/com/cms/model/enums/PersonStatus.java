@@ -7,5 +7,7 @@ public enum PersonStatus {
     VICTIM,
     OFFICER,
     CRIMINAL,
-    IN_CUSTODY
+    IN_CUSTODY,
+    ACTIVE
 }
+

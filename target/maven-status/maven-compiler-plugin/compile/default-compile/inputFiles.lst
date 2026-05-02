@@ -42,6 +42,7 @@ D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Permiss
 D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\Court.java
 D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\model\CaseFile.java
 D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\util\DBTest.java
+D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\ChangePasswordController.java
 D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\AIRepository.java
 D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\controller\OfficerDashboardController.java
 D:\Study Material\Semester 2\DBS\Project\CMS\src\main\java\com\cms\repository\EvidenceRepository.java
