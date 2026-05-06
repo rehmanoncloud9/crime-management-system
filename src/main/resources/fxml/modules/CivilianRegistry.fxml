@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox styleClass="module" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.CivilianRegistryController">
+    <VBox spacing="20" styleClass="module-container">
+        <HBox spacing="16" alignment="CENTER_LEFT">
+            <Label text="Civilian Intelligence Registry" styleClass="heading-xl"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox spacing="10" styleClass="search-bar-glass">
+                <TextField fx:id="searchField" promptText="🔍 Search name, job or employer..." prefWidth="350" styleClass="text-field-premium-sm"/>
+            </HBox>
+            <Button onAction="#handleAddCivilian" text="+ ENROLL CIVILIAN" styleClass="btn-premium-teal"/>
+            <Button onAction="#loadCivilians" text="↺" styleClass="btn-premium-outline-sm"/>
+        </HBox>
+
+        <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="content-area-glass">
+            <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent" VBox.vgrow="ALWAYS">
+                <FlowPane fx:id="civilianFlowPane" hgap="24" vgap="24" style="-fx-padding: 10;">
+                    <!-- Civilian cards injected here -->
+                </FlowPane>
+            </ScrollPane>
+        </VBox>
+    </VBox>
+</VBox>

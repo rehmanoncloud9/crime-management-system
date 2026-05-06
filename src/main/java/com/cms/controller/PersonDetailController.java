@@ -5,6 +5,7 @@ import com.cms.model.enums.*;
 import com.cms.service.PersonService;
 import com.cms.service.HibernateUtil;
 import com.cms.service.NavigationService;
+import com.cms.util.NexusAlert;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -96,7 +97,7 @@ public class PersonDetailController {
         });
         
         task.setOnFailed(e -> {
-            new Alert(Alert.AlertType.ERROR, "Failed to load person: " + task.getException().getMessage()).showAndWait();
+            NexusAlert.showError("Failed to load person: " + task.getException().getMessage());
         });
 
         new Thread(task).start();
@@ -264,7 +265,7 @@ public class PersonDetailController {
             };
             task.setOnSucceeded(e -> {
                 updateUI();
-                new Alert(Alert.AlertType.INFORMATION, "Status updated to " + newStatus).showAndWait();
+                NexusAlert.showInfo("Status updated to " + newStatus);
             });
             new Thread(task).start();
         });

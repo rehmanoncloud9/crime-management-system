@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox spacing="0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.IncidentDetailController" styleClass="module">
+    
+    <!-- Top Fixed Header -->
+    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 20;">
+        <Button text="← Back to Incidents" onAction="#handleBack" styleClass="btn, btn-outline-sm"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="headerIncidentNum" styleClass="heading-md" text="INC-00000000"/>
+    </HBox>
+
+    <!-- Main Content -->
+    <StackPane VBox.vgrow="ALWAYS">
+        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <content>
+                <VBox spacing="20" style="-fx-padding: 0 20 20 20;">
+                    <!-- Top Summary Card -->
+                    <HBox spacing="30" styleClass="card" alignment="CENTER_LEFT">
+                        <VBox spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                            <Label fx:id="titleLabel" styleClass="heading-lg" text="Incident Title" wrapText="true"/>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <Label fx:id="statusBadge" styleClass="badge, badge-active" text="STATUS"/>
+                                <Label fx:id="severityBadge" styleClass="badge, badge-warning" text="MEDIUM SEVERITY"/>
+                                <Label fx:id="crimeTypeLabel" styleClass="text-muted" text="Crime Type"/>
+                            </HBox>
+                        </VBox>
+                        
+                        <VBox spacing="5" alignment="CENTER_RIGHT">
+                            <Label fx:id="dateLabel" styleClass="heading-sm" text="May 06, 2026"/>
+                            <Label fx:id="timeLabel" styleClass="text-muted-sm" text="10:00 PM"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Main Grid -->
+                    <GridPane hgap="20" vgap="20">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="60"/>
+                            <ColumnConstraints percentWidth="40"/>
+                        </columnConstraints>
+
+                        <!-- Left Column: Dossier Details -->
+                        <VBox spacing="20" GridPane.columnIndex="0">
+                            <VBox spacing="15" styleClass="card">
+                                <Label text="Dossier Description" styleClass="heading-sm"/>
+                                <Label fx:id="descriptionLabel" wrapText="true" style="-fx-text-fill: -cms-t1; -fx-font-size: 14px;" 
+                                       text="Detailed description of the incident will be displayed here."/>
+                            </VBox>
+
+                            <VBox spacing="15" styleClass="card">
+                                <Label text="Location Information" styleClass="heading-sm"/>
+                                <GridPane vgap="12" hgap="15">
+                                    <Label text="District:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="label-sm"/>
+                                    <Label fx:id="districtLabel" GridPane.columnIndex="1" GridPane.rowIndex="0" text="N/A"/>
+                                    
+                                    <Label text="City:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="label-sm"/>
+                                    <Label fx:id="cityLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" text="N/A"/>
+                                    
+                                    <Label text="Area:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="label-sm"/>
+                                    <Label fx:id="areaLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" text="N/A"/>
+
+                                    <Label text="Address:" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="label-sm"/>
+                                    <Label fx:id="addressLabel" GridPane.columnIndex="1" GridPane.rowIndex="3" text="N/A" wrapText="true"/>
+                                </GridPane>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Right Column: Reporting & Case -->
+                        <VBox spacing="20" GridPane.columnIndex="1">
+                            <VBox spacing="15" styleClass="card">
+                                <Label text="Reporting Details" styleClass="heading-sm"/>
+                                <GridPane vgap="12" hgap="15">
+                                    <Label text="Officer:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="label-sm"/>
+                                    <Label fx:id="officerLabel" GridPane.columnIndex="1" GridPane.rowIndex="0" text="N/A"/>
+                                    
+                                    <Label text="Reporter:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="label-sm"/>
+                                    <Label fx:id="reporterNameLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" text="N/A"/>
+                                    
+                                    <Label text="Contact:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="label-sm"/>
+                                    <Label fx:id="reporterContactLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" text="N/A"/>
+                                </GridPane>
+                            </VBox>
+
+                            <VBox fx:id="caseCard" spacing="15" styleClass="card" style="-fx-border-color: -cms-primary; -fx-border-width: 0 0 0 4;">
+                                <Label text="Linked Case File" styleClass="heading-sm" style="-fx-text-fill: -cms-primary;"/>
+                                <VBox fx:id="caseInfoBox" spacing="8">
+                                    <Label fx:id="caseNumLabel" styleClass="heading-md" text="CASE-0000"/>
+                                    <Label fx:id="caseStatusLabel" styleClass="badge, badge-info" text="OPEN"/>
+                                    <Button text="View Case Management" onAction="#handleViewCase" styleClass="btn, btn-primary-sm" maxWidth="Infinity"/>
+                                </VBox>
+                                <VBox fx:id="noCaseBox" spacing="8" visible="false" managed="false">
+                                    <Label text="No case linked yet." styleClass="text-muted-sm"/>
+                                    <Button text="Convert to Case" onAction="#handleConvertToCase" styleClass="btn, btn-outline-sm" maxWidth="Infinity"/>
+                                </VBox>
+                            </VBox>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+            </content>
+        </ScrollPane>
+
+        <!-- Loading Overlay -->
+        <StackPane fx:id="loadingOverlay" visible="false" style="-fx-background-color: rgba(255,255,255,0.8); -fx-alignment: center;">
+            <ProgressIndicator style="-fx-progress-color: -cms-primary; -fx-scale-x: 1.5; -fx-scale-y: 1.5;"/>
+        </StackPane>
+    </StackPane>
+</VBox>

@@ -52,7 +52,7 @@ public class PersonRepository {
     public List<Person> findCriminals(int limit, int offset) {
         TypedQuery<Person> query = entityManager.createQuery(
                 "SELECT p FROM Person p WHERE p.deletedAt IS NULL " +
-                "AND p.personStatus NOT IN ('OFFICER', 'ACTIVE', 'WITNESS', 'VICTIM') " +
+                "AND p.personStatus IN ('CRIMINAL', 'SUSPECT', 'IN_CUSTODY') " +
                 "ORDER BY p.id DESC",
                 Person.class
         );
@@ -70,7 +70,7 @@ public class PersonRepository {
         TypedQuery<Person> query = entityManager.createQuery(
                 "SELECT p FROM Person p " +
                         "WHERE p.deletedAt IS NULL " +
-                        "AND p.personStatus NOT IN ('OFFICER', 'ACTIVE', 'WITNESS', 'VICTIM') " +
+                        "AND p.personStatus IN ('CRIMINAL', 'SUSPECT', 'IN_CUSTODY') " +
                         "AND (LOWER(p.firstName) LIKE LOWER(:fn) AND LOWER(p.lastName) LIKE LOWER(:ln)) " +
                         "ORDER BY p.id DESC",
                 Person.class

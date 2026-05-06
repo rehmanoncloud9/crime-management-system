@@ -78,8 +78,11 @@ public class IncidentRegistryController {
         viewBtn.getStyleClass().add("btn-premium-teal-sm");
         viewBtn.setMaxWidth(Double.MAX_VALUE);
         viewBtn.setOnAction(e -> {
-            // Placeholder for detail view
-            logger.info("Opening incident {}", inc.getIncidentNumber());
+            NavigationService.getInstance().navigateTo(
+                "Incident Dossier", 
+                "/fxml/modules/IncidentDetailView.fxml", 
+                controller -> ((IncidentDetailController) controller).init(inc.getId())
+            );
         });
 
         card.getChildren().addAll(numLabel, titleLabel, dateLabel, statusBadge, viewBtn);

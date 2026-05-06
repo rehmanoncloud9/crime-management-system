@@ -109,7 +109,7 @@ public class PersonRegistryController {
     }
 
     @FXML
-    private void handleAddPerson() {
+    public void handleAddPerson() {
         NavigationService.getInstance().navigateTo("Add New Person", "/fxml/modules/PersonRegistration.fxml");
     }
 }

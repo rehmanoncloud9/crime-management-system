@@ -3,6 +3,7 @@ package com.cms.controller;
 import com.cms.model.CaseFile;
 
 import com.cms.service.ReportingService;
+import com.cms.util.NexusAlert;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -86,15 +87,12 @@ public class ChargeSheetsController {
     private void handleGenerate() {
 
         CaseFile selected = caseCombo.getValue();
-
         if (selected == null) {
-            new Alert(Alert.AlertType.WARNING,
-                    "Please select a case first.").showAndWait();
+            NexusAlert.showWarning("Please select a case first.");
             return;
         }
 
         try {
-
             String outputPath = System.getProperty("user.home")
                     + "/Desktop/Charge_Sheet_" + selected.getCaseNumber() + ".pdf";
 
@@ -111,15 +109,11 @@ public class ChargeSheetsController {
                     outputPath
             );
 
-            new Alert(Alert.AlertType.INFORMATION,
-                    "Charge sheet exported:\n" + outputPath).showAndWait();
+            NexusAlert.showInfo("Charge sheet exported:\n" + outputPath);
 
         } catch (Exception e) {
-
             logger.error("Charge sheet generation failed", e);
-
-            new Alert(Alert.AlertType.ERROR,
-                    "Failed: " + e.getMessage()).showAndWait();
+            NexusAlert.showError("Failed: " + e.getMessage());
         }
     }
 

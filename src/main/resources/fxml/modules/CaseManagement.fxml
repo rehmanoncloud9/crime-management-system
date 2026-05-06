@@ -59,9 +59,12 @@
                             <VBox fx:id="timelineContainer" spacing="0" style="-fx-padding: 20;"/>
                         </ScrollPane>
                     </Tab>
-                    <Tab text="Suspects">
+                    <Tab text="People">
                         <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent">
-                            <FlowPane fx:id="suspectFlowPane" hgap="15" vgap="15" style="-fx-padding: 15;"/>
+                            <VBox spacing="12" style="-fx-padding: 15;">
+                                <Button text="+ Link Person" onAction="#handleLinkSuspect" styleClass="btn, btn-outline"/>
+                                <FlowPane fx:id="suspectFlowPane" hgap="15" vgap="15"/>
+                            </VBox>
                         </ScrollPane>
                     </Tab>
                     <Tab text="Evidence">

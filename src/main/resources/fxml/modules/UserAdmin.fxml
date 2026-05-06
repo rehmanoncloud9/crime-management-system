@@ -61,6 +61,20 @@
                     </VBox>
                 </GridPane>
 
+                <Separator style="-fx-opacity: 0.2;"/>
+                
+                <Label text="🔐 ACCESS CREDENTIALS" styleClass="form-label-premium" style="-fx-font-weight: bold;"/>
+                <HBox spacing="12">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Username" styleClass="form-label-premium-sm"/>
+                        <TextField fx:id="newUsernameField" promptText="Login Username" styleClass="text-field-premium-sm"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Initial Password" styleClass="form-label-premium-sm"/>
+                        <PasswordField fx:id="newPasswordField" promptText="Secure Password" styleClass="text-field-premium-sm"/>
+                    </VBox>
+                </HBox>
+
                 <Region VBox.vgrow="ALWAYS"/>
                 
                 <HBox spacing="12" alignment="CENTER_RIGHT">

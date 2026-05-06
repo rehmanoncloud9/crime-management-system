@@ -87,5 +87,14 @@ public class IncidentService {
         return HibernateUtil.executeTransaction(session ->
             new IncidentRepository(session).findUnlinkedIncidents());
     }
+
+    public Object[] getIncidentDossier(Long incidentId) {
+        return HibernateUtil.executeTransaction(session -> {
+            IncidentRepository repo = new IncidentRepository(session);
+            CrimeIncident incident = repo.findDetailedById(incidentId).orElse(null);
+            com.cms.model.CaseFile caseFile = repo.findCaseByIncidentId(incidentId).orElse(null);
+            return new Object[]{incident, caseFile};
+        });
+    }
 }
 

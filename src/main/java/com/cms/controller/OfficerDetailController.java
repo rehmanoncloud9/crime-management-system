@@ -8,6 +8,7 @@ import com.cms.service.UserService;
 import com.cms.service.HibernateUtil;
 import com.cms.service.ImageStorageService;
 import com.cms.service.SessionManager;
+import com.cms.util.NexusAlert;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -54,10 +55,16 @@ public class OfficerDetailController {
     @FXML private TableColumn<CaseFile, String> caseDateCol;
 
     @FXML private Label caseCountBadge;
+    @FXML private Label headerNameLabel;
+    @FXML private Label perfEfficiencyHeader;
     @FXML private Label perfTotalCases;
     @FXML private Label perfClosedCases;
     @FXML private Label perfActiveCases;
     @FXML private Label perfEfficiency;
+    
+    @FXML private ProgressBar perfClosedProgress;
+    @FXML private ProgressBar perfActiveProgress;
+    @FXML private ProgressBar perfEfficiencyProgress;
 
     @FXML private Button statusBtn;
     @FXML private StackPane loadingOverlay;
@@ -111,7 +118,7 @@ public class OfficerDetailController {
         task.setOnFailed(e -> {
             Platform.runLater(() -> {
                 showLoading(false);
-                new Alert(Alert.AlertType.ERROR, "Failed to load officer: " + task.getException().getMessage()).showAndWait();
+                NexusAlert.showError("Failed to load officer: " + task.getException().getMessage());
             });
         });
 
@@ -120,6 +127,7 @@ public class OfficerDetailController {
 
     private void updateUI() {
         nameLabel.setText(currentOfficer.getFullName());
+        headerNameLabel.setText(currentOfficer.getFullName());
         badgeLabel.setText("BADGE #" + (currentOfficer.getBadgeNumber() != null ? currentOfficer.getBadgeNumber() : "N/A"));
         
         roleBadge.setText(currentOfficer.getRole() != null ? currentOfficer.getRole().name() : "N/A");
@@ -127,12 +135,13 @@ public class OfficerDetailController {
         
         boolean isActive = currentOfficer.getStatus() == UserStatus.ACTIVE;
         statusCircle.setFill(isActive ? Color.web("#16a34a") : Color.web("#e11d48"));
-        statusBadge.getStyleClass().setAll("badge", isActive ? "badge-active" : "badge-closed");
+        statusBadge.getStyleClass().setAll("badge-premium", isActive ? "badge-success" : "badge-danger");
         statusBtn.setText(isActive ? "Suspend Account" : "Activate Account");
+        statusBtn.getStyleClass().setAll("btn", isActive ? "btn-outline-danger-sm" : "btn-outline-success-sm");
 
-        rankLabel.setText(currentOfficer.getOfficerRank() != null ? currentOfficer.getOfficerRank() : "N/A");
-        deptLabel.setText(currentOfficer.getDepartment() != null ? currentOfficer.getDepartment() : "N/A");
-        precinctLabel.setText(currentOfficer.getPrecinct() != null ? currentOfficer.getPrecinct() : "N/A");
+        rankLabel.setText(currentOfficer.getOfficerRank() != null ? currentOfficer.getOfficerRank() : "Not Specified");
+        deptLabel.setText(currentOfficer.getDepartment() != null ? currentOfficer.getDepartment() : "General Duty");
+        precinctLabel.setText(currentOfficer.getPrecinct() != null ? currentOfficer.getPrecinct() : "Unassigned");
         joinedLabel.setText(currentOfficer.getDateOfJoining() != null ? currentOfficer.getDateOfJoining().format(dateFormatter) : "N/A");
         
         emailLabel.setText(currentOfficer.getEmail() != null ? currentOfficer.getEmail() : "N/A");
@@ -190,7 +199,7 @@ public class OfficerDetailController {
 
         task.setOnFailed(e -> {
             Platform.runLater(() -> {
-                new Alert(Alert.AlertType.ERROR, "Failed to load assigned cases: " + task.getException().getMessage()).show();
+                NexusAlert.showError("Failed to load assigned cases: " + task.getException().getMessage());
             });
         });
 
@@ -204,48 +213,54 @@ public class OfficerDetailController {
             c.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED || 
             c.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED).count();
         long active = total - closed;
-        double efficiency = total > 0 ? (double) closed / total * 100 : 0;
+        double efficiency = total > 0 ? (double) closed / total : 0;
 
-        caseCountBadge.setText(total + " CASES");
+        caseCountBadge.setText(String.valueOf(total));
         perfTotalCases.setText(String.valueOf(total));
         perfClosedCases.setText(String.valueOf(closed));
         perfActiveCases.setText(String.valueOf(active));
-        perfEfficiency.setText(String.format("%.1f%%", efficiency));
+        
+        String effText = String.format("%.1f%%", efficiency * 100);
+        perfEfficiency.setText(effText);
+        perfEfficiencyHeader.setText(effText);
+
+        // Update progress bars
+        perfClosedProgress.setProgress(total > 0 ? (double) closed / total : 0);
+        perfActiveProgress.setProgress(total > 0 ? (double) active / total : 0);
+        perfEfficiencyProgress.setProgress(efficiency);
     }
 
     @FXML
     private void handleToggleStatus() {
         User actor = SessionManager.getInstance().getCurrentUser();
         if (actor == null) {
-            new Alert(Alert.AlertType.ERROR, "No active session found.").show();
+            NexusAlert.showError("No active session found.");
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
+        boolean confirm = NexusAlert.confirm("Account Status Change", 
             "Are you sure you want to " + (currentOfficer.getStatus() == UserStatus.ACTIVE ? "suspend" : "activate") + 
             " this account?");
         
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                showLoading(true);
-                Task<Void> task = new Task<>() {
-                    @Override
-                    protected Void call() {
-                        userService.toggleUserStatus(currentOfficer.getId(), actor);
-                        return null;
-                    }
-                };
-                task.setOnSucceeded(ev -> Platform.runLater(() -> {
-                    loadOfficer(currentOfficer.getId()); // Reload UI
-                    showLoading(false);
-                }));
-                task.setOnFailed(ev -> Platform.runLater(() -> {
-                    showLoading(false);
-                    new Alert(Alert.AlertType.ERROR, "Failed to update status: " + task.getException().getMessage()).show();
-                }));
-                new Thread(task).start();
-            }
-        });
+        if (confirm) {
+            showLoading(true);
+            Task<Void> task = new Task<>() {
+                @Override
+                protected Void call() {
+                    userService.toggleUserStatus(currentOfficer.getId(), actor);
+                    return null;
+                }
+            };
+            task.setOnSucceeded(ev -> Platform.runLater(() -> {
+                loadOfficer(currentOfficer.getId()); // Reload UI
+                showLoading(false);
+            }));
+            task.setOnFailed(ev -> Platform.runLater(() -> {
+                showLoading(false);
+                NexusAlert.showError("Failed to update status: " + task.getException().getMessage());
+            }));
+            new Thread(task).start();
+        }
     }
 
     @FXML
@@ -257,7 +272,7 @@ public class OfficerDetailController {
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(newPassword -> {
             if (newPassword.trim().isEmpty()) {
-                new Alert(Alert.AlertType.WARNING, "Password cannot be empty.").show();
+                NexusAlert.showWarning("Password cannot be empty.");
                 return;
             }
             // Confirm password
@@ -277,15 +292,15 @@ public class OfficerDetailController {
                 };
                 task.setOnSucceeded(ev -> Platform.runLater(() -> {
                     showLoading(false);
-                    new Alert(Alert.AlertType.INFORMATION, "Password reset successful.").show();
+                    NexusAlert.showInfo("Password reset successful.");
                 }));
                 task.setOnFailed(ev -> Platform.runLater(() -> {
                     showLoading(false);
-                    new Alert(Alert.AlertType.ERROR, "Password reset failed: " + task.getException().getMessage()).show();
+                    NexusAlert.showError("Password reset failed: " + task.getException().getMessage());
                 }));
                 new Thread(task).start();
             } else {
-                new Alert(Alert.AlertType.ERROR, "Passwords do not match.").show();
+                NexusAlert.showError("Passwords do not match.");
             }
         });
     }
@@ -304,20 +319,36 @@ public class OfficerDetailController {
             dialog.setTitle("Edit Officer Profile - " + currentOfficer.getFullName());
             dialog.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             dialog.initOwner(nameLabel.getScene().getWindow());
-            dialog.setScene(new javafx.scene.Scene(root));
+            dialog.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+            
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            dialog.setScene(scene);
             dialog.setResizable(false);
             
+            // Allow dragging from the header
+            final double[] xOffset = new double[1];
+            final double[] yOffset = new double[1];
+            root.setOnMousePressed(event -> {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            });
+            root.setOnMouseDragged(event -> {
+                dialog.setX(event.getScreenX() - xOffset[0]);
+                dialog.setY(event.getScreenY() - yOffset[0]);
+            });
+
             // Show dialog and wait
             dialog.showAndWait();
             
             // Reload if changes were saved
             if (controller.isSaved()) {
                 loadOfficer(currentOfficer.getId());
-                new Alert(Alert.AlertType.INFORMATION, "Profile updated successfully!").show();
+                NexusAlert.showInfo("Profile updated successfully!");
             }
         } catch (Exception e) {
             logger.error("Failed to open edit dialog", e);
-            new Alert(Alert.AlertType.ERROR, "Failed to open edit form: " + e.getMessage()).showAndWait();
+            NexusAlert.showError("Failed to open edit form: " + e.getMessage());
         }
     }
 

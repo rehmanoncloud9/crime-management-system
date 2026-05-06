@@ -138,6 +138,8 @@ public class EliteAIService {
         if (matchesAny(msg,"find","search","look up","who is"))       return handleSearch(msg);
         if (matchesAny(msg,"analyze","analysis","pattern","trend"))   return analyzePatterns();
         if (matchesAny(msg,"today","this week","recent activity"))    return getTodayActivity();
+        if (matchesAny(msg,"audit","logs","activity","history"))      return getAuditLogs();
+        if (matchesAny(msg,"civilian","regular people"))              return getCivilians();
         if (matchesAny(msg,"thank","thanks","great","awesome"))
             return "Glad I could help! Anything else you need?";
         if (matchesAny(msg,"bye","goodbye","see you"))
@@ -147,16 +149,18 @@ public class EliteAIService {
 
     private String buildDatabaseContext() {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
-            long persons  = q(s,"SELECT COUNT(p) FROM Person p");
-            long cases    = q(s,"SELECT COUNT(cf) FROM CaseFile cf");
-            long open     = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class)
-                             .setParameter("st", CaseStatus.OPEN).uniqueResult();
-            long officers = q(s,"SELECT COUNT(u) FROM User u");
-            long evidence = q(s,"SELECT COUNT(e) FROM Evidence e");
-            long warrants = s.createQuery("SELECT COUNT(p) FROM Person p WHERE p.deletedAt IS NULL AND EXISTS (SELECT w FROM Warrant w WHERE w.suspect = p AND w.status = :ws)",Long.class)
-                             .setParameter("ws", WarrantStatus.ISSUED).uniqueResult();
-            return String.format("Persons: %d | Cases: %d | Open cases: %d | Officers: %d | Evidence: %d | Active warrants: %d",
-                persons, cases, open, officers, evidence, warrants);
+            long persons   = q(s,"SELECT COUNT(p) FROM Person p");
+            long civilians = q(s,"SELECT COUNT(c) FROM Civilian c");
+            long audits    = q(s,"SELECT COUNT(a) FROM AuditLog a");
+            long cases     = q(s,"SELECT COUNT(cf) FROM CaseFile cf");
+            long open      = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class)
+                              .setParameter("st", CaseStatus.OPEN).uniqueResult();
+            long officers  = q(s,"SELECT COUNT(u) FROM User u");
+            long evidence  = q(s,"SELECT COUNT(e) FROM Evidence e");
+            long warrants  = s.createQuery("SELECT COUNT(p) FROM Person p WHERE p.deletedAt IS NULL AND EXISTS (SELECT w FROM Warrant w WHERE w.suspect = p AND w.status = :ws)",Long.class)
+                              .setParameter("ws", WarrantStatus.ISSUED).uniqueResult();
+            return String.format("Persons: %d | Civilians: %d | Audit Logs: %d | Cases: %d | Open: %d | Officers: %d | Evidence: %d | Warrants: %d",
+                persons, civilians, audits, cases, open, officers, evidence, warrants);
         } catch (Exception e) { return "Database context temporarily unavailable."; }
     }
     private long q(Session s, String hql) { return s.createQuery(hql,Long.class).uniqueResult(); }
@@ -361,6 +365,35 @@ public class EliteAIService {
             }
             return sb.toString();
         } catch (Exception e) { return "Analysis error: " + e.getMessage(); }
+    }
+
+    private String getAuditLogs() {
+        try (Session s = HibernateUtil.getSessionFactory().openSession()) {
+            List<AuditLog> logs = s.createQuery("FROM AuditLog a ORDER BY a.timestamp DESC", AuditLog.class)
+                .setMaxResults(8).list();
+            if (logs.isEmpty()) return "No system audit logs found.";
+            StringBuilder sb = new StringBuilder("Here are the latest system activities recorded:\n\n");
+            for (AuditLog al : logs) {
+                sb.append("• **").append(al.getAction()).append("** by ").append(al.getUserName())
+                  .append(" — ").append(al.getDescription()).append("\n");
+            }
+            return sb.toString();
+        } catch (Exception e) { return "Error fetching audit logs: " + e.getMessage(); }
+    }
+
+    private String getCivilians() {
+        try (Session s = HibernateUtil.getSessionFactory().openSession()) {
+            List<Civilian> civs = s.createQuery("FROM Civilian c JOIN FETCH c.person p ORDER BY c.id DESC", Civilian.class)
+                .setMaxResults(8).list();
+            if (civs.isEmpty()) return "No civilians registered in the database.";
+            StringBuilder sb = new StringBuilder("Here are the latest registered civilians:\n\n");
+            for (Civilian c : civs) {
+                sb.append("• **").append(c.getPerson().getFirstName()).append(" ").append(c.getPerson().getLastName()).append("** — ")
+                  .append(c.getOccupation() != null ? c.getOccupation() : "General")
+                  .append(" at ").append(c.getEmployer() != null ? c.getEmployer() : "Private").append("\n");
+            }
+            return sb.toString();
+        } catch (Exception e) { return "Error fetching civilians: " + e.getMessage(); }
     }
 
     private String getTodayActivity() { return getRecentCases() + "\n\n---\n\n" + getStatistics(); }

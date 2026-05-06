@@ -5,6 +5,7 @@ import com.cms.model.enums.Role;
 import com.cms.model.enums.UserStatus;
 import com.cms.service.ImageStorageService;
 import com.cms.service.UserService;
+import com.cms.util.NexusAlert;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -28,6 +29,8 @@ public class OfficerEditController {
     @FXML private Label photoStatusLabel;
     @FXML private TextField badgeField;
     @FXML private TextField nameField;
+    @FXML private TextField rankField;
+    @FXML private TextField deptField;
     @FXML private ComboBox<Role> roleCombo;
     @FXML private TextField emailField;
     @FXML private TextField phoneField;
@@ -54,6 +57,8 @@ public class OfficerEditController {
 
         badgeField.setText(officer.getBadgeNumber());
         nameField.setText(officer.getFullName());
+        rankField.setText(officer.getOfficerRank() != null ? officer.getOfficerRank() : "");
+        deptField.setText(officer.getDepartment() != null ? officer.getDepartment() : "");
         roleCombo.setValue(officer.getRole());
         emailField.setText(officer.getEmail() != null ? officer.getEmail() : "");
         phoneField.setText(officer.getPhone() != null ? officer.getPhone() : "");
@@ -75,7 +80,7 @@ public class OfficerEditController {
         File file = fc.showOpenDialog(photoView.getScene().getWindow());
         if (file != null) {
             if (file.length() > 2 * 1024 * 1024) {
-                new Alert(Alert.AlertType.WARNING, "Image must be under 2MB.").showAndWait();
+                NexusAlert.showWarning("Image must be under 2MB.");
                 return;
             }
             selectedPhotoFile = file;
@@ -89,15 +94,15 @@ public class OfficerEditController {
         // Validate
         String name = nameField.getText().trim();
         if (name.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Name cannot be empty.").showAndWait();
+            NexusAlert.showWarning("Name cannot be empty.");
             return;
         }
         if (roleCombo.getValue() == null) {
-            new Alert(Alert.AlertType.WARNING, "Please select a role.").showAndWait();
+            NexusAlert.showWarning("Please select a role.");
             return;
         }
         if (statusCombo.getValue() == null) {
-            new Alert(Alert.AlertType.WARNING, "Please select a status.").showAndWait();
+            NexusAlert.showWarning("Please select a status.");
             return;
         }
 
@@ -114,6 +119,8 @@ public class OfficerEditController {
 
             // Update fields
             officer.setFullName(name);
+            officer.setOfficerRank(rankField.getText().trim().isEmpty() ? null : rankField.getText().trim());
+            officer.setDepartment(deptField.getText().trim().isEmpty() ? null : deptField.getText().trim());
             officer.setRole(roleCombo.getValue());
             officer.setEmail(emailField.getText().trim().isEmpty() ? null : emailField.getText().trim());
             officer.setPhone(phoneField.getText().trim().isEmpty() ? null : phoneField.getText().trim());
@@ -131,7 +138,7 @@ public class OfficerEditController {
 
         } catch (Exception e) {
             logger.error("Failed to update officer", e);
-            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
+            NexusAlert.showError("Error: " + e.getMessage());
         }
     }
 
@@ -142,11 +149,10 @@ public class OfficerEditController {
 
     @FXML
     private void handleResetPassword() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, 
-            "Reset password for " + officer.getFullName() + "?\nNew password will be: " + officer.getBadgeNumber() + "123!",
-            ButtonType.YES, ButtonType.NO);
-        alert.setTitle("Confirm Reset");
-        if (alert.showAndWait().orElse(ButtonType.NO) == ButtonType.YES) {
+        boolean confirm = NexusAlert.confirm("Confirm Reset", 
+            "Reset password for " + officer.getFullName() + "?\nNew password will be: " + officer.getBadgeNumber() + "123!");
+        
+        if (confirm) {
             try {
                 com.cms.service.AuthService authService = new com.cms.service.AuthService();
                 officer.setPasswordHash(authService.hashPassword(officer.getBadgeNumber() + "123!"));
@@ -156,21 +162,20 @@ public class OfficerEditController {
                 com.cms.model.User actor = com.cms.service.SessionManager.getInstance().getCurrentUser();
                 com.cms.service.AuditService.getInstance().logAction(actor, "PASSWORD_RESET", "Reset password for officer: " + officer.getUsername());
                 
-                new Alert(Alert.AlertType.INFORMATION, "Password reset successful.").showAndWait();
+                NexusAlert.showInfo("Password reset successful.");
             } catch (Exception e) {
                 logger.error("Failed to reset password", e);
-                new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
+                NexusAlert.showError("Error: " + e.getMessage());
             }
         }
     }
 
     @FXML
     private void handleDeleteOfficer() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, 
-            "Are you absolutely sure you want to PERMANENTLY delete officer " + officer.getFullName() + "?\nThis action cannot be undone.",
-            ButtonType.YES, ButtonType.NO);
-        alert.setTitle("Confirm Delete");
-        if (alert.showAndWait().orElse(ButtonType.NO) == ButtonType.YES) {
+        boolean confirm = NexusAlert.confirm("Confirm Delete", 
+            "Are you absolutely sure you want to PERMANENTLY delete officer " + officer.getFullName() + "?\nThis action cannot be undone.");
+        
+        if (confirm) {
             try {
                 com.cms.model.User actor = com.cms.service.SessionManager.getInstance().getCurrentUser();
                 userService.deleteUser(officer.getId(), actor);
@@ -178,7 +183,7 @@ public class OfficerEditController {
                 ((Stage) nameField.getScene().getWindow()).close();
             } catch (Exception e) {
                 logger.error("Failed to delete officer", e);
-                new Alert(Alert.AlertType.ERROR, "Error deleting officer: " + e.getMessage()).showAndWait();
+                NexusAlert.showError("Error deleting officer: " + e.getMessage());
             }
         }
     }

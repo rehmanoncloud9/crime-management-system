@@ -127,6 +127,7 @@ public class MainController {
         if (role == com.cms.model.enums.Role.ADMINISTRATOR)
             addMenuButton("👮", "Officers", "UserAdmin");
         addMenuButton("🔍", "Criminals", "CriminalSearch");
+        addMenuButton("👥", "Civilian Registry", "CivilianRegistry");
         addMenuButton("📋", "Person Registry", "PersonRegistry");
 
         addSection("INTELLIGENCE");

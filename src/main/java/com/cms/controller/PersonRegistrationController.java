@@ -7,6 +7,7 @@ import com.cms.model.enums.Gender;
 import com.cms.model.enums.PersonStatus;
 import com.cms.model.geo.*;
 import com.cms.service.GeographyService;
+import com.cms.service.HibernateUtil;
 import com.cms.util.UIUtils;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -26,7 +27,6 @@ public class PersonRegistrationController {
     @FXML private TextField  lastNameField;
     @FXML private ComboBox<Gender>        genderCombo;
     @FXML private DatePicker              dobPicker;
-    @FXML private ComboBox<Country>       nationalityCombo;
     @FXML private ComboBox<District>      districtCombo;
     @FXML private ComboBox<City>          cityCombo;
     @FXML private ComboBox<Area>          areaCombo;
@@ -42,9 +42,9 @@ public class PersonRegistrationController {
     @FXML private ComboBox<BloodGroup>    bloodGroupCombo;
     @FXML private TextField               dnaProfileField;
     @FXML private TextArea                diseasesArea;
-    @FXML private TextArea                injuriesArea;
     @FXML private ComboBox<PersonStatus>  personStatusCombo;
-    @FXML private TextArea                medicalNotesArea;
+    @FXML private TextField               occupationField;
+    @FXML private TextField               employerField;
     @FXML private Button                  saveBtn;
     @FXML private Label                   formTitle;
     @FXML private ImageView               photoView;
@@ -61,7 +61,6 @@ public class PersonRegistrationController {
         bloodGroupCombo.setItems(FXCollections.observableArrayList(BloodGroup.values()));
 
         GeographyService geo = new GeographyService();
-        UIUtils.makeAutoSuggest(nationalityCombo, geo::searchCountries, Country::getName);
         UIUtils.makeAutoSuggest(districtCombo,    geo::searchDistricts, District::getName);
         UIUtils.makeAutoSuggest(cityCombo,        geo::searchCities,    City::getName);
         UIUtils.makeAutoSuggest(areaCombo,        geo::searchAreas,     Area::getName);
@@ -97,11 +96,9 @@ public class PersonRegistrationController {
             boolean unk = Boolean.TRUE.equals(newVal);
             nationalIdField.setDisable(unk);
             dobPicker.setDisable(unk);
-            nationalityCombo.setDisable(unk);
             if (unk) {
                 nationalIdField.clear();
                 dobPicker.setValue(null);
-                nationalityCombo.setValue(null);
                 if (firstNameField.getText().isEmpty()) firstNameField.setText("UNIDENTIFIED");
                 if (lastNameField.getText().isEmpty())  lastNameField.setText("PERSON");
                 genderCombo.setValue(Gender.UNKNOWN);
@@ -154,11 +151,29 @@ public class PersonRegistrationController {
                 bloodGroupCombo.setValue(p.getMedicalRecord().getBloodGroup());
                 dnaProfileField.setText(p.getMedicalRecord().getDnaProfile() != null ? p.getMedicalRecord().getDnaProfile() : "");
                 diseasesArea.setText(p.getMedicalRecord().getKnownDiseases() != null ? p.getMedicalRecord().getKnownDiseases() : "");
-                injuriesArea.setText(p.getMedicalRecord().getInjuries() != null ? p.getMedicalRecord().getInjuries() : "");
-                medicalNotesArea.setText(p.getMedicalRecord().getMedicalNotes() != null ? p.getMedicalRecord().getMedicalNotes() : "");
             }
+            
+            // Load Civilian data if exists
+            loadCivilianData(p);
+
             if (formTitle != null) formTitle.setText("Edit Profile: " + p.getFirstName() + " " + p.getLastName());
             if (saveBtn   != null) saveBtn.setText("UPDATE PROFILE");
+        });
+    }
+
+    private void loadCivilianData(Person p) {
+        // We can use the personService or a new CivilianService
+        HibernateUtil.executeVoidTransaction(session -> {
+            com.cms.model.Civilian civilian = session.createQuery(
+                "from Civilian where person.id = :pid", com.cms.model.Civilian.class)
+                .setParameter("pid", p.getId())
+                .uniqueResult();
+            if (civilian != null) {
+                javafx.application.Platform.runLater(() -> {
+                    occupationField.setText(civilian.getOccupation() != null ? civilian.getOccupation() : "");
+                    employerField.setText(civilian.getEmployer() != null ? civilian.getEmployer() : "");
+                });
+            }
         });
     }
 
@@ -182,7 +197,6 @@ public class PersonRegistrationController {
             person.setGender(genderCombo.getValue() != null ? genderCombo.getValue() : Gender.UNKNOWN);
             person.setDateOfBirth(dobPicker.getValue());
             person.setNationalId(nationalIdField.getText().trim().isEmpty() ? null : nationalIdField.getText().trim());
-            person.setNationality(nationalityCombo.getValue());
             person.setDistrict(districtCombo.getValue());
             person.setCity(cityCombo.getValue());
             person.setArea(areaCombo.getValue());
@@ -225,14 +239,40 @@ public class PersonRegistrationController {
             mr.setBloodGroup(bloodGroupCombo.getValue() != null ? bloodGroupCombo.getValue() : BloodGroup.UNKNOWN);
             mr.setDnaProfile(dnaProfileField.getText().trim());
             mr.setKnownDiseases(diseasesArea.getText().trim());
-            mr.setInjuries(injuriesArea.getText().trim());
-            mr.setMedicalNotes(medicalNotesArea.getText().trim());
-            person.setMedicalRecord(mr); // this sets mr.setPerson(person) via setter
+            person.setMedicalRecord(mr);
+
+            // Handle Civilian specialization
+            String occ = occupationField.getText().trim();
+            String emp = employerField.getText().trim();
+            com.cms.model.Civilian civilian = null;
+            if (!occ.isEmpty() || !emp.isEmpty() || person.getPersonStatus() == PersonStatus.VICTIM || person.getPersonStatus() == PersonStatus.WITNESS) {
+                civilian = new com.cms.model.Civilian();
+                civilian.setPerson(person);
+                civilian.setOccupation(occ.isEmpty() ? null : occ);
+                civilian.setEmployer(emp.isEmpty() ? null : emp);
+            }
 
             final Person finalPerson = person;
+            final com.cms.model.Civilian civToSave = civilian;
             javafx.concurrent.Task<Void> task = new javafx.concurrent.Task<>() {
                 @Override protected Void call() {
-                    personService.save(finalPerson);
+                    HibernateUtil.executeVoidTransaction(session -> {
+                        session.merge(finalPerson);
+                        if (civToSave != null) {
+                            // Check if already exists to avoid duplicate
+                            com.cms.model.Civilian existing = session.createQuery(
+                                "from Civilian where person.id = :pid", com.cms.model.Civilian.class)
+                                .setParameter("pid", finalPerson.getId())
+                                .uniqueResult();
+                            if (existing != null) {
+                                existing.setOccupation(civToSave.getOccupation());
+                                existing.setEmployer(civToSave.getEmployer());
+                                session.merge(existing);
+                            } else {
+                                session.persist(civToSave);
+                            }
+                        }
+                    });
                     return null;
                 }
             };
@@ -301,16 +341,17 @@ public class PersonRegistrationController {
         unknownPersonCheck.setSelected(false);
         firstNameField.clear(); lastNameField.clear();
         genderCombo.setValue(null); dobPicker.setValue(null);
-        nationalityCombo.setValue(null); nationalIdField.clear();
+        nationalIdField.clear();
         districtCombo.setValue(null); cityCombo.setValue(null); areaCombo.setValue(null);
         heightField.clear(); weightField.clear();
         marksArea.clear(); addressArea.clear();
         aliasesField.clear(); gangField.clear();
         warrantCheck.setSelected(false); personStatusCombo.setValue(null);
         bloodGroupCombo.setValue(null); dnaProfileField.clear();
-        diseasesArea.clear(); injuriesArea.clear(); medicalNotesArea.clear();
+        diseasesArea.clear();
         selectedPhotoFile = null;
         if (photoView != null) photoView.setImage(null);
+        occupationField.clear(); employerField.clear();
         existingPersonId = null;
         if (formTitle != null) formTitle.setText("Register Person Profile");
         if (saveBtn   != null) saveBtn.setText("SAVE PROFILE");

@@ -3,6 +3,7 @@ package com.cms.service;
 import com.cms.model.User;
 import com.cms.model.enums.UserStatus;
 import com.cms.repository.UserRepository;
+import com.cms.service.HibernateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +30,7 @@ public class UserService {
 
     public void saveUser(User user) {
         HibernateUtil.executeVoidTransaction(session -> {
-            if (user.getId() == null) {
-                session.persist(user);
-            } else {
-                session.merge(user);
-            }
+            session.merge(user);
         });
     }
 

@@ -11,6 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import com.cms.service.NavigationService;
+import com.cms.util.NexusAlert;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.Tooltip;
 
@@ -119,13 +120,11 @@ public class CriminalSearchController {
     }
 
     private void handleDelete(Person p) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete the record for " + p.getFirstName() + "? This action cannot be undone.");
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                personService.deletePerson(p.getId());
-                loadAll();
-            }
-        });
+        boolean confirm = NexusAlert.confirm("Confirm Deletion", "Are you sure you want to delete the record for " + p.getFirstName() + "? This action cannot be undone.");
+        if (confirm) {
+            personService.deletePerson(p.getId());
+            loadAll();
+        }
     }
 
     private void loadAll() {
@@ -166,6 +165,16 @@ public class CriminalSearchController {
         };
         task.setOnSucceeded(e -> resultsTable.setItems(FXCollections.observableArrayList(task.getValue())));
         new Thread(task).start();
+    }
+
+    @FXML
+    public void handleAddCriminal() {
+        NavigationService.getInstance().navigateTo("Person Registration", "/fxml/modules/PersonRegistration.fxml", (controller) -> {
+            if (controller instanceof PersonRegistrationController prc) {
+                // We can't pre-set enum values easily unless we add a method to PRC
+                // But navigating there is a good start.
+            }
+        });
     }
 
     @FXML

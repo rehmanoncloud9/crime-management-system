@@ -9,6 +9,9 @@ import com.cms.service.AuthService;
 import com.cms.service.NavigationService;
 import com.cms.service.SessionManager;
 import com.cms.service.CaseService;
+import com.cms.service.HibernateUtil;
+import com.cms.repository.UserRepository;
+import com.cms.util.NexusAlert;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -38,6 +41,8 @@ public class UserAdminController {
     @FXML private TextField newPrecinctField;
     @FXML private TextField newEmailField;
     @FXML private TextField newPhoneField;
+    @FXML private TextField newUsernameField;
+    @FXML private PasswordField newPasswordField;
 
     private File selectedPhotoFile; // local file reference instead of byte[]
 
@@ -50,7 +55,16 @@ public class UserAdminController {
     public void initialize() {
         loadUsers();
         setupSearch();
+        setupFormListeners();
         newRoleCombo.setItems(FXCollections.observableArrayList(Role.values()));
+    }
+
+    private void setupFormListeners() {
+        newBadgeField.textProperty().addListener((obs, old, newVal) -> {
+            if (newUsernameField.getText().isEmpty() || newUsernameField.getText().equals(old != null ? old.toLowerCase() : "")) {
+                newUsernameField.setText(newVal.toLowerCase());
+            }
+        });
     }
 
     private void setupSearch() {
@@ -118,30 +132,71 @@ public class UserAdminController {
     private void handleSaveNewUser() {
         if (!validateNewUserInputs()) return;
 
+        final String badge = newBadgeField.getText().trim();
+        final String username = newUsernameField.getText().trim().toLowerCase();
+        final String email = newEmailField.getText().trim();
+
+        // Check for duplicates before attempting save to provide better error messages
+        try {
+            User existing = HibernateUtil.executeTransaction(session -> {
+                UserRepository repo = new UserRepository(session);
+                return repo.findByUsername(username)
+                    .or(() -> repo.findByBadgeNumber(badge))
+                    .or(() -> repo.findByEmail(email))
+                    .orElse(null);
+            });
+
+            if (existing != null) {
+                String conflict = "Username";
+                if (existing.getBadgeNumber().equalsIgnoreCase(badge)) conflict = "Badge ID";
+                else if (existing.getEmail() != null && existing.getEmail().equalsIgnoreCase(email)) conflict = "Email Address";
+
+                NexusAlert.showError("ACCOUNT CLASH: An officer with this " + conflict + " already exists.\n\n" +
+                        "Please verify the credentials or search for the existing user.");
+                return;
+            }
+        } catch (Exception e) {
+            logger.warn("Pre-save check failed: {}", e.getMessage());
+        }
+
         User newUser = new User();
-        newUser.setBadgeNumber(newBadgeField.getText().trim());
-        // EVERY USER MUST HAVE AN ASSOCIATED PERSON RECORD (Database Constraint)
-        com.cms.model.Person person = new com.cms.model.Person();
-        String fullName = newNameField.getText().trim();
-        String[] parts = fullName.split(" ", 2);
-        person.setFirstName(parts[0]);
-        person.setLastName(parts.length > 1 ? parts[1] : "");
-        person.setEmail(newEmailField.getText().trim());
-        person.setPhone(newPhoneField.getText().trim());
-        person.setPersonStatus(com.cms.model.enums.PersonStatus.OFFICER); // Correct classification for officers
-        
-        newUser.setPerson(person); // CascadeType.ALL will save the person too
-        newUser.setFullName(fullName);
-        newUser.setUsername(newBadgeField.getText().trim().toLowerCase());
+        newUser.setBadgeNumber(badge);
+        newUser.setUsername(username);
         newUser.setRole(newRoleCombo.getValue());
         newUser.setPrecinct(newPrecinctField.getText().trim());
-        newUser.setEmail(newEmailField.getText().trim());
-        newUser.setPhone(newPhoneField.getText().trim());
         newUser.setStatus(UserStatus.ACTIVE);
         newUser.setMustChangePassword(true);
         newUser.setDateOfJoining(java.time.LocalDate.now());
 
-        String tempPassword = newUser.getBadgeNumber() + String.format("%04d", (int)(Math.random() * 10000));
+        String fullName = newNameField.getText().trim();
+        
+        // REUSE PERSON if email exists, otherwise create new
+        com.cms.model.Person person = HibernateUtil.executeTransaction(session -> {
+            return session.createQuery("from Person where email = :email", com.cms.model.Person.class)
+                    .setParameter("email", email)
+                    .uniqueResult();
+        });
+
+        if (person == null) {
+            person = new com.cms.model.Person();
+            String[] parts = fullName.trim().split("\\s+", 2);
+            person.setFirstName(parts[0]);
+            // Ensure lastName is never blank to satisfy @NotBlank constraint
+            person.setLastName(parts.length > 1 ? parts[1] : "Officer"); 
+            person.setEmail(email);
+            String phone = newPhoneField.getText().trim();
+            person.setPhone(phone.isEmpty() ? null : phone);
+            person.setPersonStatus(com.cms.model.enums.PersonStatus.OFFICER);
+        } else {
+            // Update the existing person to be an officer if they were something else
+            person.setPersonStatus(com.cms.model.enums.PersonStatus.OFFICER);
+        }
+
+        newUser.setPerson(person); 
+
+        String tempPassword = newPasswordField.getText().isEmpty() ? 
+            newUser.getBadgeNumber() + String.format("%04d", (int)(Math.random() * 10000)) : 
+            newPasswordField.getText();
         newUser.setPasswordHash(authService.hashPassword(tempPassword));
 
         // Save image to local storage
@@ -160,25 +215,37 @@ public class UserAdminController {
         task.setOnSucceeded(event -> {
             loadUsers();
             handleCancelNewUser();
-            new Alert(Alert.AlertType.INFORMATION,
+            NexusAlert.showInfo(
                 "User created successfully.\n\n" +
                 "Username : " + newUser.getUsername() + "\n" +
                 "Temp Password: " + tempPassword + "\n\n" +
                 "The user will be required to change their\n" +
-                "password on first login.").showAndWait();
+                "password on first login.");
         });
         task.setOnFailed(event -> {
             Throwable ex = task.getException();
             logger.error("Failed to create user", ex);
             
-            String errMsg = "System Error: " + ex.getMessage();
-            if (ex.getMessage() != null && (ex.getMessage().contains("Constraint") || (ex.getCause() != null && ex.getCause().getMessage().contains("Constraint")))) {
-                errMsg = "ACCOUNT CLASH: An officer with this Badge ID or Email already exists.\n\n" +
-                         "NOTE: If you don't see them in the list, their record might be partially corrupted. " +
-                         "I've updated the search logic to reveal these 'Ghost Records'—please search for the Badge ID in the list above and delete it before retrying.";
+            String errMsg = ex.getMessage();
+            if (errMsg == null) errMsg = "Unknown database error";
+
+            // Better error categorization
+            if (errMsg.contains("Constraint") || (ex.getCause() != null && ex.getCause().getMessage().contains("Constraint"))) {
+                if (errMsg.contains("badge_number") || errMsg.contains("badge")) {
+                    errMsg = "BADGE CLASH: An officer with Badge ID '" + badge + "' already exists.";
+                } else if (errMsg.contains("username")) {
+                    errMsg = "USERNAME CLASH: The username '" + username + "' is already taken.";
+                } else if (errMsg.contains("email")) {
+                    errMsg = "EMAIL CLASH: A person with the email '" + email + "' is already registered in the system.";
+                } else {
+                    errMsg = "ACCOUNT CLASH: A duplicate record was detected for this Badge ID or Email.\n\n" +
+                             "Please verify the credentials or search for existing records.";
+                }
+            } else {
+                errMsg = "System Error: " + errMsg;
             }
             
-            new Alert(Alert.AlertType.ERROR, errMsg).showAndWait();
+            NexusAlert.showError(errMsg);
         });
         new Thread(task).start();
     }
@@ -187,16 +254,16 @@ public class UserAdminController {
         String badge = newBadgeField.getText().trim();
         String name = newNameField.getText().trim();
         if (badge.isEmpty() || name.isEmpty() || !name.matches("^[a-zA-Z\\s]+$")) {
-            new Alert(Alert.AlertType.WARNING, "Badge and Name are required. Name can only contain letters.").showAndWait();
+            NexusAlert.showWarning("Badge and Name are required. Name can only contain letters.");
             return false;
         }
         if (newRoleCombo.getValue() == null) {
-            new Alert(Alert.AlertType.WARNING, "Please select a Role.").showAndWait();
+            NexusAlert.showWarning("Please select a Role.");
             return false;
         }
         String email = newEmailField.getText().trim();
         if (email.isEmpty() || !email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
-            new Alert(Alert.AlertType.WARNING, "A valid Email is required.").showAndWait();
+            NexusAlert.showWarning("A valid Email is required.");
             return false;
         }
         return true;
@@ -206,8 +273,9 @@ public class UserAdminController {
         newBadgeField.clear();
         newNameField.clear();
         newEmailField.clear();
-        newPhoneField.clear();
         newPrecinctField.clear();
+        newUsernameField.clear();
+        newPasswordField.clear();
         newRoleCombo.setValue(null);
         selectedPhotoFile = null;
         newUserPhotoView.setImage(null);
@@ -308,17 +376,14 @@ public class UserAdminController {
     // ==================== UTILITIES ====================
 
     private void handleDeleteOfficer(User user) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
-            "Are you sure you want to PERMANENTLY delete officer " + user.getBadgeNumber() + "?\nThis will also remove their linked Person profile.",
-            ButtonType.YES, ButtonType.NO);
-        confirm.setTitle("Confirm Deletion");
-        confirm.showAndWait().ifPresent(res -> {
-            if (res == ButtonType.YES) {
-                User actor = SessionManager.getInstance().getCurrentUser();
-                userService.deleteUser(user.getId(), actor);
-                loadUsers();
-            }
-        });
+        boolean confirm = NexusAlert.confirm("Confirm Deletion", 
+            "Are you sure you want to PERMANENTLY delete officer " + user.getBadgeNumber() + "?\nThis will also remove their linked Person profile.");
+        
+        if (confirm) {
+            User actor = SessionManager.getInstance().getCurrentUser();
+            userService.deleteUser(user.getId(), actor);
+            loadUsers();
+        }
     }
 
     private File chooseImageFile() {
@@ -327,7 +392,7 @@ public class UserAdminController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
         File file = fileChooser.showOpenDialog(userFlowPane.getScene().getWindow());
         if (file != null && file.length() > 2 * 1024 * 1024) {
-            new Alert(Alert.AlertType.WARNING, "Image size must be less than 2MB.").showAndWait();
+            NexusAlert.showWarning("Image size must be less than 2MB.");
             return null;
         }
         return file;

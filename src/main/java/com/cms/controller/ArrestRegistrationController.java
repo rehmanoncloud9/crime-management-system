@@ -7,6 +7,7 @@ import com.cms.model.User;
 import com.cms.service.ArrestService;
 import com.cms.service.CaseService;
 import com.cms.service.PersonService;
+import com.cms.util.NexusAlert;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -220,7 +221,7 @@ public class ArrestRegistrationController {
                     );
                 } catch (Exception ex) {
                     Platform.runLater(() ->
-                        new Alert(Alert.AlertType.ERROR, "Arrest registration failed:\n" + ex.getMessage()).showAndWait());
+                        NexusAlert.showError("Arrest registration failed:\n" + ex.getMessage()));
                     return null;
                 }
             }
@@ -229,8 +230,7 @@ public class ArrestRegistrationController {
 
         Optional<ArrestRecord> result = dialog.showAndWait();
         result.ifPresent(ar -> {
-            new Alert(Alert.AlertType.INFORMATION,
-                "Arrest registered successfully!\nBooking: " + ar.getBookingReference()).showAndWait();
+            NexusAlert.showInfo("Arrest registered successfully!\nBooking: " + ar.getBookingReference());
             loadArrestsAsync();
             loadStatsAsync();
         });

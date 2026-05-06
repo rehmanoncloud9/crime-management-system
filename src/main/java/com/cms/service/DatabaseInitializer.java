@@ -42,6 +42,7 @@ public class DatabaseInitializer {
             runJdbcBootstrap();
             ensureAdminAccount();
             seedReferenceData();
+            expireStaleSessions();
             logger.info(">>> [CMS-INIT] Database Initialization Complete.");
         } catch (Exception e) {
             logger.error("!!! CRITICAL: DATABASE INITIALIZATION FAILED: {}", e.getMessage(), e);
@@ -217,7 +218,7 @@ public class DatabaseInitializer {
             // 1. Create person record
             stmt.executeUpdate(
                 "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, gender, created_at, updated_at) " +
-                "VALUES ('Rehman', 'OnCloud9', true, 'UNKNOWN', '" + adminEmail + "', 'OTHER', NOW(), NOW())",
+                "VALUES ('Rehman', 'OnCloud9', true, 'OFFICER', '" + adminEmail + "', 'OTHER', NOW(), NOW())",
                 Statement.RETURN_GENERATED_KEYS);
 
             long personId = -1;
@@ -372,6 +373,24 @@ public class DatabaseInitializer {
     // ─────────────────────────────────────────────────────────────
     // URL helpers
     // ─────────────────────────────────────────────────────────────
+
+    private static void expireStaleSessions() {
+        logger.info("[INIT] Expiring stale active sessions...");
+        try {
+            HibernateUtil.executeVoidTransaction(session -> {
+                int updated = session.createNativeQuery(
+                    "UPDATE login_sessions SET session_status = 'EXPIRED', logout_at = NOW() " +
+                    "WHERE session_status = 'ACTIVE' AND login_at < :cutoff")
+                    .setParameter("cutoff", java.time.LocalDateTime.now().minusHours(24))
+                    .executeUpdate();
+                if (updated > 0) {
+                    logger.info("[INIT] Successfully expired {} stale sessions.", updated);
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("[INIT] Failed to expire stale sessions: {}", e.getMessage());
+        }
+    }
 
     private static String extractDatabaseName(String dbUrl) {
         try {

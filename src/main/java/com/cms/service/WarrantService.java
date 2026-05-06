@@ -20,10 +20,21 @@ public class WarrantService {
     }
 
     public void save(Warrant warrant) {
+        boolean isNew = warrant.getId() == null;
         HibernateUtil.executeTransaction(session -> {
             WarrantRepository repo = new WarrantRepository(session);
             repo.save(warrant);
             return null;
         });
+        
+        try {
+            AuditService.getInstance().log(
+                isNew ? com.cms.model.enums.AuditAction.CREATE : com.cms.model.enums.AuditAction.UPDATE,
+                "Warrant",
+                warrant.getId(),
+                (isNew ? "Issued" : "Updated") + " warrant for suspect ID: " + 
+                (warrant.getSuspect() != null ? warrant.getSuspect().getId() : "Unknown")
+            );
+        } catch (Exception ignored) {}
     }
 }

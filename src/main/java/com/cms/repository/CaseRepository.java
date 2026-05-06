@@ -144,24 +144,31 @@ public class CaseRepository {
     }
 
     public List<User> findAvailableInvestigators(int limit) {
+        // Find officers currently assigned to ACTIVE cases (not closed)
         List<Long> busyIds = entityManager.createQuery(
                 "SELECT DISTINCT cf.primaryInvestigator.id FROM CaseFile cf " +
-                        "WHERE cf.status = :status AND cf.primaryInvestigator IS NOT NULL",
+                        "WHERE cf.status IN (:activeStatuses) AND cf.primaryInvestigator IS NOT NULL",
                 Long.class
-        ).setParameter("status", com.cms.model.enums.IncidentStatus.UNDER_INVESTIGATION)
+        ).setParameter("activeStatuses", java.util.List.of(
+                com.cms.model.enums.CaseStatus.UNDER_INVESTIGATION,
+                com.cms.model.enums.CaseStatus.ARRESTED,
+                com.cms.model.enums.CaseStatus.CHARGED,
+                com.cms.model.enums.CaseStatus.IN_TRIAL
+         ))
          .getResultList();
 
         String hql =
                 "SELECT u FROM User u " +
-                "WHERE u.role IN (:officerRole, :supervisorRole, :detectiveRole) " +
+                "LEFT JOIN FETCH u.person " +
+                "WHERE u.role IN (:roles) " +
                 "AND u.status = :activeStatus " +
                 (busyIds.isEmpty() ? "" : "AND u.id NOT IN :busyIds ") +
                 "ORDER BY u.person.firstName, u.person.lastName";
 
         TypedQuery<User> query = entityManager.createQuery(hql, User.class)
-                .setParameter("officerRole", Role.OFFICER)
-                .setParameter("supervisorRole", Role.SUPERVISOR)
-                .setParameter("detectiveRole", Role.DETECTIVE)
+                .setParameter("roles", java.util.List.of(
+                    Role.OFFICER, Role.SUPERVISOR, Role.DETECTIVE,
+                    Role.ADMINISTRATOR, Role.FIELD_AGENT))
                 .setParameter("activeStatus", UserStatus.ACTIVE)
                 .setMaxResults(limit);
 

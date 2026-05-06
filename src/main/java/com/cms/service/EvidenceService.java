@@ -60,6 +60,13 @@ public class EvidenceService {
                     com.cms.model.enums.NotificationPriority.INFO
                 );
             }
+            
+            AuditService.getInstance().log(
+                isNew ? com.cms.model.enums.AuditAction.CREATE : com.cms.model.enums.AuditAction.UPDATE,
+                "Evidence",
+                evidence.getId(),
+                (isNew ? "Created" : "Updated") + " evidence: " + evidence.getType()
+            );
         } catch (Exception ignored) {}
     }
 }

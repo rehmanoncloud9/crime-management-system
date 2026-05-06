@@ -40,6 +40,29 @@ public class IncidentRepository {
         return Optional.ofNullable(entityManager.find(CrimeIncident.class, id));
     }
 
+    public Optional<CrimeIncident> findDetailedById(Long id) {
+        if (id == null) return Optional.empty();
+        return entityManager.createQuery(
+                "SELECT i FROM CrimeIncident i " +
+                "LEFT JOIN FETCH i.crimeType " +
+                "LEFT JOIN FETCH i.district " +
+                "LEFT JOIN FETCH i.city " +
+                "LEFT JOIN FETCH i.area " +
+                "LEFT JOIN FETCH i.reportingOfficer ro " +
+                "LEFT JOIN FETCH ro.person " +
+                "WHERE i.id = :id", CrimeIncident.class)
+            .setParameter("id", id)
+            .getResultStream().findFirst();
+    }
+
+    public Optional<com.cms.model.CaseFile> findCaseByIncidentId(Long incidentId) {
+        if (incidentId == null) return Optional.empty();
+        return entityManager.createQuery(
+                "SELECT c FROM com.cms.model.CaseFile c WHERE c.incident.id = :id", com.cms.model.CaseFile.class)
+            .setParameter("id", incidentId)
+            .getResultStream().findFirst();
+    }
+
     public void save(CrimeIncident incident) {
         if (incident.getId() == null) entityManager.persist(incident);
         else                          entityManager.merge(incident);

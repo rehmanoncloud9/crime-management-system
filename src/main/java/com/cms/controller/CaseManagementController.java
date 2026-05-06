@@ -7,6 +7,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import com.cms.util.NexusAlert;
 import javafx.geometry.Pos;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -101,31 +102,55 @@ public class CaseManagementController {
     }
 
     private void showCaseDetails(CaseFile selected) {
+        // Fetch full detail with all relationships within a Hibernate session
+        javafx.concurrent.Task<CaseFile> detailTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected CaseFile call() {
+                return caseService.findCaseDetailById(selected.getId());
+            }
+        };
+        detailTask.setOnSucceeded(e -> {
+            CaseFile detailed = detailTask.getValue();
+            if (detailed == null) {
+                detailed = selected; // fallback
+            }
+            renderCaseDetails(detailed);
+        });
+        detailTask.setOnFailed(e -> {
+            // Fallback: render whatever we have
+            renderCaseDetails(selected);
+        });
+        Thread th = new Thread(detailTask);
+        th.setDaemon(true);
+        th.start();
+    }
+
+    private void renderCaseDetails(CaseFile cf) {
         detailView.setDisable(false);
-        detailCaseNumber.setText(selected.getCaseNumber());
-        detailIncidentTitle.setText(selected.getIncident() != null ? selected.getIncident().getTitle() : "N/A");
-        
-        labelStatus.setText(selected.getStatus().name());
-        labelInvestigator.setText(selected.getPrimaryInvestigator() != null ? selected.getPrimaryInvestigator().getFullName() : "UNASSIGNED");
-        labelOpened.setText(selected.getOpenedAt().format(formatter));
-        labelCrimeType.setText(selected.getIncident() != null && selected.getIncident().getCrimeType() != null ? selected.getIncident().getCrimeType().getName() : "N/A");
-        labelDescription.setText(selected.getIncident() != null ? selected.getIncident().getDescription() : "");
+        this.selectedCase = cf;
+
+        detailCaseNumber.setText(cf.getCaseNumber());
+        try { detailIncidentTitle.setText(cf.getIncident() != null ? cf.getIncident().getTitle() : "N/A"); } catch (Exception ex) { detailIncidentTitle.setText("N/A"); }
+        try { labelStatus.setText(cf.getStatus().name()); } catch (Exception ex) { labelStatus.setText("UNKNOWN"); }
+        try { labelInvestigator.setText(cf.getPrimaryInvestigator() != null ? cf.getPrimaryInvestigator().getFullName() : "UNASSIGNED"); } catch (Exception ex) { labelInvestigator.setText("UNASSIGNED"); }
+        try { labelOpened.setText(cf.getOpenedAt() != null ? cf.getOpenedAt().format(formatter) : "N/A"); } catch (Exception ex) { labelOpened.setText("N/A"); }
+        try { labelCrimeType.setText(cf.getIncident() != null && cf.getIncident().getCrimeType() != null ? cf.getIncident().getCrimeType().getName() : "N/A"); } catch (Exception ex) { labelCrimeType.setText("N/A"); }
+        try { labelDescription.setText(cf.getIncident() != null ? cf.getIncident().getDescription() : ""); } catch (Exception ex) { labelDescription.setText(""); }
 
         com.cms.model.enums.Role currentRole = com.cms.service.SessionManager.getInstance().getCurrentUser().getRole();
         if (currentRole == com.cms.model.enums.Role.ANALYST) {
             startInvestigateBtn.setDisable(true);
             closeCaseBtn.setDisable(true);
         } else {
-            startInvestigateBtn.setDisable(selected.getStatus() != com.cms.model.enums.CaseStatus.OPEN);
-            boolean isClosed = selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_CONVICTED ||
-                               selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED ||
-                               selected.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED;
+            startInvestigateBtn.setDisable(cf.getStatus() != com.cms.model.enums.CaseStatus.OPEN);
+            boolean isClosed = cf.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_CONVICTED ||
+                               cf.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED ||
+                               cf.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED;
             closeCaseBtn.setDisable(isClosed);
         }
 
-        this.selectedCase = selected;
-        buildTimeline(selected);
-        loadEvidenceAndSuspects(selected);
+        buildTimeline(cf);
+        loadEvidenceAndSuspects(cf);
     }
 
     private void buildTimeline(CaseFile selected) {
@@ -252,7 +277,7 @@ public class CaseManagementController {
         List<com.cms.model.CrimeIncident> unlinked = incidentService.getUnlinkedIncidents();
         
         if (unlinked.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "No unlinked incidents found. All field reports have already been assigned to cases.").showAndWait();
+            NexusAlert.showWarning("No unlinked incidents found. All field reports have already been assigned to cases.");
             return;
         }
 
@@ -272,9 +297,9 @@ public class CaseManagementController {
             };
             task.setOnSucceeded(e -> {
                 loadCasesAsync();
-                new Alert(Alert.AlertType.INFORMATION, "Case successfully initiated for incident: " + selectedInc.getIncidentNumber()).showAndWait();
+                NexusAlert.showInfo("Case successfully initiated for incident: " + selectedInc.getIncidentNumber());
             });
-            task.setOnFailed(e -> new Alert(Alert.AlertType.ERROR, "System Failure: " + task.getException().getMessage()).showAndWait());
+            task.setOnFailed(e -> NexusAlert.showError("System Failure: " + task.getException().getMessage()));
             new Thread(task).start();
         });
     }
@@ -288,12 +313,12 @@ public class CaseManagementController {
         try {
             freeOfficers = caseService.findAvailableInvestigators(200);
         } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, "Failed to load officers: " + e.getMessage()).showAndWait();
+            NexusAlert.showError("Failed to load officers: " + e.getMessage());
             return;
         }
 
         if (freeOfficers.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "No free officers available. All are on active investigations.").showAndWait();
+            NexusAlert.showWarning("No free officers available. All are on active investigations.");
             return;
         }
 
@@ -311,12 +336,14 @@ public class CaseManagementController {
                 }
             };
             task.setOnSucceeded(e -> {
-                new Alert(Alert.AlertType.INFORMATION,
-                    "Investigation started!\nAssigned: " + officer.getFullName()).showAndWait();
+                NexusAlert.showInfo("Investigation started!\nAssigned: " + officer.getFullName());
+                
+                // Refresh list and the current detail view
                 loadCasesAsync();
+                showCaseDetails(selected); 
             });
             task.setOnFailed(e ->
-                new Alert(Alert.AlertType.ERROR, "Failed: " + task.getException().getMessage()).showAndWait());
+                NexusAlert.showError("Failed: " + task.getException().getMessage()));
             Thread th = new Thread(task); th.setDaemon(true); th.start();
         });
     }
@@ -344,11 +371,15 @@ public class CaseManagementController {
             personDialog.setContentText("Person:");
 
             personDialog.showAndWait().ifPresent(person -> {
-                caseService.addPersonToCase(selectedCase.getId(), person.getId(), role);
-                // Refresh
-                caseService.findAllCases().stream()
-                    .filter(c -> c.getId().equals(selectedCase.getId()))
-                    .findFirst().ifPresent(this::showCaseDetails);
+                javafx.concurrent.Task<Void> linkTask = new javafx.concurrent.Task<>() {
+                    @Override protected Void call() {
+                        caseService.addPersonToCase(selectedCase.getId(), person.getId(), role);
+                        return null;
+                    }
+                };
+                linkTask.setOnSucceeded(ev -> showCaseDetails(selectedCase));
+                linkTask.setOnFailed(ev -> NexusAlert.showError("Link Failed: " + linkTask.getException().getMessage()));
+                new Thread(linkTask).start();
             });
         });
     }
@@ -368,7 +399,11 @@ public class CaseManagementController {
                     return null;
                 }
             };
-            task.setOnSucceeded(e -> loadCasesAsync());
+            task.setOnSucceeded(e -> {
+                loadCasesAsync();
+                showCaseDetails(selected);
+                NexusAlert.showInfo("Case has been successfully closed.");
+            });
             new Thread(task).start();
         });
     }

@@ -121,9 +121,30 @@
                         <Label text="City" styleClass="form-label-premium"/>
                         <ComboBox fx:id="cityCombo" prefWidth="180" styleClass="combo-box-premium"/>
                     </VBox>
-                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                    <VBox spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <Label text="Area / Sector" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="areaCombo" prefWidth="180" styleClass="combo-box-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="3">
                         <Label text="Street Address / Details" styleClass="form-label-premium"/>
                         <TextArea fx:id="addressArea" prefHeight="60" wrapText="true" styleClass="text-area-premium"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="💼" style="-fx-font-size: 18px;"/>
+                    <Label text="Professional Context" styleClass="heading-md"/>
+                </HBox>
+                <GridPane hgap="20" vgap="15">
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Occupation" styleClass="form-label-premium"/>
+                        <TextField fx:id="occupationField" promptText="Job Title" styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Employer / Company" styleClass="form-label-premium"/>
+                        <TextField fx:id="employerField" promptText="Current Employer" styleClass="text-field-premium"/>
                     </VBox>
                 </GridPane>
             </VBox>

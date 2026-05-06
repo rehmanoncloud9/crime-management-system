@@ -5,6 +5,7 @@ import com.cms.model.Person;
 import com.cms.model.enums.PersonStatus;
 import com.cms.service.CaseService;
 import com.cms.service.NavigationService;
+import com.cms.util.NexusAlert;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -102,13 +103,13 @@ public class LinkCaseController {
         };
         
         task.setOnSucceeded(e -> {
-            new Alert(Alert.AlertType.INFORMATION, "Person linked to case successfully.").showAndWait();
+            NexusAlert.showInfo("Person linked to case successfully.");
             if (onLinkSucceeded != null) onLinkSucceeded.run();
             handleCancel(); // Close current view
         });
         
         task.setOnFailed(e -> {
-            new Alert(Alert.AlertType.ERROR, "Link failed: " + task.getException().getMessage()).showAndWait();
+            NexusAlert.showError("Link failed: " + task.getException().getMessage());
         });
 
         new Thread(task).start();

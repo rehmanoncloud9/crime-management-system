@@ -12,7 +12,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
+import com.cms.util.NexusAlert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.image.WritableImage;
@@ -439,13 +439,13 @@ public class StatisticalReportsController {
                 doc.close();
 
                 Platform.runLater(() ->
-                    new Alert(Alert.AlertType.INFORMATION, "PDF report saved to:\n" + outPath).showAndWait()
+                    NexusAlert.showInfo("PDF report saved to:\n" + outPath)
                 );
                 return null;
             }
         };
         task.setOnFailed(e -> Platform.runLater(() ->
-            new Alert(Alert.AlertType.ERROR, "PDF Export failed: " + task.getException().getMessage()).showAndWait()));
+            NexusAlert.showError("PDF Export failed: " + task.getException().getMessage())));
         Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 
@@ -490,13 +490,13 @@ public class StatisticalReportsController {
                 workbook.close();
                 
                 Platform.runLater(() -> 
-                    new Alert(Alert.AlertType.INFORMATION, "Excel report saved to:\n" + outputPath).showAndWait()
+                    NexusAlert.showInfo("Excel report saved to:\n" + outputPath)
                 );
                 return null;
             }
         };
         task.setOnFailed(e -> Platform.runLater(() ->
-            new Alert(Alert.AlertType.ERROR, "Export failed: " + task.getException().getMessage()).showAndWait()));
+            NexusAlert.showError("Export failed: " + task.getException().getMessage())));
         Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
     

@@ -3,6 +3,7 @@ package com.cms.controller;
 import com.cms.model.User;
 import com.cms.service.AuthService;
 import com.cms.util.AnimationHelper;
+import com.cms.util.NexusAlert;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -245,10 +246,7 @@ public class LoginController {
             java.awt.Desktop.getDesktop().browse(new java.net.URI("https://wa.me/923487453067"));
         } catch (Exception e) {
             logger.error("Failed to open WhatsApp URL", e);
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                    javafx.scene.control.Alert.AlertType.INFORMATION, "Could not open WhatsApp link. Contact number: 034 87453067");
-            alert.setHeaderText("Technical Support");
-            alert.showAndWait();
+            NexusAlert.show("Technical Support", "Could not open WhatsApp link. Contact number: 034 87453067", NexusAlert.Type.SUCCESS);
         }
     }
 }

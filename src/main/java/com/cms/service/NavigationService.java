@@ -5,6 +5,7 @@ import javafx.animation.*;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
+import com.cms.util.NexusAlert;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +103,11 @@ public class NavigationService {
             notifyObservers(state);
         } catch (IOException e) {
             logger.error("Navigation failed to: {}", state.fxmlPath, e);
+            javafx.application.Platform.runLater(() -> {
+                NexusAlert.show("Navigation Error", 
+                    "Failed to load module\nTarget: " + state.fxmlPath + "\n\nError: " + e.getMessage(), 
+                    NexusAlert.Type.ERROR);
+            });
         }
     }
 

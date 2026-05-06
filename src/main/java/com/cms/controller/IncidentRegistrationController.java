@@ -8,6 +8,7 @@ import com.cms.model.geo.*;
 import com.cms.service.GeographyService;
 import com.cms.service.IncidentService;
 import com.cms.service.SessionManager;
+import com.cms.util.NexusAlert;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -447,6 +448,12 @@ public class IncidentRegistrationController {
     }
 
     private void alert(Alert.AlertType type, String msg) {
-        Platform.runLater(() -> new Alert(type, msg).showAndWait());
+        NexusAlert.Type nexusType = switch (type) {
+            case ERROR -> NexusAlert.Type.ERROR;
+            case WARNING -> NexusAlert.Type.WARNING;
+            case CONFIRMATION -> NexusAlert.Type.CONFIRM;
+            default -> NexusAlert.Type.SUCCESS;
+        };
+        Platform.runLater(() -> NexusAlert.show(null, msg, nexusType));
     }
 }

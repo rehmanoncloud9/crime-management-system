@@ -2,6 +2,7 @@ package com.cms.controller;
 
 import com.cms.model.CrimeType;
 import com.cms.service.CrimeTypeService;
+import com.cms.util.NexusAlert;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -99,10 +100,10 @@ public class ConfigController {
             props.setProperty("ai.sensitivity", String.valueOf((int)aiSensitivitySlider.getValue()));
             props.store(out, "Updated by CMS UI");
             
-            new Alert(Alert.AlertType.INFORMATION, "Settings Saved Successfully").showAndWait();
+            NexusAlert.showInfo("Settings Saved Successfully");
         } catch (Exception e) {
             logger.error("Failed to save config", e);
-            new Alert(Alert.AlertType.ERROR, "Save Failed: " + e.getMessage()).showAndWait();
+            NexusAlert.showError("Save Failed: " + e.getMessage());
         }
     }
 
@@ -135,7 +136,7 @@ public class ConfigController {
                 crimeTypeService.save(ct);
                 loadCrimeTypes();
             } catch (Exception e) {
-                new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+                NexusAlert.showError(e.getMessage());
             }
         });
     }
@@ -144,12 +145,10 @@ public class ConfigController {
         CrimeType selected = crimeTypeTable.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + selected.getName() + "?");
-        confirm.showAndWait().ifPresent(btn -> {
-            if (btn == ButtonType.OK) {
-                crimeTypeService.delete(selected);
-                loadCrimeTypes();
-            }
-        });
+        boolean confirm = NexusAlert.confirm("Confirm Deletion", "Delete " + selected.getName() + "?");
+        if (confirm) {
+            crimeTypeService.delete(selected);
+            loadCrimeTypes();
+        }
     }
 }

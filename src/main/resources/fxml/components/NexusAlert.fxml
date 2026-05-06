@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox fx:id="root" alignment="CENTER" spacing="20" styleClass="alert-card" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.cms.controller.NexusAlertController">
+    <padding>
+        <Insets bottom="30" left="30" right="30" top="30" />
+    </padding>
+
+    <StackPane fx:id="iconContainer">
+        <Circle fx:id="iconBg" radius="25" fill="rgba(0,229,200,0.15)" stroke="#00e5c8" strokeWidth="1.5" />
+        <Label fx:id="iconLabel" text="✓" style="-fx-font-size: 24px; -fx-text-fill: #00e5c8; -fx-font-weight: bold;" />
+    </StackPane>
+
+    <VBox alignment="CENTER" spacing="8">
+        <Label fx:id="titleLabel" styleClass="heading-md" text="Success" />
+        <Label fx:id="messageLabel" text="The operation was completed successfully." wrapText="true" textAlignment="CENTER" style="-fx-text-fill: -cms-t2;" maxWidth="300" />
+    </VBox>
+
+    <HBox alignment="CENTER" spacing="12">
+        <Button fx:id="cancelBtn" text="Cancel" onAction="#handleCancel" styleClass="btn, btn-outline" visible="false" managed="false" />
+        <Button fx:id="okBtn" text="Understood" onAction="#handleOk" styleClass="btn, btn-primary" prefWidth="120" />
+    </HBox>
+</VBox>

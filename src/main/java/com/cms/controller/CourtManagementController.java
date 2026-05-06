@@ -2,10 +2,10 @@ package com.cms.controller;
 
 import com.cms.model.CourtCase;
 import com.cms.model.CourtHearing;
+import com.cms.util.NexusAlert;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
@@ -71,7 +71,7 @@ public class CourtManagementController {
                     java.util.Optional<com.cms.model.CaseFile> cmsCaseOpt = courtService.getCaseByNumber(cmsNum);
                     if (cmsCaseOpt.isEmpty()) {
                         javafx.application.Platform.runLater(() -> 
-                            new Alert(Alert.AlertType.ERROR, "CMS Case not found: " + cmsNum).showAndWait()
+                            NexusAlert.showError("CMS Case not found: " + cmsNum)
                         );
                         return null;
                     }
@@ -88,9 +88,9 @@ public class CourtManagementController {
             };
             task.setOnSucceeded(e -> {
                 loadData();
-                new Alert(Alert.AlertType.INFORMATION, "Court case linked successfully.").showAndWait();
+                NexusAlert.showInfo("Court case linked successfully.");
             });
-            task.setOnFailed(e -> new Alert(Alert.AlertType.ERROR, "Error: " + task.getException().getMessage()).showAndWait());
+            task.setOnFailed(e -> NexusAlert.showError("Error: " + task.getException().getMessage()));
             new Thread(task).start();
         });
     }
@@ -99,7 +99,7 @@ public class CourtManagementController {
     private void handleScheduleHearing() {
         CourtCase selected = courtCasesTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            new Alert(Alert.AlertType.WARNING, "Please select a court case first.").showAndWait();
+            NexusAlert.showWarning("Please select a court case first.");
             return;
         }
 
@@ -123,9 +123,9 @@ public class CourtManagementController {
             };
             task.setOnSucceeded(e -> {
                 loadData();
-                new Alert(Alert.AlertType.INFORMATION, "Hearing scheduled successfully.").showAndWait();
+                NexusAlert.showInfo("Hearing scheduled successfully.");
             });
-            task.setOnFailed(e -> new Alert(Alert.AlertType.ERROR, "Invalid date format or error executing.").showAndWait());
+            task.setOnFailed(e -> NexusAlert.showError("Invalid date format or error executing."));
             new Thread(task).start();
         });
     }

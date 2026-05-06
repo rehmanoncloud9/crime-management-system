@@ -20,6 +20,7 @@
             <Region HBox.hgrow="ALWAYS"/>
             <Button onAction="#handleSearch" text="SEARCH" styleClass="btn, btn-primary"/>
             <Button onAction="#handleClear" text="CLEAR" styleClass="btn, btn-outline"/>
+            <Button onAction="#handleAddCriminal" text="+ ENROLL SUSPECT" styleClass="btn-premium-teal-sm"/>
         </HBox>
 
         <!-- Results Table -->

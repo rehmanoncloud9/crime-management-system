@@ -233,4 +233,33 @@ public class AuthService {
             throw e;
         }
     }
+    
+    public void logout(LoginSession loginSession) {
+        if (loginSession == null) return;
+
+        try {
+            HibernateUtil.executeVoidTransaction(session -> {
+                LoginSession managedSession = session.get(LoginSession.class, loginSession.getId());
+                if (managedSession != null && managedSession.isActive()) {
+                    managedSession.logout();
+                    session.merge(managedSession);
+                    
+                    logger.info("Session {} for user {} terminated in database.", 
+                        managedSession.getId(), managedSession.getUser().getUsername());
+
+                    try {
+                        AuditService.getInstance().logAction(
+                            managedSession.getUser(),
+                            AuditAction.LOGOUT,
+                            "User logged out successfully."
+                        );
+                    } catch (Exception e) {
+                        logger.warn("Audit logging for logout failed: {}", e.getMessage());
+                    }
+                }
+            });
+        } catch (Exception e) {
+            logger.error("Database logout failed for session {}", loginSession.getId(), e);
+        }
+    }
 }

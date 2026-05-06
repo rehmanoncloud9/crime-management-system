@@ -29,6 +29,7 @@ public class SessionManager {
 
     public synchronized void logout() {
         if (currentSession != null) {
+            new AuthService().logout(currentSession);
             currentSession = null;
         }
     }
