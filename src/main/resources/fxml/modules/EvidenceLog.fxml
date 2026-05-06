@@ -3,10 +3,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" style="-fx-background-color: #07090F;" styleClass="scroll-pane"
+<ScrollPane fitToWidth="true" styleClass="scroll-pane"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cms.controller.EvidenceLogController">
-    <VBox spacing="16" style="-fx-background-color: #07090F;">
+    <VBox spacing="16" styleClass="content-area">
         <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
 
         <Label text="Evidence Log" styleClass="heading-xl"/>
@@ -66,7 +66,7 @@
                     <TableColumn fx:id="colStatus"   text="Status"        prefWidth="130"/>
                     <TableColumn fx:id="colLocation" text="Location"      prefWidth="200"/>
                 </columns>
-                <placeholder><Label text="No evidence records yet." style="-fx-text-fill: rgba(255,255,255,0.4);"/></placeholder>
+                <placeholder><Label text="No evidence records yet." style="-fx-text-fill: -cms-t3;"/></placeholder>
             </TableView>
         </VBox>
     </VBox>

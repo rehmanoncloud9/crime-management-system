@@ -9,8 +9,16 @@
             stylesheets="@../css/login.css"
             styleClass="main-container">
 
+    <!-- Background Orbs for Aurora Effect (Moving) -->
+    <Region fx:id="orb1" layoutX="-100" layoutY="-100" prefWidth="600" prefHeight="600" opacity="0.18" 
+            style="-fx-background-color: radial-gradient(center 50% 50%, radius 50%, #00E5C8 0%, transparent 80%); -fx-background-radius: 1000;"/>
+    <Region fx:id="orb2" layoutX="800" layoutY="200" prefWidth="500" prefHeight="500" opacity="0.12" 
+            style="-fx-background-color: radial-gradient(center 50% 50%, radius 50%, #B388FF 0%, transparent 80%); -fx-background-radius: 1000;"/>
+    <Region fx:id="orb3" layoutX="400" layoutY="500" prefWidth="550" prefHeight="550" opacity="0.1" 
+            style="-fx-background-color: radial-gradient(center 50% 50%, radius 50%, #40C4FF 0%, transparent 80%); -fx-background-radius: 1000;"/>
+
     <GridPane AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
-              AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+              AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" style="-fx-background-color: transparent;">
 
         <columnConstraints>
             <ColumnConstraints percentWidth="52.0" hgrow="ALWAYS"/>
@@ -21,16 +29,25 @@
         </rowConstraints>
 
         <!-- LEFT: Branding panel -->
-        <VBox GridPane.columnIndex="0" styleClass="left-panel" spacing="0">
+        <VBox GridPane.columnIndex="0" styleClass="left-panel" spacing="0" style="-fx-background-color: transparent;">
             <VBox alignment="CENTER" spacing="16">
 
-                <!-- Shield SVG icon -->
-                <StackPane styleClass="logo-shield" maxWidth="120" maxHeight="120">
+                <!-- Shield SVG icon - Multi-layer Liquid Glass -->
+                <StackPane styleClass="logo-shield" maxWidth="150" maxHeight="150">
+                    <!-- Ambient Glow -->
                     <SVGPath content="M24 4L6 10v12c0 11.1 7.68 21.48 18 24 10.32-2.52 18-12.9 18-24V10L24 4z"
-                             fill="transparent" stroke="#00E5FF" strokeWidth="2"
-                             scaleX="3.5" scaleY="3.5"/>
+                             fill="rgba(0,191,165,0.2)" scaleX="4.4" scaleY="4.4" />
+                    <!-- Frosted Glass Base -->
+                    <SVGPath content="M24 4L6 10v12c0 11.1 7.68 21.48 18 24 10.32-2.52 18-12.9 18-24V10L24 4z"
+                             fill="linear-gradient(to bottom right, rgba(255,255,255,0.9), rgba(255,255,255,0.3))" 
+                             scaleX="4.0" scaleY="4.0"/>
+                    <!-- Liquid Core Gradient -->
                     <SVGPath content="M24 10l-10 4v8c0 6 4 11 10 13 6-2 10-7 10-13v-8l-10-4z"
-                             fill="#00E5FF" opacity="0.12" scaleX="3.5" scaleY="3.5"/>
+                             fill="linear-gradient(to bottom right, #00BFA5, #40C4FF)" opacity="0.85" scaleX="4.0" scaleY="4.0"/>
+                    <!-- Glass Edge Highlight -->
+                    <SVGPath content="M24 4L6 10v12c0 11.1 7.68 21.48 18 24 10.32-2.52 18-12.9 18-24V10L24 4z"
+                             fill="transparent" stroke="white" strokeWidth="1.2" opacity="0.9"
+                             scaleX="4.0" scaleY="4.0"/>
                 </StackPane>
 
                 <Region prefHeight="40"/>
@@ -41,29 +58,29 @@
                 <Region prefHeight="32"/>
 
                 <!-- Feature bullets -->
-                <VBox spacing="10" alignment="CENTER_LEFT" maxWidth="280">
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="✦" style="-fx-text-fill: #00E5FF; -fx-font-size: 10px;"/>
-                        <Label text="Real-time incident tracking" style="-fx-text-fill: rgba(255,255,255,0.45); -fx-font-size: 12px;"/>
+                <VBox spacing="12" alignment="CENTER_LEFT" maxWidth="280">
+                    <HBox spacing="14" alignment="CENTER_LEFT">
+                        <Label text="●" style="-fx-text-fill: #00BFA5; -fx-font-size: 8px;"/>
+                        <Label text="Real-time incident tracking" style="-fx-text-fill: #2E4A48; -fx-font-size: 13px; -fx-font-weight: 600;"/>
                     </HBox>
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="✦" style="-fx-text-fill: #00E5FF; -fx-font-size: 10px;"/>
-                        <Label text="AI-powered case analytics" style="-fx-text-fill: rgba(255,255,255,0.45); -fx-font-size: 12px;"/>
+                    <HBox spacing="14" alignment="CENTER_LEFT">
+                        <Label text="●" style="-fx-text-fill: #00BFA5; -fx-font-size: 8px;"/>
+                        <Label text="AI-powered case analytics" style="-fx-text-fill: #2E4A48; -fx-font-size: 13px; -fx-font-weight: 600;"/>
                     </HBox>
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="✦" style="-fx-text-fill: #00E5FF; -fx-font-size: 10px;"/>
-                        <Label text="Encrypted evidence management" style="-fx-text-fill: rgba(255,255,255,0.45); -fx-font-size: 12px;"/>
+                    <HBox spacing="14" alignment="CENTER_LEFT">
+                        <Label text="●" style="-fx-text-fill: #00BFA5; -fx-font-size: 8px;"/>
+                        <Label text="Encrypted evidence management" style="-fx-text-fill: #2E4A48; -fx-font-size: 13px; -fx-font-weight: 600;"/>
                     </HBox>
                 </VBox>
 
                 <Region prefHeight="20"/>
-                <Label text="v6.0 · CLASSIFIED" styleClass="version-label"/>
+                <Label text="v7.0 · AURORA NEXUS" styleClass="version-label"/>
             </VBox>
         </VBox>
 
         <!-- RIGHT: Login form -->
-        <VBox GridPane.columnIndex="1" styleClass="right-panel">
-            <VBox spacing="36" maxWidth="400" alignment="CENTER_LEFT">
+        <VBox GridPane.columnIndex="1" styleClass="right-panel" style="-fx-background-color: transparent;">
+            <VBox spacing="36" maxWidth="420" alignment="CENTER_LEFT" styleClass="glass-card">
 
                 <!-- Heading -->
                 <VBox spacing="8">
@@ -114,9 +131,9 @@
 
                 <!-- Footer -->
                 <HBox alignment="CENTER" spacing="6">
-                    <Label text="Technical difficulties?" styleClass="footer-text"/>
-                    <Hyperlink text="Contact System Admin" styleClass="footer-link"
-                               onAction="#handleContactAdmin"/>
+                    <Label text="Need assistance?" styleClass="footer-text"/>
+                    <Hyperlink text="WhatsApp System Admin" styleClass="footer-link"
+                               onAction="#handleContactAdmin" style="-fx-text-fill: #10B981;"/>
                 </HBox>
 
             </VBox>

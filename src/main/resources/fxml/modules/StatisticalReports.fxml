@@ -4,10 +4,10 @@
 <?import javafx.scene.chart.*?>
 <?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true"  style="-fx-background-color: #07090F;" styleClass="scroll-pane"
+<ScrollPane fitToWidth="true" styleClass="scroll-pane"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cms.controller.StatisticalReportsController">
-    <VBox spacing="16" style="-fx-background-color: #07090F;">
+    <VBox spacing="16" styleClass="content-area">
         <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
 
         <Label text="Crime Statistics &amp; Reports" styleClass="heading-xl"/>

@@ -4,8 +4,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="24" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.cms.controller.AdminDashboardController" styleClass="module"
-      style="-fx-background-color: #080B14;">
+      fx:controller="com.cms.controller.AdminDashboardController" styleClass="content-area">
     <padding><Insets bottom="28" left="28" right="28" top="28"/></padding>
 
     <!-- Title -->

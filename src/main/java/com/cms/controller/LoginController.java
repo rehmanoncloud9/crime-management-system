@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -40,6 +41,13 @@ public class LoginController {
     private Button loginButton;
 
     @FXML
+    private Region orb1;
+    @FXML
+    private Region orb2;
+    @FXML
+    private Region orb3;
+
+    @FXML
     public void initialize() {
         // Animate login form entrance
         Platform.runLater(() -> {
@@ -59,7 +67,23 @@ public class LoginController {
                 });
                 p2.play();
             }
+
+            // Animate background orbs
+            if (orb1 != null && orb2 != null && orb3 != null) {
+                animateOrb(orb1, 400, 300, 15000);
+                animateOrb(orb2, -300, -200, 20000);
+                animateOrb(orb3, -200, 400, 18000);
+            }
         });
+    }
+
+    private void animateOrb(Node orb, double dx, double dy, double durationMs) {
+        TranslateTransition tt = new TranslateTransition(Duration.millis(durationMs), orb);
+        tt.setByX(dx);
+        tt.setByY(dy);
+        tt.setCycleCount(Animation.INDEFINITE);
+        tt.setAutoReverse(true);
+        tt.play();
     }
 
     @FXML
@@ -216,35 +240,15 @@ public class LoginController {
 
     @FXML
     private void handleContactAdmin(ActionEvent event) {
-        // Contact info is read from config.properties (app.support.email or
-        // app.support.url).
-        // Fallback: show a plain dialog so there is no hardcoded personal number.
-        Properties props = new Properties();
-        try (java.io.InputStream in = getClass().getResourceAsStream("/config.properties")) {
-            if (in != null)
-                props.load(in);
-        } catch (Exception ignored) {
+        try {
+            // Direct WhatsApp link as requested
+            java.awt.Desktop.getDesktop().browse(new java.net.URI("https://wa.me/923487453067"));
+        } catch (Exception e) {
+            logger.error("Failed to open WhatsApp URL", e);
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.INFORMATION, "Could not open WhatsApp link. Contact number: 034 87453067");
+            alert.setHeaderText("Technical Support");
+            alert.showAndWait();
         }
-
-        String supportUrl = props.getProperty("app.support.url", "");
-        String supportEmail = props.getProperty("app.support.email", "");
-
-        if (!supportUrl.isBlank()) {
-            try {
-                java.awt.Desktop.getDesktop().browse(new java.net.URI(supportUrl));
-                return;
-            } catch (Exception e) {
-                logger.error("Failed to open support URL", e);
-            }
-        }
-
-        String msg = supportEmail.isBlank()
-                ? "Please contact your system administrator for technical support."
-                : "For technical support, email: " + supportEmail;
-
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                javafx.scene.control.Alert.AlertType.INFORMATION, msg);
-        alert.setHeaderText("Technical Support");
-        alert.showAndWait();
     }
 }

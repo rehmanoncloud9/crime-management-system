@@ -5,7 +5,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="20" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.cms.controller.PersonRegistrationController" styleClass="module">
+      fx:controller="com.cms.controller.PersonRegistrationController" styleClass="content-area">
         <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
 
         <HBox spacing="10" alignment="CENTER_LEFT">
@@ -18,14 +18,14 @@
         <HBox spacing="24">
             <VBox spacing="12" alignment="TOP_CENTER" styleClass="card" style="-fx-min-width: 180;">
                 <ImageView fx:id="photoView" fitWidth="150" fitHeight="150" preserveRatio="true"/>
-                <Button text="📷 Upload Photo" onAction="#handleUploadPhoto" styleClass="btn, btn-outline" style="-fx-border-color: #00D4FF; -fx-text-fill: #00D4FF; -fx-background-color: rgba(0,212,255,0.08);"/>
+                <Button text="📷 Upload Photo" onAction="#handleUploadPhoto" styleClass="btn, btn-primary-sm" maxWidth="Infinity"/>
             </VBox>
 
             <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="card">
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="Personal Information" styleClass="heading-md"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <CheckBox fx:id="unknownPersonCheck" text="Unknown Person (Unidentified)" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                    <CheckBox fx:id="unknownPersonCheck" text="Unknown Person" style="-fx-text-fill: -cms-rose; -fx-font-weight: bold;"/>
                 </HBox>
                 <GridPane hgap="16" vgap="12">
                     <Label text="First Name:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -129,6 +129,6 @@
         <!-- Actions -->
         <HBox spacing="12">
             <Button fx:id="saveBtn" onAction="#handleSave" text="SAVE PROFILE" styleClass="btn, btn-success"/>
-            <Button onAction="#handleClear" text="CLEAR" styleClass="btn, btn-outline" style="-fx-border-color: #00D4FF; -fx-text-fill: #00D4FF; -fx-background-color: rgba(0,212,255,0.08);"/>
+            <Button onAction="#handleClear" text="CLEAR" styleClass="btn, btn-outline"/>
         </HBox>
 </VBox>

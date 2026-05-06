@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crime Management System — CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --aurora-mint: #00e5c8;
+    --aurora-teal: #00bfa5;
+    --aurora-sky: #40c4ff;
+    --aurora-violet: #b388ff;
+    --aurora-rose: #ff80ab;
+    --aurora-lime: #ccff90;
+    --glass-bg: rgba(255,255,255,0.55);
+    --glass-border: rgba(255,255,255,0.75);
+    --glass-shadow: 0 8px 40px rgba(0,191,165,0.13), 0 2px 8px rgba(64,196,255,0.10);
+    --clay-shadow: 6px 6px 20px rgba(0,191,165,0.18), -4px -4px 16px rgba(255,255,255,0.85);
+    --text-primary: #1a2a2a;
+    --text-secondary: #2e4a48;
+    --text-muted: #5a7a78;
+    --accent: #00bfa5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    background: #e8f8f5;
+    color: var(--text-primary);
+    overflow-x: hidden;
+    min-height: 100vh;
+    scroll-behavior: smooth;
+  }
+
+  html {
+    scroll-snap-type: y mandatory;
+  }
+
+  /* Aurora background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 10%, rgba(0,229,200,0.22) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 20%, rgba(64,196,255,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 50% 100%, rgba(179,136,255,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 80%, rgba(255,128,171,0.10) 0%, transparent 50%),
+      linear-gradient(135deg, #e0f7fa 0%, #f0fff4 40%, #e8f5e9 70%, #f3e5f5 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(0,229,200,0.08) 0%, transparent 40%),
+      radial-gradient(circle at 80% 30%, rgba(64,196,255,0.06) 0%, transparent 35%);
+    z-index: 0;
+    pointer-events: none;
+    animation: auroraShift 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes auroraShift {
+    0% { opacity: 0.6; transform: scale(1) rotate(0deg); }
+    100% { opacity: 1; transform: scale(1.05) rotate(2deg); }
+  }
+
+  /* Floating orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.18;
+    z-index: 0;
+    pointer-events: none;
+    animation: orbFloat 20s ease-in-out infinite;
+  }
+  .orb1 { width: 400px; height: 400px; background: radial-gradient(circle, #00e5c8, #40c4ff); top: -100px; left: -100px; animation-duration: 18s; }
+  .orb2 { width: 300px; height: 300px; background: radial-gradient(circle, #b388ff, #ff80ab); top: 30%; right: -80px; animation-duration: 22s; animation-delay: -5s; }
+  .orb3 { width: 350px; height: 350px; background: radial-gradient(circle, #ccff90, #00e5c8); bottom: -80px; left: 30%; animation-duration: 25s; animation-delay: -10s; }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -40px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.96); }
+  }
+
+  /* Layout */
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* Slide sections */
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 0;
+    scroll-snap-align: start;
+    opacity: 0;
+    transform: translateY(40px);
+    animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes slideIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Glass card */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Clay card */
+  .clay {
+    background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(240,255,252,0.8));
+    border-radius: 24px;
+    box-shadow: var(--clay-shadow);
+    border: 1.5px solid rgba(255,255,255,0.9);
+  }
+
+  /* Liquid glass pill */
+  .liquid-pill {
+    display: inline-block;
+    padding: 6px 18px;
+    background: rgba(0,229,200,0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,229,200,0.35);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--aurora-teal);
+  }
+
+  /* Hero slide */
+  .hero {
+    padding-top: 60px;
+    padding-bottom: 20px;
+    text-align: center;
+  }
+
+  .hero-card {
+    padding: 64px 48px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(224,253,248,0.65) 50%, rgba(255,255,255,0.70) 100%);
+    backdrop-filter: blur(30px) saturate(200%);
+    border: 2px solid rgba(255,255,255,0.85);
+    border-radius: 40px;
+    box-shadow:
+      0 20px 80px rgba(0,191,165,0.15),
+      0 4px 20px rgba(64,196,255,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; height: 4px;
+    background: linear-gradient(90deg, var(--aurora-mint), var(--aurora-sky), var(--aurora-violet), var(--aurora-rose), var(--aurora-lime), var(--aurora-mint));
+    background-size: 200% 100%;
+    border-radius: 40px 40px 0 0;
+    animation: gradientSlide 4s linear infinite;
+  }
+
+  @keyframes gradientSlide {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: rgba(0,229,200,0.12);
+    border: 1px solid rgba(0,229,200,0.30);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--aurora-teal);
+    margin-bottom: 28px;
+    backdrop-filter: blur(8px);
+  }
+
+  .hero-badge .dot {
+    width: 7px; height: 7px;
+    background: var(--aurora-mint);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }
+  }
+
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(42px, 6vw, 72px);
+    line-height: 1.1;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--aurora-teal), var(--aurora-sky));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    font-weight: 400;
+    max-width: 600px;
+    margin: 0 auto 36px;
+    line-height: 1.6;
+  }
+
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .meta-tag {
+    padding: 8px 20px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(0,191,165,0.2);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Section header */
+  .section-header {
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-header h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(28px, 3.5vw, 40px);
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  /* Grid layouts */
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+
+  /* Feature card */
+  .feat-card {
+    padding: 28px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+  }
+
+  .feat-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 20px 60px rgba(0,191,165,0.2), 0 4px 16px rgba(64,196,255,0.15);
+  }
+
+  .feat-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, rgba(0,229,200,0.2), rgba(64,196,255,0.15));
+    border: 1px solid rgba(0,229,200,0.25);
+    color: var(--aurora-teal);
+  }
+
+  .feat-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .feat-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .feat-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  /* Team cards */
+  .team-card {
+    padding: 36px 28px;
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+
+  .team-card:hover { transform: translateY(-8px); }
+
+  .avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 auto 16px;
+    letter-spacing: -0.02em;
+    position: relative;
+  }
+
+  .avatar::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--aurora-mint), var(--aurora-sky), var(--aurora-violet), var(--aurora-mint));
+    z-index: -1;
+    animation: spin 4s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .avatar-ar { background: linear-gradient(135deg, #e0f7fa, #b2dfdb); color: #00695c; }
+  .avatar-mk { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); color: #2e7d32; }
+  .avatar-ms { background: linear-gradient(135deg, #f3e5f5, #e1bee7); color: #6a1b9a; }
+
+  .team-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .team-id {
+    font-size: 12px;
+    color: var(--aurora-teal);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .task-list {
+    list-style: none;
+    text-align: left;
+  }
+
+  .task-list li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(0,191,165,0.10);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+
+  .task-list li::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--aurora-mint);
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Module cards */
+  .module-card {
+    padding: 24px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    transition: transform 0.25s ease;
+  }
+
+  .module-card:hover { transform: translateX(6px); }
+
+  .module-num {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--aurora-teal), var(--aurora-sky));
+    box-shadow: 0 4px 14px rgba(0,191,165,0.3);
+  }
+
+  .module-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+  }
+
+  .module-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    padding: 24px 20px;
+    text-align: center;
+    background: linear-gradient(145deg, rgba(255,255,255,0.92), rgba(224,253,248,0.75));
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.88);
+    box-shadow: 5px 5px 16px rgba(0,191,165,0.14), -3px -3px 12px rgba(255,255,255,0.88);
+    transition: transform 0.3s ease;
+  }
+
+  .stat-card:hover { transform: translateY(-4px); }
+
+  .stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 38px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--aurora-teal), var(--aurora-sky));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* Entity table */
+  .entity-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+  }
+
+  .entity-table th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 20px 8px;
+    text-align: left;
+  }
+
+  .entity-table tr.entity-row td {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px);
+    padding: 14px 20px;
+    font-size: 14px;
+    border-top: 1px solid rgba(255,255,255,0.8);
+    border-bottom: 1px solid rgba(0,191,165,0.08);
+    transition: background 0.2s;
+  }
+
+  .entity-table tr.entity-row td:first-child {
+    border-left: 1px solid rgba(255,255,255,0.8);
+    border-radius: 14px 0 0 14px;
+    font-weight: 700;
+    color: var(--aurora-teal);
+  }
+
+  .entity-table tr.entity-row td:last-child {
+    border-right: 1px solid rgba(255,255,255,0.8);
+    border-radius: 0 14px 14px 0;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'SF Mono', 'Cascadia Code', monospace;
+  }
+
+  .entity-table tr.entity-row:hover td {
+    background: rgba(0,229,200,0.08);
+  }
+
+  /* Normalization cards */
+  .norm-card {
+    padding: 22px 24px;
+    border-left: 3px solid transparent;
+    transition: transform 0.25s ease;
+    background: linear-gradient(135deg, rgba(255,255,255,0.80), rgba(240,255,252,0.70));
+    border-radius: 16px;
+    border: 1.5px solid rgba(255,255,255,0.85);
+    box-shadow: 4px 4px 14px rgba(0,191,165,0.12), -2px -2px 10px rgba(255,255,255,0.85);
+  }
+
+  .norm-card:hover { transform: translateX(4px); }
+
+  .norm-label {
+    display: inline-block;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--aurora-teal);
+    margin-bottom: 6px;
+  }
+
+  .norm-card h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+  .norm-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* Mapping steps */
+  .step-card {
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(180deg, var(--aurora-mint), var(--aurora-sky));
+    border-radius: 4px 0 0 4px;
+  }
+
+  .step-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--aurora-teal);
+    margin-bottom: 8px;
+  }
+
+  .step-card h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+  .step-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  /* Security */
+  .security-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 700px) { .security-grid { grid-template-columns: 1fr; } }
+
+  .sec-card {
+    padding: 24px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.85), rgba(240,255,252,0.70));
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.88);
+    box-shadow: var(--clay-shadow);
+  }
+
+  .sec-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    background: rgba(0,229,200,0.1);
+    color: var(--aurora-teal);
+  }
+
+  .sec-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sec-card h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+  .sec-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* Audit schema table */
+  .schema-table-wrap {
+    padding: 28px;
+  }
+
+  .schema-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .schema-table thead th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-bottom: 12px;
+    border-bottom: 1.5px solid rgba(0,191,165,0.15);
+    text-align: left;
+  }
+
+  .schema-table tbody tr {
+    border-bottom: 1px solid rgba(0,191,165,0.08);
+    transition: background 0.2s;
+  }
+
+  .schema-table tbody tr:hover { background: rgba(0,229,200,0.05); }
+
+  .schema-table tbody td {
+    padding: 12px 0;
+    font-size: 13.5px;
+  }
+
+  .schema-table tbody td:first-child {
+    font-weight: 700;
+    color: var(--aurora-teal);
+    font-family: 'SF Mono', 'Cascadia Code', monospace;
+  }
+
+  .schema-table tbody td:last-child {
+    color: var(--text-muted);
+    font-family: 'SF Mono', 'Cascadia Code', monospace;
+    font-size: 12px;
+  }
+
+  /* Issues */
+  .issue-card {
+    padding: 24px 28px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+    backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(255,255,255,0.75);
+    transition: transform 0.25s ease;
+  }
+
+  .issue-card:hover { transform: translateX(4px); }
+
+  .issue-card.critical {
+    background: linear-gradient(135deg, rgba(255,82,82,0.08), rgba(255,255,255,0.75));
+    border-left: 4px solid #ff5252;
+  }
+
+  .issue-card.high {
+    background: linear-gradient(135deg, rgba(255,183,77,0.08), rgba(255,255,255,0.75));
+    border-left: 4px solid #ffb74d;
+  }
+
+  .issue-card.medium {
+    background: linear-gradient(135deg, rgba(64,196,255,0.08), rgba(255,255,255,0.75));
+    border-left: 4px solid #40c4ff;
+  }
+
+  .issue-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .badge-critical { background: rgba(255,82,82,0.12); color: #d32f2f; }
+  .badge-high { background: rgba(255,183,77,0.15); color: #e65100; }
+  .badge-medium { background: rgba(64,196,255,0.12); color: #0277bd; }
+
+  .issue-card h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+  .issue-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .issue-fix { margin-top: 10px; font-size: 13px; color: var(--aurora-teal); font-weight: 600; }
+
+  /* Roadmap */
+  .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+
+  .road-card {
+    padding: 32px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .road-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .road-card:nth-child(1)::before { background: linear-gradient(90deg, #ff5252, #ffb74d); }
+  .road-card:nth-child(2)::before { background: linear-gradient(90deg, #40c4ff, #00e5c8); }
+  .road-card:nth-child(3)::before { background: linear-gradient(90deg, #b388ff, #40c4ff); }
+
+  .road-phase {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .road-card h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .road-timeline {
+    font-size: 12px;
+    color: var(--aurora-teal);
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .road-items { list-style: none; text-align: left; }
+  .road-items li {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(0,191,165,0.08);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+
+  .road-items li::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300bfa5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* CLO cards */
+  .clo-card {
+    padding: 28px;
+  }
+
+  .clo-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--aurora-teal);
+    margin-bottom: 8px;
+  }
+
+  .clo-card h3 { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+  .clo-card p { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+
+  /* Closing slide */
+  .closing-card {
+    padding: 60px 48px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(255,255,255,0.78) 0%, rgba(224,253,248,0.68) 50%, rgba(243,229,245,0.60) 100%);
+    backdrop-filter: blur(30px) saturate(200%);
+    border: 2px solid rgba(255,255,255,0.88);
+    border-radius: 40px;
+    box-shadow: 0 24px 80px rgba(0,191,165,0.16), 0 6px 24px rgba(64,196,255,0.10);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .closing-card::before {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: -2px; right: -2px; height: 4px;
+    background: linear-gradient(90deg, var(--aurora-mint), var(--aurora-sky), var(--aurora-violet), var(--aurora-rose), var(--aurora-lime), var(--aurora-mint));
+    background-size: 200% 100%;
+    border-radius: 0 0 40px 40px;
+    animation: gradientSlide 4s linear infinite;
+  }
+
+  .closing-card h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(32px, 4.5vw, 54px);
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .closing-card h2 em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--aurora-teal), var(--aurora-sky));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .closing-takeaways {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 36px 0;
+    text-align: left;
+  }
+
+  .takeaway {
+    padding: 18px 20px;
+    background: rgba(255,255,255,0.65);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.85);
+    box-shadow: 3px 3px 10px rgba(0,191,165,0.10);
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .takeaway span.tw-icon { 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0; 
+    color: var(--aurora-teal);
+  }
+
+  .takeaway span.tw-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .authors {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+
+  .author-chip {
+    padding: 10px 22px;
+    background: rgba(0,229,200,0.10);
+    border: 1px solid rgba(0,229,200,0.25);
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Constraint tags */
+  .constraint-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: rgba(0,229,200,0.10);
+    border: 1px solid rgba(0,229,200,0.25);
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--aurora-teal);
+    margin: 4px;
+  }
+
+  .constraint-tag .check { 
+    color: #00c853; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .constraint-tag .check svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .constraints-wrap {
+    padding: 24px 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  /* Delay animations */
+  .slide:nth-child(1) { animation-delay: 0.1s; }
+  .slide:nth-child(2) { animation-delay: 0.2s; }
+  .slide:nth-child(3) { animation-delay: 0.3s; }
+  .slide:nth-child(4) { animation-delay: 0.35s; }
+  .slide:nth-child(5) { animation-delay: 0.4s; }
+  .slide:nth-child(6) { animation-delay: 0.45s; }
+  .slide:nth-child(7) { animation-delay: 0.5s; }
+  .slide:nth-child(8) { animation-delay: 0.55s; }
+  .slide:nth-child(9) { animation-delay: 0.6s; }
+  .slide:nth-child(10) { animation-delay: 0.65s; }
+  .slide:nth-child(11) { animation-delay: 0.7s; }
+  .slide:nth-child(12) { animation-delay: 0.75s; }
+
+  @media (max-width: 640px) {
+    .hero-card, .closing-card { padding: 40px 24px; }
+    .grid-3, .grid-2, .grid-4 { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .roadmap-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,191,165,0.3), transparent);
+    margin: 8px 0 28px;
+  }
+
+  /* Schema highlight boxes */
+  .highlight-box {
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(0,229,200,0.08), rgba(64,196,255,0.06));
+    border-radius: 16px;
+    border: 1px solid rgba(0,229,200,0.20);
+  }
+
+  .highlight-box h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+  .highlight-box p { font-size: 13.5px; color: var(--text-muted); line-height: 1.65; }
+  .highlight-box .hb-icon { 
+    width: 40px; height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(0,229,200,0.1);
+    color: var(--aurora-teal);
+    margin-bottom: 12px; 
+  }
+  .highlight-box .hb-icon svg { width: 20px; height: 20px; }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <div class="slide hero">
+    <div class="hero-card">
+      <div class="hero-badge"><span class="dot"></span>CS-220 Database Systems · Spring 2026</div>
+      <h1>Crime Management<br><em>System</em></h1>
+      <p class="hero-subtitle">A relational database application for law enforcement operations. Built at NUST SEECS, Section CS-15E.</p>
+      <div class="hero-meta">
+        <span class="meta-tag">Abdul Rehman · 576841</span>
+        <span class="meta-tag">Muhammad Kaleem Sajjad · 544147</span>
+        <span class="meta-tag">Muhammad Shayan · 544810</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Project Overview</span>
+      <h2>What is CMS?</h2>
+    </div>
+    <p style="font-size:18px;color:var(--text-muted);margin-bottom:40px;max-width:850px;line-height:1.7;">
+      A relational database application for law enforcement operations. It lets officers register incidents, manage cases, track evidence, issue warrants, and monitor court proceedings — all with a complete audit trail baked in.
+    </p>
+    <div class="grid-3">
+      <div class="feat-card glass"><div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></div><h3>Incident and Case Management</h3><p>FIR-style registration, case file creation, and investigator assignment in one place.</p></div>
+      <div class="feat-card glass"><div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Person Registry</h3><p>Suspects, victims, and witnesses all in a unified table with role tracking per case.</p></div>
+      <div class="feat-card glass"><div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div><h3>Evidence and Custody</h3><p>Full chain of custody logs with every transfer timestamped for accountability.</p></div>
+      <div class="feat-card glass"><div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16 2 6"/><path d="m2 16 14-10"/><path d="M16 6c0 2.2-2.7 4-6 4s-6-1.8-6-4"/><path d="M16 16c0 2.2-2.7 4-6 4s-6-1.8-6-4"/><path d="M10 2v18"/></svg></div><h3>Court and Warrants</h3><p>Warrant tracking, arrest records, hearing schedules, and charge sheet management.</p></div>
+      <div class="feat-card glass"><div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div><h3>AI Risk Scoring</h3><p>Risk scores and recidivism likelihood stored directly as database columns for easy querying.</p></div>
+      <div class="feat-card glass"><div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>Audit Trail</h3><p>Every write operation is logged with both the old and new values captured.</p></div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Team</span>
+      <h2>Who Built This</h2>
+    </div>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:24px;">Instructor: Hirra Anwar · Submitted: April 22, 2026</p>
+    <div class="grid-3">
+      <div class="team-card clay">
+        <div class="avatar avatar-ar">AR</div>
+        <h3>Abdul Rehman</h3>
+        <div class="team-id">576841</div>
+        <ul class="task-list">
+          <li>Database schema design and ERD</li>
+          <li>SQL DDL, constraints and triggers</li>
+          <li>Normalization to 3NF and BCNF</li>
+          <li>Query optimization and indexing</li>
+        </ul>
+      </div>
+      <div class="team-card clay">
+        <div class="avatar avatar-mk">MK</div>
+        <h3>Muhammad Kaleem Sajjad</h3>
+        <div class="team-id">544147</div>
+        <ul class="task-list">
+          <li>Backend JPA entities</li>
+          <li>Security and credentials management</li>
+          <li>Data seeding and testing</li>
+          <li>Audit log implementation</li>
+        </ul>
+      </div>
+      <div class="team-card clay">
+        <div class="avatar avatar-ms">MS</div>
+        <h3>Muhammad Shayan</h3>
+        <div class="team-id">544810</div>
+        <ul class="task-list">
+          <li>ER to Relational mapping</li>
+          <li>Weak entity and M:N mapping</li>
+          <li>Court and warrant modules</li>
+          <li>Documentation and reporting</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- REQUIREMENTS -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Requirements</span>
+      <h2>7 Functional Modules</h2>
+    </div>
+    <div class="grid-2">
+      <div class="module-card glass"><div class="module-num">01</div><div><h3>Incident Management</h3><p>FIR-style registration with crime type, location tagging, and status tracking built in.</p></div></div>
+      <div class="module-card glass"><div class="module-num">02</div><div><h3>Case Management</h3><p>Case files are linked directly to incidents, with investigator assignment handled cleanly.</p></div></div>
+      <div class="module-card glass"><div class="module-num">03</div><div><h3>Person Registry</h3><p>Suspects, victims and witnesses in one place — each with national IDs and per-case roles.</p></div></div>
+      <div class="module-card glass"><div class="module-num">04</div><div><h3>Evidence and Custody</h3><p>Log every piece of evidence and record each custody transfer with officer ID plus timestamp.</p></div></div>
+      <div class="module-card glass"><div class="module-num">05</div><div><h3>Warrants and Arrests</h3><p>Issue warrants, track their status, and log full arrest details with booking references.</p></div></div>
+      <div class="module-card glass"><div class="module-num">06</div><div><h3>Court Cases and Hearings</h3><p>Track court name, judge, hearing dates, and outcomes for every case brought to court.</p></div></div>
+      <div class="module-card glass"><div class="module-num">07</div><div><h3>Audit Logs and AI Scoring</h3><p>Audit every write operation while also storing risk scores and recidivism likelihood per person.</p></div></div>
+    </div>
+  </div>
+
+  <!-- SCHEMA DESIGN -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Schema Design</span>
+      <h2>Entity-Relationship Diagram</h2>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">31</div><div class="stat-label">Total Tables</div></div>
+      <div class="stat-card"><div class="stat-num">13+</div><div class="stat-label">Core Entities</div></div>
+      <div class="stat-card"><div class="stat-num">3NF</div><div class="stat-label">Normalized To</div></div>
+      <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">One to One Relations</div></div>
+      <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Weak Entities</div></div>
+      <div class="stat-card"><div class="stat-num">M:N</div><div class="stat-label">Junction Tables</div></div>
+    </div>
+    <div class="glass" style="padding:28px;">
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.7;">The ERD was designed by hand covering all major law enforcement workflows, then digitally mapped to the final relational schema. The diagram captures every entity, relationship, and cardinality constraint across the full 31-table structure.</p>
+    </div>
+  </div>
+
+  <!-- CORE ENTITIES -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Schema Design</span>
+      <h2>Core Entities and Key Attributes</h2>
+    </div>
+    <div class="glass" style="padding:8px 0; overflow-x:auto;">
+      <table class="entity-table">
+        <thead>
+          <tr><th>Entity</th><th>Key Attributes</th></tr>
+        </thead>
+        <tbody>
+          <tr class="entity-row"><td>users</td><td>id, badge_number, username, role, department, status</td></tr>
+          <tr class="entity-row"><td>persons</td><td>id, first_name, last_name, national_id, risk_score, is_high_risk</td></tr>
+          <tr class="entity-row"><td>crime_incidents</td><td>id, incident_number, crime_type_id, district_id, reporting_officer_id, status</td></tr>
+          <tr class="entity-row"><td>case_files</td><td>id, case_number, incident_id, primary_investigator_id, priority, status</td></tr>
+          <tr class="entity-row"><td>evidence</td><td>id, evidence_number, case_id, type, collected_by, current_storage_location</td></tr>
+          <tr class="entity-row"><td>warrants</td><td>id, warrant_number, case_id, suspect_id, status, expires_at</td></tr>
+          <tr class="entity-row"><td>court_cases</td><td>id, case_id, court_id, judge_name, prosecutor_id, status</td></tr>
+          <tr class="entity-row"><td>audit_logs</td><td>id, user_id, action, entity_type, old_value, new_value, timestamp</td></tr>
+          <tr class="entity-row"><td>ai_analysis_results</td><td>id, analysis_type, subject_id, result_json, confidence, model_version</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MAPPING STEPS 1-3 -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Mapping Algorithm</span>
+      <h2>ER to Relational Mapping: Steps 1 to 3</h2>
+    </div>
+    <div class="grid-3">
+      <div class="step-card glass">
+        <div class="step-num">Step 01 · Regular Entity Types</div>
+        <h3>20 Entities Mapped</h3>
+        <p>Each regular entity gets its own relation with simple attributes. Composite attributes are decomposed, so the location on crime_incidents becomes separate latitude and longitude columns.</p>
+      </div>
+      <div class="step-card glass">
+        <div class="step-num">Step 02 · Weak Entity Types</div>
+        <h3>3 Weak Entities Handled</h3>
+        <p>login_sessions owned by users, evidence_custody_log owned by evidence, and court_hearings owned by court_cases. Surrogate primary keys are used and the owner foreign key carries ON DELETE CASCADE.</p>
+      </div>
+      <div class="step-card glass">
+        <div class="step-num">Step 03 · Binary 1:1 Relationships</div>
+        <h3>4 One to One Relationships</h3>
+        <p>Enforced using a foreign key plus a UNIQUE constraint: case_files to crime_incidents, court_cases to case_files, charge_sheets to case_files, and medical_records to persons.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPPING STEPS 4-7 -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Mapping Algorithm</span>
+      <h2>ER to Relational Mapping: Steps 4 to 7</h2>
+    </div>
+    <div class="grid-2">
+      <div class="step-card glass">
+        <div class="step-num">Step 04 · 1:N Relationships</div>
+        <h3>FK on the N-Side</h3>
+        <p>All one to many relationships are handled by placing a foreign key on the many side. Two unary self-references exist: crime_types has a parent_id and users has a created_by field.</p>
+      </div>
+      <div class="step-card glass">
+        <div class="step-num">Step 05 · M:N Relationships</div>
+        <h3>6 Junction Tables Created</h3>
+        <p>All many to many relationships are resolved through junction tables: case_persons, case_officers, case_witnesses, case_victims, case_suspects, and person_associates.</p>
+      </div>
+      <div class="step-card glass">
+        <div class="step-num">Step 06 · Multi-valued Attributes</div>
+        <h3>2 Intentional Exceptions</h3>
+        <p>Two multi-valued attributes are kept as comma-separated strings for simplicity: persons.aliases and modus_operandi.tags. Both are flagged and documented in the schema notes.</p>
+      </div>
+      <div class="step-card glass">
+        <div class="step-num">Step 07 · N-ary Relationships</div>
+        <h3>No Ternary Relationships</h3>
+        <p>All relationships in CMS are binary. The AI scoring module uses a polymorphic pattern with subject_type and subject_id columns for the flexibility needed without adding ternary complexity.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NORMALIZATION -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Database Design</span>
+      <h2>Normalization and Constraints</h2>
+    </div>
+    <div class="grid-2" style="margin-bottom:28px;">
+      <div class="norm-card"><div class="norm-label">1NF</div><h3>All Attributes Atomic</h3><p>Aliases and tags are intentional exceptions kept as comma-separated strings for simplicity, and both are clearly noted as such in the documentation.</p></div>
+      <div class="norm-card"><div class="norm-label">2NF</div><h3>No Partial Dependencies</h3><p>All non-key attributes depend on the full primary key. Surrogate integer primary keys eliminate any composite-key partial dependency issues entirely.</p></div>
+      <div class="norm-card"><div class="norm-label">3NF</div><h3>No Transitive Dependencies</h3><p>Every non-key attribute depends only on the primary key, not on any other non-key attribute. This holds across the full schema.</p></div>
+      <div class="norm-card"><div class="norm-label">BCNF</div><h3>Every Determinant is a Superkey</h3><p>All functional dependencies satisfy BCNF. Every core table in the schema has been verified to meet this requirement.</p></div>
+    </div>
+    <div class="glass constraints-wrap">
+      <span class="constraint-tag"><span class="check"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> PRIMARY KEY on every table</span>
+      <span class="constraint-tag"><span class="check"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> FOREIGN KEY with ON DELETE CASCADE</span>
+      <span class="constraint-tag"><span class="check"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> UNIQUE on badge_number, username, email</span>
+      <span class="constraint-tag"><span class="check"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> UNIQUE on incident_id in case_files</span>
+      <span class="constraint-tag"><span class="check"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> CHECK constraints on status enums</span>
+      <span class="constraint-tag"><span class="check"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Triggers for audit log population</span>
+      <span class="constraint-tag"><span class="check"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> has_active_warrant trigger-maintained</span>
+      <span class="constraint-tag"><span class="check"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span> Indexes on all FK and queried columns</span>
+    </div>
+  </div>
+
+  <!-- SCHEMA HIGHLIGHTS -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Schema Design</span>
+      <h2>Schema Highlights</h2>
+    </div>
+    <div class="grid-2">
+      <div class="highlight-box glass"><div class="hb-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>Geographic Hierarchy</h3><p>Countries to Provinces to Districts to Cities to Areas. A full 5-level location system where a foreign key chain ensures referential integrity at every single level.</p></div>
+      <div class="highlight-box glass"><div class="hb-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .52 5.888 4 4 0 0 0 3.13 7.088A12 12 0 0 1 14 13c.5 0 1-.5 1-1V2Z"/><path d="M2 21c0-3 1.8-5.7 4.5-6.7"/><path d="M15 13a6 6 0 0 1 6 6v2"/><path d="M13 2.05a9 9 0 0 1 8.95 8.95"/><path d="M13 8h1"/></svg></div><h3>Modus Operandi Table</h3><p>Captures exactly how repeat offenders operate: method used, tools, target type, and typical time window. Linked to both person and crime type to support behavioral profiling.</p></div>
+      <div class="highlight-box glass"><div class="hb-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div><h3>AI Analysis Results</h3><p>A polymorphic table with analysis_type, subject_type, subject_id, result_json, confidence, and model_version. Stores risk scores and recidivism predictions without any model training in scope.</p></div>
+      <div class="highlight-box glass"><div class="hb-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div><h3>Incident Amendments</h3><p>A dependent audit entity tied to crime_incidents. Records who amended the incident, what changed, and exactly when. This supports truly immutable investigation records over time.</p></div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Security</span>
+      <h2>Security Architecture and Audit Trail</h2>
+    </div>
+    <div class="security-grid" style="margin-bottom:24px;">
+      <div class="sec-card"><div class="sec-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>Role-Based Access</h3><p>Officers, detectives, supervisors, prosecutors, and admins each have distinct scopes. The role column in the users table controls what each person can see and do.</p></div>
+      <div class="sec-card"><div class="sec-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>Login Security</h3><p>Failed login attempts are tracked, accounts can be locked via the locked_until column, and new accounts carry a must_change_password flag to force a reset on first login.</p></div>
+      <div class="sec-card"><div class="sec-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg></div><h3>Session Tracking</h3><p>The login_sessions table records every login and logout event along with the IP address and workstation ID, giving a full session trail for every user.</p></div>
+      <div class="sec-card"><div class="sec-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><h3>Warrant Control</h3><p>The has_active_warrant flag is maintained automatically by a trigger. Warrants expire on their own through the expires_at column, so nothing needs to be manually cleaned up.</p></div>
+    </div>
+    <div class="glass schema-table-wrap">
+      <p style="font-size:13px;font-weight:700;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">audit_logs Schema</p>
+      <table class="schema-table">
+        <thead><tr><th>Column</th><th>Type</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>BIGINT PK</td></tr>
+          <tr><td>user_id</td><td>FK → users</td></tr>
+          <tr><td>user_name</td><td>VARCHAR (cached)</td></tr>
+          <tr><td>action</td><td>INSERT | UPDATE | DELETE</td></tr>
+          <tr><td>entity_type</td><td>VARCHAR (table name)</td></tr>
+          <tr><td>entity_id</td><td>BIGINT</td></tr>
+          <tr><td>old_value</td><td>JSON</td></tr>
+          <tr><td>new_value</td><td>JSON</td></tr>
+          <tr><td>ip_address</td><td>VARCHAR</td></tr>
+          <tr><td>timestamp</td><td>DATETIME</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ISSUES -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Issue Report</span>
+      <h2>Critical Issues and Remediation</h2>
+    </div>
+    <div class="issue-card critical glass">
+      <span class="issue-badge badge-critical">Critical</span>
+      <h3>Schema Desynchronization</h3>
+      <p>The schema.sql file is outdated and is missing the medical_records table as well as columns like is_identified, photo, and personStatus inside the persons table.</p>
+      <p class="issue-fix">Fix: Regenerate schema.sql from JPA entities and add a schema validation script to the CI/CD pipeline going forward.</p>
+    </div>
+    <div class="issue-card high glass">
+      <span class="issue-badge badge-high">High</span>
+      <h3>Hardcoded Credentials</h3>
+      <p>Database passwords are sitting in db.properties and admin passwords are exposed directly in SampleDataService.java inside the source code repository.</p>
+      <p class="issue-fix">Fix: Move all secrets to environment variables, exclude .env from version control, and force a password change on every user's first login.</p>
+    </div>
+    <div class="issue-card high glass">
+      <span class="issue-badge badge-high">High</span>
+      <h3>Brittle Data Seeding</h3>
+      <p>SampleDataService.java relies on manual ALTER TABLE and UPDATE statements, including a hardcoded DETECTIVE to SUPERVISOR role update that could break at any point.</p>
+      <p class="issue-fix">Fix: Switch to Flyway or Liquibase versioned migrations and replace the manual SQL with proper V1__ and V2__ migration files.</p>
+    </div>
+    <div class="issue-card medium glass">
+      <span class="issue-badge badge-medium">Medium</span>
+      <h3>Deprecated Hibernate APIs</h3>
+      <p>The build is throwing deprecation warnings right now. This means the code could break when the project is updated to a newer version of Hibernate down the line.</p>
+      <p class="issue-fix">Fix: Refactor all deprecated calls, add unit tests for the data seeding logic, and verify compatibility with the current Hibernate version.</p>
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Roadmap</span>
+      <h2>Remediation Roadmap</h2>
+    </div>
+    <div class="roadmap-grid">
+      <div class="road-card clay">
+        <div class="road-phase">Phase 1</div>
+        <h3>Immediate Fixes</h3>
+        <div class="road-timeline">Weeks 1 to 2</div>
+        <ul class="road-items">
+          <li>Extract all credentials to environment variables</li>
+          <li>Regenerate schema.sql from Hibernate entities</li>
+          <li>Document current DB state and write a migration guide</li>
+        </ul>
+      </div>
+      <div class="road-card clay">
+        <div class="road-phase">Phase 2</div>
+        <h3>Medium-Term</h3>
+        <div class="road-timeline">Weeks 3 to 4</div>
+        <ul class="road-items">
+          <li>Implement Flyway versioned migrations</li>
+          <li>Refactor deprecated Hibernate API calls</li>
+          <li>Add integration tests for data seeding in CI/CD</li>
+        </ul>
+      </div>
+      <div class="road-card clay">
+        <div class="road-phase">Phase 3</div>
+        <h3>Long-Term</h3>
+        <div class="road-timeline">Month 2</div>
+        <ul class="road-items">
+          <li>Resolve module and netlib warnings</li>
+          <li>Automated schema validation before deployment</li>
+          <li>Full security audit with forced reset for default accounts</li>
+          <li>Complete deployment documentation</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:20px;text-align:center;">
+      <span class="meta-tag">Estimated total effort: 4 to 6 weeks</span>
+      <span class="meta-tag" style="margin-left:8px;">All changes maintain backward compatibility</span>
+      <span class="meta-tag" style="margin-left:8px;">Incremental deployment is safe</span>
+    </div>
+  </div>
+
+  <!-- COURSE OUTCOMES -->
+  <div class="slide">
+    <div class="section-header">
+      <span class="liquid-pill">Academic</span>
+      <h2>Course Outcome Mapping</h2>
+    </div>
+    <div class="grid-2">
+      <div class="clo-card glass">
+        <div class="clo-num">CLO-2 · Complex Schema Design</div>
+        <h3>31 Tables with Specialization Hierarchies</h3>
+        <p>The schema includes crime type parent-child structures, person roles that vary per case, evidence type classification, multiple many to many relationships requiring junction tables, and one to one cardinality enforced through UNIQUE constraints.</p>
+      </div>
+      <div class="clo-card glass">
+        <div class="clo-num">CLO-3 · Concurrency and Transactions</div>
+        <h3>Real Conflict Scenarios</h3>
+        <p>Two officers updating the same case at the same time is a write-write conflict. A custody transfer must write to both evidence and custody_log atomically. A warrant status change must never leave the system in a partial state. These were all studied through isolation levels.</p>
+      </div>
+      <div class="clo-card glass">
+        <div class="clo-num">CLO-4 · SQL DDL and ERD Implementation</div>
+        <h3>Full DDL with Normalization</h3>
+        <p>Complete SQL DDL written with primary keys, foreign keys, constraints, and triggers for audit logging. Schema normalized to 3NF and BCNF. The ERD was designed in a formal tool and mapped step by step using the full ER to Relational algorithm.</p>
+      </div>
+      <div class="clo-card glass">
+        <div class="clo-num">Interdisciplinary · AI Integration</div>
+        <h3>AI Risk Scores in the Database</h3>
+        <p>Risk scores and recidivism predictions are stored as database columns in risk_score and the ai_analysis_results table. Model training is entirely out of scope. The database design covers storage, versioning, and audit linkage of AI-computed values only.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOSING -->
+  <div class="slide">
+    <div class="closing-card">
+      <div style="margin-bottom:16px;"><span class="liquid-pill">Key Takeaways</span></div>
+      <h2>Crime Management <em>System</em></h2>
+      <p style="font-size:16px;color:var(--text-muted);margin-top:12px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.7;">A complete, production-ready relational database built from the ground up for real law enforcement workflows.</p>
+      <div class="closing-takeaways">
+        <div class="takeaway"><span class="tw-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg></span>31-table normalized schema covering all law enforcement workflows from incident to conviction</div>
+        <div class="takeaway"><span class="tw-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Complete audit trail with trigger-maintained immutability on every write operation</div>
+        <div class="takeaway"><span class="tw-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>Full ER to Relational mapping across all 7 algorithm steps with every edge case handled</div>
+        <div class="takeaway"><span class="tw-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>Critical issues identified and documented with a clear, phased remediation plan ready to execute</div>
+      </div>
+      <div class="authors">
+        <span class="author-chip">Abdul Rehman</span>
+        <span class="author-chip">Muhammad Kaleem Sajjad</span>
+        <span class="author-chip">Muhammad Shayan</span>
+      </div>
+      <p style="margin-top:28px;font-size:14px;color:var(--text-muted);">Thank you · Open for questions</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Intersection observer for staggered scroll animations
+  const slides = document.querySelectorAll('.slide');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+      }
+    });
+  }, { threshold: 0.08 });
+
+  slides.forEach((slide, i) => {
+    slide.style.animationPlayState = 'paused';
+    slide.style.animationDelay = `${i * 0.08}s`;
+    observer.observe(slide);
+  });
+</script>
+</body>
+</html>

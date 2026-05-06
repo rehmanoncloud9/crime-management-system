@@ -4,7 +4,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="20" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.cms.controller.ConfigController" styleClass="module">
+      fx:controller="com.cms.controller.ConfigController" styleClass="content-area">
     <padding>
         <Insets bottom="16" left="16" right="16" top="16"/>
     </padding>

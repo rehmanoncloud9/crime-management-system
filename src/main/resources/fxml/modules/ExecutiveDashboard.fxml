@@ -7,10 +7,10 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" style="-fx-background-color: #080B14;" styleClass="scroll-pane"
+<ScrollPane fitToWidth="true" styleClass="scroll-pane"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cms.controller.ExecutiveDashboardController">
-    <VBox spacing="24" style="-fx-background-color: #080B14;">
+    <VBox spacing="24" styleClass="content-area">
         <padding><Insets bottom="28" left="28" right="28" top="28"/></padding>
 
         <!-- Header -->

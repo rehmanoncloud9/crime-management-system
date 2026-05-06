@@ -1,22 +1,23 @@
 /* CMS v6.0 — AI Chatbot Glass Theme */
 
 .chat-root {
-    -fx-background-color: #080B14;
+    -fx-background-color: -cms-mist;
 }
 .chat-header {
-    -fx-background-color: rgba(255,255,255,0.04);
-    -fx-border-color: rgba(255,255,255,0.07);
+    -fx-background-color: rgba(255,255,255,0.8);
+    -fx-border-color: rgba(0,191,165,0.1);
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 16 20;
+    -fx-padding: 18 20;
 }
 .chat-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: 700;
-    -fx-text-fill: white;
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -cms-t1;
 }
 .chat-subtitle {
     -fx-font-size: 11px;
-    -fx-text-fill: rgba(255,255,255,0.35);
+    -fx-font-weight: 600;
+    -fx-text-fill: -cms-t3;
 }
 .chat-messages-pane {
     -fx-background-color: transparent;
@@ -26,8 +27,8 @@
     -fx-background-color: transparent;
 }
 .chat-input-bar {
-    -fx-background-color: rgba(255,255,255,0.03);
-    -fx-border-color: rgba(255,255,255,0.07);
+    -fx-background-color: rgba(255,255,255,0.6);
+    -fx-border-color: rgba(0,191,165,0.1);
     -fx-border-width: 1 0 0 0;
-    -fx-padding: 14 20;
+    -fx-padding: 16 20;
 }

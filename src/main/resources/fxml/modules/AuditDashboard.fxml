@@ -6,7 +6,7 @@
 <ScrollPane fitToWidth="true"  styleClass="scroll-pane"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cms.controller.AuditDashboardController">
-    <VBox spacing="16">
+    <VBox spacing="16" styleClass="content-area">
         <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
 
         <Label text="Audit Dashboard" styleClass="heading-xl"/>

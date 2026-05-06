@@ -21,7 +21,7 @@
             <!-- Total Criminals -->
             <VBox styleClass="card card-criminals" HBox.hgrow="ALWAYS" spacing="6">
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="🔴" style="-fx-font-size: 13px;"/>
+                    <Label text="●" style="-fx-text-fill: #FF80AB; -fx-font-size: 10px;"/>
                     <Label text="TOTAL CRIMINALS" styleClass="card-title"/>
                 </HBox>
                 <HBox alignment="BOTTOM_LEFT" spacing="10">
@@ -33,7 +33,7 @@
             <!-- Active Cases -->
             <VBox styleClass="card card-cases" HBox.hgrow="ALWAYS" spacing="6">
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="🔵" style="-fx-font-size: 13px;"/>
+                    <Label text="●" style="-fx-text-fill: #00BFA5; -fx-font-size: 10px;"/>
                     <Label text="ACTIVE CASES" styleClass="card-title"/>
                 </HBox>
                 <HBox alignment="BOTTOM_LEFT" spacing="10">
@@ -45,7 +45,7 @@
             <!-- Officers -->
             <VBox styleClass="card card-officers" HBox.hgrow="ALWAYS" spacing="6">
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="🟢" style="-fx-font-size: 13px;"/>
+                    <Label text="●" style="-fx-text-fill: #40C4FF; -fx-font-size: 10px;"/>
                     <Label text="OFFICERS" styleClass="card-title"/>
                 </HBox>
                 <HBox alignment="BOTTOM_LEFT" spacing="10">
@@ -57,7 +57,7 @@
             <!-- Closed Cases -->
             <VBox styleClass="card card-closed" HBox.hgrow="ALWAYS" spacing="6">
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="⚡" style="-fx-font-size: 13px;"/>
+                    <Label text="●" style="-fx-text-fill: #B388FF; -fx-font-size: 10px;"/>
                     <Label text="CLOSED CASES" styleClass="card-title"/>
                 </HBox>
                 <HBox alignment="BOTTOM_LEFT" spacing="10">
@@ -68,14 +68,13 @@
 
             <!-- Total Incidents -->
             <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="6"
-                  style="-fx-border-color: rgba(245,158,11,0.5) rgba(255,255,255,0.08) rgba(255,255,255,0.04) rgba(245,158,11,0.5); -fx-border-width: 1 1 1 3;">
+                  style="-fx-border-color: transparent transparent transparent #F59E0B; -fx-border-width: 0 0 0 4;">
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="🚨" style="-fx-font-size: 13px;"/>
+                    <Label text="●" style="-fx-text-fill: #F59E0B; -fx-font-size: 10px;"/>
                     <Label text="INCIDENTS" styleClass="card-title"/>
                 </HBox>
                 <HBox alignment="BOTTOM_LEFT" spacing="10">
-                    <Label fx:id="incidentCount" text="—" styleClass="card-value"
-                           style="-fx-effect: dropshadow(gaussian, rgba(245,158,11,0.5), 10, 0, 0, 0);"/>
+                    <Label fx:id="incidentCount" text="—" styleClass="card-value" style="-fx-text-fill: #F59E0B;"/>
                 </HBox>
                 <Label text="Total reported" styleClass="text-muted" style="-fx-padding: 2 0 0 0;"/>
             </VBox>
@@ -111,19 +110,19 @@
                             <ColumnConstraints hgrow="ALWAYS" percentWidth="33.3"/>
                             <ColumnConstraints hgrow="ALWAYS" percentWidth="33.3"/>
                         </columnConstraints>
-                        <Button text="📂  New Case" onAction="#handleAddCase"
+                        <Button text="New Case" onAction="#handleAddCase"
                                 styleClass="quick-action-btn" maxWidth="Infinity" GridPane.columnIndex="0"/>
-                        <Button text="👤  Add Person" onAction="#handleAddCriminal"
+                        <Button text="Add Person" onAction="#handleAddCriminal"
                                 styleClass="quick-action-btn" maxWidth="Infinity" GridPane.columnIndex="1"/>
-                        <Button text="👮  Officers" onAction="#handleAddOfficer"
+                        <Button text="Officers" onAction="#handleAddOfficer"
                                 styleClass="quick-action-btn" maxWidth="Infinity" GridPane.columnIndex="2"/>
-                        <Button text="📊  Reports" onAction="#handleReports"
+                        <Button text="Reports" onAction="#handleReports"
                                 styleClass="quick-action-btn" maxWidth="Infinity"
                                 GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <Button text="⚙  Settings" onAction="#handleSettings"
+                        <Button text="Settings" onAction="#handleSettings"
                                 styleClass="quick-action-btn" maxWidth="Infinity"
                                 GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Button text="🛡  Audit Log" onAction="#handleAudit"
+                        <Button text="Audit Log" onAction="#handleAudit"
                                 styleClass="quick-action-btn" maxWidth="Infinity"
                                 GridPane.rowIndex="1" GridPane.columnIndex="2"/>
                     </GridPane>
@@ -139,7 +138,7 @@
                     <HBox alignment="CENTER_LEFT">
                         <Label text="Critical Alerts" styleClass="section-title" HBox.hgrow="ALWAYS"/>
                         <Label fx:id="alertCountLabel" text=""
-                               style="-fx-font-size:10px; -fx-text-fill: rgba(255,255,255,0.35);"/>
+                               style="-fx-font-size:10px; -fx-text-fill: -cms-t3;"/>
                     </HBox>
                     <VBox fx:id="alertsContainer" spacing="10">
                         <Label text="Checking system alerts..." styleClass="text-muted"/>
@@ -151,25 +150,19 @@
                     <Label text="System Status" styleClass="section-title"/>
                     <VBox spacing="8">
                         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="status-row">
-                            <Label text="✔" styleClass="status-icon-ok"/>
+                            <Label text="●" styleClass="status-indicator-ok"/>
                             <Label text="Database: Connected" styleClass="status-label"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Label text="LIVE" style="-fx-font-size:9px; -fx-font-weight:700;
-                                -fx-text-fill: #10B981; -fx-background-color: rgba(16,185,129,0.15);
-                                -fx-background-radius:8; -fx-padding: 2 7;
-                                -fx-border-color: rgba(16,185,129,0.35); -fx-border-width:1; -fx-border-radius:8;"/>
+                             <Label text="LIVE" styleClass="status-badge-live"/>
                         </HBox>
                         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="status-row">
-                            <Label text="✔" styleClass="status-icon-ok"/>
+                            <Label text="●" styleClass="status-indicator-ok"/>
                             <Label text="Secure Server: Active" styleClass="status-label"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Label text="OK" style="-fx-font-size:9px; -fx-font-weight:700;
-                                -fx-text-fill: #10B981; -fx-background-color: rgba(16,185,129,0.15);
-                                -fx-background-radius:8; -fx-padding: 2 7;
-                                -fx-border-color: rgba(16,185,129,0.35); -fx-border-width:1; -fx-border-radius:8;"/>
+                             <Label text="OK" styleClass="status-badge-ok"/>
                         </HBox>
                         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="status-row status-sync">
-                            <Label text="🔄" styleClass="status-icon-sync"/>
+                            <Label text="●" styleClass="status-indicator-sync"/>
                             <Label fx:id="lastSyncLabel" text="Last Sync: Active" styleClass="status-label"/>
                         </HBox>
                     </VBox>

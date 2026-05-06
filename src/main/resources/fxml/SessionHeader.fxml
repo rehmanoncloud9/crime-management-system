@@ -7,64 +7,61 @@
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.cms.controller.HeaderController">
 
-    <!-- HAMBURGER TOGGLE -->
-    <Button fx:id="menuToggleBtn" text="&#9776;" onAction="#handleMenuToggle"
-            styleClass="btn-icon"
-            style="-fx-font-size: 17px; -fx-min-width: 38; -fx-min-height: 38; -fx-cursor: hand;"/>
-
-    <!-- BREADCRUMB / MODULE TITLE -->
-    <HBox alignment="CENTER_LEFT" spacing="8" styleClass="header-nav">
-        <Button fx:id="backBtn" text="&#8617;" onAction="#handleBack"
-                styleClass="btn-icon, btn-back" visible="false" managed="false"
-                style="-fx-font-size: 15px;"/>
-        <Label text="DASHBOARD" styleClass="header-module-title"/>
-        <FlowPane fx:id="breadcrumbPane" hgap="4" alignment="CENTER_LEFT"
-                  styleClass="breadcrumb-container" visible="false" managed="false"/>
+    <!-- LEFT: NAVIGATION PILL -->
+    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="header-nav-pill">
+        <Button fx:id="menuToggleBtn" text="&#9776;" onAction="#handleMenuToggle"
+                styleClass="btn-icon-premium"/>
+        <Separator orientation="VERTICAL" prefHeight="20" styleClass="header-sep"/>
+        <HBox alignment="CENTER_LEFT" spacing="8">
+             <Button fx:id="backBtn" text="&#8617;" onAction="#handleBack"
+                     styleClass="btn-icon-sm" visible="false" managed="false"/>
+             <Label text="DASHBOARD" styleClass="header-title-premium"/>
+             <FlowPane fx:id="breadcrumbPane" hgap="4" alignment="CENTER_LEFT"
+                       styleClass="breadcrumb-container" visible="false" managed="false"/>
+        </HBox>
     </HBox>
-
+ 
     <Region HBox.hgrow="ALWAYS"/>
-
-    <!-- USER PROFILE -->
-    <HBox alignment="CENTER_LEFT" spacing="12">
-        <StackPane>
-            <Circle fx:id="profileCircle" radius="18"
-                    fill="rgba(0,229,255,0.1)"
-                    stroke="rgba(0,229,255,0.45)" strokeWidth="1.5"/>
-            <Label fx:id="initialsLabel" text="?"
-                   style="-fx-font-weight: 800; -fx-font-size: 13px; -fx-text-fill: #00E5FF;"/>
+ 
+    <!-- CENTER: USER HUB -->
+    <HBox alignment="CENTER" spacing="14" styleClass="header-user-hub">
+        <StackPane styleClass="avatar-wrapper">
+            <Circle fx:id="profileCircle" radius="18" fill="white" stroke="-cms-mint" strokeWidth="2"/>
+            <Label fx:id="initialsLabel" text="?" styleClass="avatar-initials"/>
         </StackPane>
-        <VBox alignment="CENTER_LEFT" spacing="1">
-            <Label fx:id="userNameLabel" text="Officer Name" styleClass="header-username"/>
-            <Label fx:id="officerRankLabel" text="Rank · Badge" styleClass="header-rank"/>
-            <Label fx:id="precinctLabel" text="" styleClass="text-muted-xs" visible="true" managed="true"/>
+        <VBox alignment="CENTER_LEFT" spacing="0">
+            <Label fx:id="userNameLabel" text="Rehman OnCloud9" styleClass="hub-username"/>
+            <Label fx:id="officerRankLabel" text="ADMINISTRATOR" styleClass="hub-rank"/>
         </VBox>
-        <Label fx:id="roleBadge" text="OFFICER" styleClass="role-badge, role-badge-default"/>
+        <StackPane styleClass="role-indicator-glow">
+             <Label fx:id="roleBadge" text="ADMIN" styleClass="role-pill-neon"/>
+        </StackPane>
     </HBox>
-
+ 
     <Region HBox.hgrow="ALWAYS"/>
-
-    <!-- CLOCK -->
-    <VBox alignment="CENTER_RIGHT" spacing="1">
-        <Label fx:id="dateLabel" text="Saturday, 02 May 2026" styleClass="header-date"/>
-        <Label fx:id="timeLabel" text="—" styleClass="header-clock"/>
-    </VBox>
-
-    <!-- ACTIONS -->
-    <HBox alignment="CENTER" spacing="10">
-        <!-- Notification bell -->
-        <StackPane>
-            <Button fx:id="notificationBtn" text="&#128276;" onAction="#handleNotificationClick"
-                    styleClass="btn-icon" style="-fx-font-size: 16px;"/>
-            <StackPane alignment="TOP_RIGHT" pickOnBounds="false">
-                <StackPane styleClass="notif-badge" translateY="-4" translateX="4">
-                    <Label fx:id="notifCountLabel" text="0"
-                           style="-fx-font-size: 8px; -fx-text-fill: white; -fx-font-weight: 800;"/>
+ 
+    <!-- RIGHT: ACTION & CLOCK HUB -->
+    <HBox alignment="CENTER_RIGHT" spacing="16">
+        <!-- Clock Widget -->
+        <VBox alignment="CENTER_RIGHT" spacing="0" styleClass="header-clock-widget">
+            <Label fx:id="dateLabel" text="Wednesday, 06 May 2026" styleClass="clock-date"/>
+            <Label fx:id="timeLabel" text="19:50:00" styleClass="clock-time"/>
+        </VBox>
+ 
+        <HBox alignment="CENTER" spacing="8" styleClass="header-action-hub">
+            <StackPane>
+                <Button fx:id="notificationBtn" text="&#128276;" onAction="#handleNotificationClick"
+                        styleClass="btn-notif-premium"/>
+                <StackPane alignment="TOP_RIGHT" pickOnBounds="false" translateY="-4" translateX="4">
+                    <Circle radius="9" fill="#FF5252" stroke="white" strokeWidth="1.5"/>
+                    <Label fx:id="notifCountLabel" text="0" styleClass="notif-text-premium"/>
                 </StackPane>
             </StackPane>
-        </StackPane>
-
-        <Button fx:id="logoutBtn" text="LOGOUT" onAction="#handleLogout"
-                styleClass="btn-logout"/>
+            
+            <Separator orientation="VERTICAL" prefHeight="20" styleClass="header-sep-lite"/>
+            
+            <Button fx:id="logoutBtn" text="LOGOUT" onAction="#handleLogout" styleClass="btn-logout-premium"/>
+        </HBox>
     </HBox>
 
 </HBox>

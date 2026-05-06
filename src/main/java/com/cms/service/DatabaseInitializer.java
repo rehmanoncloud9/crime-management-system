@@ -217,7 +217,7 @@ public class DatabaseInitializer {
             // 1. Create person record
             stmt.executeUpdate(
                 "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, gender, created_at, updated_at) " +
-                "VALUES ('System', 'Administrator', true, 'UNKNOWN', '" + adminEmail + "', 'OTHER', NOW(), NOW())",
+                "VALUES ('Rehman', 'OnCloud9', true, 'UNKNOWN', '" + adminEmail + "', 'OTHER', NOW(), NOW())",
                 Statement.RETURN_GENERATED_KEYS);
 
             long personId = -1;

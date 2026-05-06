@@ -4,7 +4,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="20" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.cms.controller.IncidentRegistrationController" styleClass="module">
+      fx:controller="com.cms.controller.IncidentRegistrationController" styleClass="content-area">
     <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
 
         <Label text="Register New Crime Incident" styleClass="heading-xl"/>

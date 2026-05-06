@@ -4,7 +4,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cms.controller.MainController"
-            style="-fx-background-color: #080B14;">
+            style="-fx-background-color: -cms-mist;">
 
     <!-- TOP: Frosted glass header -->
     <top>
@@ -13,22 +13,28 @@
 
     <!-- BODY -->
     <center>
-        <HBox style="-fx-background-color: #080B14;" alignment="TOP_LEFT">
+        <StackPane>
+            <!-- Background Orbs for Aurora Effect -->
+            <Region layoutX="-200" layoutY="-200" prefWidth="600" prefHeight="600" opacity="0.1" 
+                    style="-fx-background-color: radial-gradient(center 50% 50%, radius 50%, #00E5C8 0%, transparent 80%); -fx-background-radius: 1000;"/>
+            <Region layoutX="900" layoutY="400" prefWidth="500" prefHeight="500" opacity="0.08" 
+                    style="-fx-background-color: radial-gradient(center 50% 50%, radius 50%, #B388FF 0%, transparent 80%); -fx-background-radius: 1000;"/>
+            
+            <HBox style="-fx-background-color: transparent;" alignment="TOP_LEFT">
 
             <!-- SIDEBAR -->
             <ScrollPane fx:id="sidebarScroll"
                         fitToWidth="true"
                         hbarPolicy="NEVER"
                         vbarPolicy="AS_NEEDED"
-                        style="-fx-background-color: #060910; -fx-border-color: transparent;"
+                        style="-fx-background-color: transparent; -fx-border-color: transparent;"
                         styleClass="sidebar-scroll">
                 <VBox fx:id="sideMenu"
-                      prefWidth="240" minWidth="240"
-                      style="-fx-background-color: #060910;"
+                      prefWidth="250" minWidth="250"
                       styleClass="sidebar">
                     <VBox styleClass="sidebar-brand">
-                        <Label text="🛡 CMS" styleClass="brand-title"/>
-                        <Label text="Crime Management System" styleClass="brand-subtitle"/>
+                        <Label text="CMS" styleClass="brand-title"/>
+                        <Label text="CRIME MANAGEMENT SYSTEM" styleClass="brand-subtitle"/>
                     </VBox>
                     <Separator/>
                     <!-- Menu buttons injected by MainController.buildSidebar() -->
@@ -41,10 +47,11 @@
                         hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
                         styleClass="main-content-scroll">
                 <StackPane fx:id="contentArea"
-                           style="-fx-background-color: #080B14; -fx-padding: 0;"/>
+                           style="-fx-background-color: transparent; -fx-padding: 0;"/>
             </ScrollPane>
 
         </HBox>
+        </StackPane>
     </center>
 
 </BorderPane>
