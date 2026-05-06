@@ -132,7 +132,7 @@
                 <!-- Footer -->
                 <HBox alignment="CENTER" spacing="6">
                     <Label text="Need assistance?" styleClass="footer-text"/>
-                    <Hyperlink text="WhatsApp System Admin" styleClass="footer-link"
+                    <Hyperlink fx:id="supportLink" text="Contact Support" styleClass="footer-link"
                                onAction="#handleContactAdmin" style="-fx-text-fill: #10B981;"/>
                 </HBox>
 

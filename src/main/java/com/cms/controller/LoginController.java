@@ -13,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -24,11 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class LoginController {
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
     private final AuthService authService = new AuthService();
+    private static final Properties APP_CONFIG = loadAppConfig();
 
     @FXML
     private TextField usernameField;
@@ -40,6 +43,8 @@ public class LoginController {
     private Label errorLabel;
     @FXML
     private Button loginButton;
+    @FXML
+    private Hyperlink supportLink;
 
     @FXML
     private Region orb1;
@@ -76,6 +81,8 @@ public class LoginController {
                 animateOrb(orb3, -200, 400, 18000);
             }
         });
+
+        updateSupportLink();
     }
 
     private void animateOrb(Node orb, double dx, double dy, double durationMs) {
@@ -242,11 +249,47 @@ public class LoginController {
     @FXML
     private void handleContactAdmin(ActionEvent event) {
         try {
-            // Direct WhatsApp link as requested
-            java.awt.Desktop.getDesktop().browse(new java.net.URI("https://wa.me/923487453067"));
+            String supportUrl = APP_CONFIG.getProperty("app.support.url", "").trim();
+            String supportEmail = APP_CONFIG.getProperty("app.support.email", "").trim();
+
+            if (!supportUrl.isBlank()) {
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(supportUrl));
+            } else if (!supportEmail.isBlank()) {
+                java.awt.Desktop.getDesktop().browse(new java.net.URI("mailto:" + supportEmail));
+            } else {
+                NexusAlert.showError("Support contact is not configured. Please contact your system administrator.");
+            }
         } catch (Exception e) {
-            logger.error("Failed to open WhatsApp URL", e);
-            NexusAlert.show("Technical Support", "Could not open WhatsApp link. Contact number: 034 87453067", NexusAlert.Type.SUCCESS);
+            logger.error("Failed to open support link", e);
+            String contactInfo = APP_CONFIG.getProperty("app.support.email", "administrator");
+            NexusAlert.show("Technical Support", "Could not open support link. Contact: " + contactInfo, NexusAlert.Type.ERROR);
         }
+    }
+
+    private void updateSupportLink() {
+        if (supportLink == null) return;
+        String supportEmail = APP_CONFIG.getProperty("app.support.email", "").trim();
+        String supportUrl = APP_CONFIG.getProperty("app.support.url", "").trim();
+
+        if (!supportEmail.isBlank()) {
+            supportLink.setText(supportEmail);
+        } else if (!supportUrl.isBlank()) {
+            supportLink.setText("Contact Support");
+        } else {
+            supportLink.setText("Contact Administrator");
+        }
+    }
+
+    private static Properties loadAppConfig() {
+        Properties props = new Properties();
+        Logger bootstrapLogger = LoggerFactory.getLogger(LoginController.class);
+        try (InputStream in = LoginController.class.getClassLoader().getResourceAsStream("config.properties")) {
+            if (in != null) {
+                props.load(in);
+            }
+        } catch (IOException e) {
+            bootstrapLogger.warn("Could not load config.properties for support contact: {}", e.getMessage());
+        }
+        return props;
     }
 }

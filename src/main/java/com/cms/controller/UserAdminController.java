@@ -96,7 +96,6 @@ public class UserAdminController {
 
         task.setOnFailed(e -> {
             logger.error("Failed to load users", task.getException());
-            logger.error("Failed to load users", task.getException());
             userFlowPane.getChildren().clear();
             userFlowPane.getChildren().add(new Label("Error loading data. Check database connection. See logs for details."));
         });
