@@ -12,8 +12,10 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Properties;
 import java.util.Optional;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    private static final Properties APP_CONFIG = loadAppConfig();
 
     private boolean sessionEnabled = true;
 
@@ -140,10 +143,12 @@ public class AuthService {
     }
 
     private void normalizeLockState(User user, UserRepository userRepository) {
-        if (user.getStatus() == UserStatus.LOCKED && user.getLockedUntil() != null
-                && user.getLockedUntil().isBefore(LocalDateTime.now())) {
-            user.setStatus(UserStatus.ACTIVE);
+        if (user.getLockedUntil() != null && user.getLockedUntil().isBefore(LocalDateTime.now())) {
+            if (user.getStatus() == UserStatus.LOCKED) {
+                user.setStatus(UserStatus.ACTIVE);
+            }
             user.setLockedUntil(null);
+            user.setFailedLoginAttempts(0);
             userRepository.update(user);
         }
     }
@@ -208,12 +213,48 @@ public class AuthService {
         int attempts = user.getFailedLoginAttempts() + 1;
         user.setFailedLoginAttempts(attempts);
 
-        if (attempts >= 5) {
-            user.setLockedUntil(LocalDateTime.now().plusMinutes(30));
+        int maxAttempts = getLockoutAttempts();
+        int lockMinutes = getLockoutMinutes();
+
+        if (attempts >= maxAttempts) {
+            user.setLockedUntil(LocalDateTime.now().plusMinutes(lockMinutes));
+            user.setStatus(UserStatus.LOCKED);
             logger.info("User {} locked due to failed attempts", user.getUsername());
         }
 
         userRepository.update(user);
+    }
+
+    private int getLockoutAttempts() {
+        return parsePositiveInt(APP_CONFIG.getProperty("app.password.lockout.attempts"), 5);
+    }
+
+    private int getLockoutMinutes() {
+        return parsePositiveInt(APP_CONFIG.getProperty("app.password.lockout.minutes"), 30);
+    }
+
+    private static int parsePositiveInt(String value, int fallback) {
+        if (value == null || value.isBlank()) return fallback;
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            return parsed > 0 ? parsed : fallback;
+        } catch (NumberFormatException ex) {
+            return fallback;
+        }
+    }
+
+    private static Properties loadAppConfig() {
+        Properties props = new Properties();
+        try (InputStream in = AuthService.class.getClassLoader().getResourceAsStream("config.properties")) {
+            if (in != null) {
+                props.load(in);
+            } else {
+                logger.warn("config.properties not found; using defaults for auth config.");
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to load config.properties for auth config: {}", e.getMessage());
+        }
+        return props;
     }
 
     protected void createSession(User user, Session session) {
