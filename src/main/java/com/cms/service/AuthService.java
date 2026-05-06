@@ -245,14 +245,15 @@ public class AuthService {
 
     private static Properties loadAppConfig() {
         Properties props = new Properties();
+        Logger bootstrapLogger = LoggerFactory.getLogger(AuthService.class);
         try (InputStream in = AuthService.class.getClassLoader().getResourceAsStream("config.properties")) {
             if (in != null) {
                 props.load(in);
             } else {
-                logger.warn("config.properties not found; using defaults for auth config.");
+                bootstrapLogger.warn("config.properties not found; using defaults for auth config.");
             }
         } catch (Exception e) {
-            logger.warn("Failed to load config.properties for auth config: {}", e.getMessage());
+            bootstrapLogger.warn("Failed to load config.properties for auth config: {}", e.getMessage());
         }
         return props;
     }

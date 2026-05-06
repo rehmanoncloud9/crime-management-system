@@ -262,7 +262,7 @@ public class LoginController {
         } catch (Exception e) {
             logger.error("Failed to open support link", e);
             String fallback = APP_CONFIG.getProperty("app.support.email", "administrator");
-            NexusAlert.show("Technical Support", "Could not open support link. Contact: " + fallback, NexusAlert.Type.SUCCESS);
+            NexusAlert.show("Technical Support", "Could not open support link. Contact: " + fallback, NexusAlert.Type.ERROR);
         }
     }
 
@@ -282,12 +282,13 @@ public class LoginController {
 
     private static Properties loadAppConfig() {
         Properties props = new Properties();
+        Logger bootstrapLogger = LoggerFactory.getLogger(LoginController.class);
         try (InputStream in = LoginController.class.getClassLoader().getResourceAsStream("config.properties")) {
             if (in != null) {
                 props.load(in);
             }
         } catch (IOException e) {
-            logger.warn("Could not load config.properties for support contact: {}", e.getMessage());
+            bootstrapLogger.warn("Could not load config.properties for support contact: {}", e.getMessage());
         }
         return props;
     }
