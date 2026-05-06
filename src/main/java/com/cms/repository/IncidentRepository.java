@@ -60,7 +60,14 @@ public class IncidentRepository {
     public List<CrimeIncident> searchByKeyword(String keyword) {
         if (keyword == null || keyword.isBlank()) return findAll(100, 0);
         return entityManager.createQuery(
-                "SELECT i FROM CrimeIncident i WHERE LOWER(i.title) LIKE :kw OR LOWER(i.incidentNumber) LIKE :kw ORDER BY i.occurredAt DESC",
+                "SELECT i FROM CrimeIncident i " +
+                        "LEFT JOIN i.crimeType ct " +
+                        "LEFT JOIN i.district d " +
+                        "WHERE LOWER(i.title) LIKE :kw " +
+                        "OR LOWER(i.incidentNumber) LIKE :kw " +
+                        "OR LOWER(ct.name) LIKE :kw " +
+                        "OR LOWER(d.name) LIKE :kw " +
+                        "ORDER BY i.occurredAt DESC",
                 CrimeIncident.class)
             .setParameter("kw", "%" + keyword.toLowerCase() + "%")
             .setMaxResults(50)

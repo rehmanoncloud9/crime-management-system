@@ -170,10 +170,15 @@ public class UserAdminController {
         task.setOnFailed(event -> {
             Throwable ex = task.getException();
             logger.error("Failed to create user", ex);
-            String msg = ex.getMessage() != null && (ex.getMessage().contains("Constraint") || (ex.getCause() != null && ex.getCause().getMessage().contains("Constraint")))
-                ? "Duplicate Data: Badge Number or Email already exists."
-                : "Failed to create user: " + ex.getMessage();
-            new Alert(Alert.AlertType.ERROR, msg).showAndWait();
+            
+            String errMsg = "System Error: " + ex.getMessage();
+            if (ex.getMessage() != null && (ex.getMessage().contains("Constraint") || (ex.getCause() != null && ex.getCause().getMessage().contains("Constraint")))) {
+                errMsg = "ACCOUNT CLASH: An officer with this Badge ID or Email already exists.\n\n" +
+                         "NOTE: If you don't see them in the list, their record might be partially corrupted. " +
+                         "I've updated the search logic to reveal these 'Ghost Records'—please search for the Badge ID in the list above and delete it before retrying.";
+            }
+            
+            new Alert(Alert.AlertType.ERROR, errMsg).showAndWait();
         });
         new Thread(task).start();
     }
@@ -266,6 +271,11 @@ public class UserAdminController {
                 statusBtn.getStyleClass().add("btn-danger-sm");
             }
 
+            Button deleteBtn = (Button) card.lookup("#deleteBtn");
+            if (deleteBtn != null) {
+                deleteBtn.setOnAction(ev -> handleDeleteOfficer(user));
+            }
+
             return card;
         } catch (Exception e) {
             logger.error("Error creating officer card for {}", user.getFullName(), e);
@@ -296,6 +306,20 @@ public class UserAdminController {
     }
 
     // ==================== UTILITIES ====================
+
+    private void handleDeleteOfficer(User user) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
+            "Are you sure you want to PERMANENTLY delete officer " + user.getBadgeNumber() + "?\nThis will also remove their linked Person profile.",
+            ButtonType.YES, ButtonType.NO);
+        confirm.setTitle("Confirm Deletion");
+        confirm.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.YES) {
+                User actor = SessionManager.getInstance().getCurrentUser();
+                userService.deleteUser(user.getId(), actor);
+                loadUsers();
+            }
+        });
+    }
 
     private File chooseImageFile() {
         FileChooser fileChooser = new FileChooser();

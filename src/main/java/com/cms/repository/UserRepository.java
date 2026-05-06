@@ -79,15 +79,16 @@ public class UserRepository {
 
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u " +
+                        "LEFT JOIN u.person p " +
                         "WHERE LOWER(u.badgeNumber) LIKE LOWER(:kw) " +
-                        "OR LOWER(u.person.firstName) LIKE LOWER(:kw) " +
-                        "OR LOWER(u.person.lastName) LIKE LOWER(:kw) " +
+                        "OR LOWER(p.firstName) LIKE LOWER(:kw) " +
+                        "OR LOWER(p.lastName) LIKE LOWER(:kw) " +
                         "OR LOWER(u.username) LIKE LOWER(:kw) " +
                         "ORDER BY u.id DESC",
                 User.class
         );
 
-        query.setParameter("kw", "%" + keyword.trim() + "%");
+        query.setParameter("kw", "%" + keyword.trim().toLowerCase() + "%");
         query.setFirstResult(offset);
         query.setMaxResults(limit);
 
