@@ -2,6 +2,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="0" prefWidth="500" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -36,50 +37,50 @@
 
             <!-- Details Form -->
             <VBox spacing="15" styleClass="card" style="-fx-padding: 20;">
-                <Label text="Official Credentials" styleClass="heading-sm"/>
-                <GridPane vgap="15" hgap="20">
+                <Label text="Official Credentials" styleClass="heading-md"/>
+                <GridPane vgap="18" hgap="25">
                     <columnConstraints>
-                        <ColumnConstraints prefWidth="120"/>
+                        <ColumnConstraints prefWidth="130"/>
                         <ColumnConstraints hgrow="ALWAYS"/>
                     </columnConstraints>
 
                     <Label text="Badge ID" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <TextField fx:id="badgeField" editable="false" styleClass="text-field-readonly" 
+                    <TextField fx:id="badgeField" editable="false" styleClass="text-field-premium, text-field-readonly" 
                                GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
                     <Label text="Full Name" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <TextField fx:id="nameField" promptText="Enter officer name" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <TextField fx:id="nameField" promptText="Enter officer name" styleClass="text-field-premium" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-                    <Label text="Rank" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <TextField fx:id="rankField" promptText="e.g. Inspector, Detective" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <Label text="Rank / Title" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <TextField fx:id="rankField" promptText="e.g. Inspector, Detective" styleClass="text-field-premium" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
                     <Label text="Department" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <TextField fx:id="deptField" promptText="e.g. Special Operations, Homicide" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    <TextField fx:id="deptField" promptText="e.g. Special Operations, Homicide" styleClass="text-field-premium" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
                     <Label text="Assigned Precinct" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                    <TextField fx:id="precinctField" promptText="e.g. 1st Precinct" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                    <TextField fx:id="precinctField" promptText="e.g. 1st Precinct" styleClass="text-field-premium" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
                     <Label text="System Role" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                    <ComboBox fx:id="roleCombo" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                    <ComboBox fx:id="roleCombo" maxWidth="Infinity" styleClass="combo-box-premium" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
 
                     <Label text="Contact Email" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-                    <TextField fx:id="emailField" promptText="officer@cms.gov" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                    <TextField fx:id="emailField" promptText="officer@cms.gov" styleClass="text-field-premium" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
 
                     <Label text="Phone Number" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
-                    <TextField fx:id="phoneField" promptText="+92 300 0000000" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+                    <TextField fx:id="phoneField" promptText="+92 300 0000000" styleClass="text-field-premium" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
 
                     <Label text="Duty Status" styleClass="form-label-premium" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
-                    <ComboBox fx:id="statusCombo" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="8"/>
+                    <ComboBox fx:id="statusCombo" maxWidth="Infinity" styleClass="combo-box-premium" GridPane.columnIndex="1" GridPane.rowIndex="8"/>
                 </GridPane>
             </VBox>
 
             <!-- Danger Zone -->
             <VBox spacing="15" styleClass="card-danger-zone">
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="⚠" style="-fx-text-fill: #ef4444; -fx-font-size: 18px;"/>
+                    <Label text="⚠️" style="-fx-text-fill: -cms-rose; -fx-font-size: 18px;"/>
                     <VBox>
-                        <Label text="Administrative Actions" styleClass="heading-xs" style="-fx-text-fill: #991b1b;"/>
-                        <Label text="Critical system modifications" styleClass="text-muted-xs"/>
+                        <Label text="Administrative Actions" styleClass="heading-sm" style="-fx-text-fill: -cms-rose;"/>
+                        <Label text="Critical modifications restricted to admin" styleClass="text-muted-xs"/>
                     </VBox>
                 </HBox>
                 <HBox spacing="10">
@@ -92,8 +93,8 @@
     </ScrollPane>
 
     <!-- Footer Actions -->
-    <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-padding: 20; -fx-background-color: rgba(255,255,255,0.05);">
-        <Button text="Cancel Changes" onAction="#handleCancel" styleClass="btn, btn-outline"/>
-        <Button text="Apply Changes" onAction="#handleSave" styleClass="btn, btn-primary" prefWidth="150"/>
+    <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-padding: 20; -fx-background-color: rgba(0,0,0,0.03);">
+        <Button text="CANCEL" onAction="#handleCancel" styleClass="btn-premium-danger-outline"/>
+        <Button text="APPLY CHANGES" onAction="#handleSave" styleClass="btn-premium-teal" prefWidth="180"/>
     </HBox>
 </VBox>

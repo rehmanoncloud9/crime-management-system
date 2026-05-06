@@ -202,6 +202,16 @@ public class EvidenceLogController {
     private void handleExportPDF() {
         CaseFile selected = caseCombo.getValue();
         if (selected == null) { alert(Alert.AlertType.WARNING, "Please select a case first."); return; }
+        
+        javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Save Chain of Custody Report");
+        chooser.setInitialFileName("Chain_of_Custody_" + selected.getCaseNumber() + ".pdf");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF Documents", "*.pdf"));
+        java.io.File selectedFile = chooser.showSaveDialog(caseCombo.getScene().getWindow());
+
+        if (selectedFile == null) return;
+        final String outPath = selectedFile.getAbsolutePath();
+
         Task<Void> t = new Task<>() {
             @Override protected Void call() throws Exception {
                 List<Evidence> list = evidenceService.findByCase(selected.getId(), 1000, 0);
@@ -209,12 +219,10 @@ public class EvidenceLogController {
                     Platform.runLater(() -> alert(Alert.AlertType.INFORMATION,"No evidence found for this case."));
                     return null;
                 }
-                String out = System.getProperty("user.home") + "/Desktop/Chain_of_Custody_"
-                             + selected.getCaseNumber() + ".pdf";
                 new ReportingService().generateReport(
                     "/reports/chain_of_custody_template.jrxml",
-                    java.util.Map.of("CaseNumber", selected.getCaseNumber()), list, out);
-                Platform.runLater(() -> alert(Alert.AlertType.INFORMATION, "Chain of Custody exported to: " + out));
+                    java.util.Map.of("CaseNumber", selected.getCaseNumber()), list, outPath);
+                Platform.runLater(() -> alert(Alert.AlertType.INFORMATION, "Chain of Custody exported to: " + outPath));
                 return null;
             }
         };

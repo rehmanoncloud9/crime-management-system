@@ -93,8 +93,14 @@ public class ChargeSheetsController {
         }
 
         try {
-            String outputPath = System.getProperty("user.home")
-                    + "/Desktop/Charge_Sheet_" + selected.getCaseNumber() + ".pdf";
+            javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
+            chooser.setTitle("Save Charge Sheet");
+            chooser.setInitialFileName("Charge_Sheet_" + selected.getCaseNumber() + ".pdf");
+            chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF Documents", "*.pdf"));
+            java.io.File selectedFile = chooser.showSaveDialog(caseCombo.getScene().getWindow());
+
+            if (selectedFile == null) return;
+            String outputPath = selectedFile.getAbsolutePath();
 
             Map<String, Object> params = new HashMap<>();
             params.put("CaseNumber", selected.getCaseNumber());

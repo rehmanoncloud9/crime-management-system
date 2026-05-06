@@ -422,15 +422,23 @@ public class IncidentRegistrationController {
     @FXML
     private void handleExportFIR() {
         if (lastSavedIncident == null) return;
+        
+        javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Save FIR Report");
+        chooser.setInitialFileName("FIR_" + lastSavedIncident.getIncidentNumber() + ".pdf");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF Documents", "*.pdf"));
+        java.io.File selectedFile = chooser.showSaveDialog(titleField.getScene().getWindow());
+
+        if (selectedFile == null) return;
+        String outPath = selectedFile.getAbsolutePath();
+
         try {
-            String out = System.getProperty("user.home") + "/Desktop/FIR_"
-                         + lastSavedIncident.getIncidentNumber() + ".pdf";
             new com.cms.service.ReportingService().generateReport(
                 "/reports/fir_template.jrxml",
                 new java.util.HashMap<>(),
                 java.util.Collections.singletonList(new FIRWrapper(lastSavedIncident)),
-                out);
-            alert(Alert.AlertType.INFORMATION, "FIR exported to: " + out);
+                outPath);
+            alert(Alert.AlertType.INFORMATION, "FIR exported to: " + outPath);
         } catch (Exception e) {
             logger.error("Failed to export FIR", e);
             alert(Alert.AlertType.ERROR, "Failed to export FIR: " + e.getMessage());

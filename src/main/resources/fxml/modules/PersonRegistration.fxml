@@ -71,80 +71,81 @@
                 <GridPane hgap="25" vgap="15">
                     <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
                         <Label text="Aliases (Monikers)" styleClass="form-label-premium"/>
-                        <TextField fx:id="aliasesField" promptText="Separated by commas..." styleClass="text-field-premium"/>
+                        <TextField fx:id="aliasesField" promptText="Separated by commas..." styleClass="text-field-premium" maxWidth="Infinity"/>
                     </VBox>
                     <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1">
                         <Label text="Gang Affiliation" styleClass="form-label-premium"/>
-                        <TextField fx:id="gangField" promptText="Known groups..." styleClass="text-field-premium"/>
+                        <TextField fx:id="gangField" promptText="Known groups..." styleClass="text-field-premium" prefWidth="250"/>
                     </VBox>
                     <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="1" alignment="BOTTOM_LEFT">
-                        <CheckBox fx:id="warrantCheck" text="ACTIVE WARRANT" style="-fx-text-fill: -cms-rose; -fx-font-weight: 800;"/>
+                        <CheckBox fx:id="warrantCheck" text="ACTIVE WARRANT" style="-fx-text-fill: -cms-rose; -fx-font-weight: 800; -fx-padding: 0 0 8 0;"/>
                     </VBox>
                 </GridPane>
             </VBox>
 
-            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
+            <VBox spacing="16" prefWidth="400" styleClass="form-section-card">
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="📏" style="-fx-font-size: 18px;"/>
                     <Label text="Physical Profile" styleClass="heading-md"/>
                 </HBox>
-                <HBox spacing="15">
-                    <VBox spacing="6">
+                <HBox spacing="25">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Height (cm)" styleClass="form-label-premium"/>
-                        <TextField fx:id="heightField" prefWidth="100" styleClass="text-field-premium"/>
+                        <TextField fx:id="heightField" styleClass="text-field-premium"/>
                     </VBox>
-                    <VBox spacing="6">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Weight (kg)" styleClass="form-label-premium"/>
-                        <TextField fx:id="weightField" prefWidth="100" styleClass="text-field-premium"/>
+                        <TextField fx:id="weightField" styleClass="text-field-premium"/>
                     </VBox>
                 </HBox>
                 <VBox spacing="6">
                     <Label text="Distinguishing Marks" styleClass="form-label-premium"/>
-                    <TextArea fx:id="marksArea" prefHeight="60" wrapText="true" styleClass="text-area-premium"/>
+                    <TextArea fx:id="marksArea" prefHeight="70" wrapText="true" styleClass="text-area-premium"/>
                 </VBox>
             </VBox>
         </HBox>
 
-        <!-- Section 3: Geographic & Medical -->
-        <HBox spacing="24">
-            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="📍" style="-fx-font-size: 18px;"/>
-                    <Label text="Residency Data" styleClass="heading-md"/>
-                </HBox>
-                <GridPane hgap="20" vgap="15">
-                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                        <Label text="District" styleClass="form-label-premium"/>
-                        <ComboBox fx:id="districtCombo" prefWidth="180" styleClass="combo-box-premium"/>
-                    </VBox>
-                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <Label text="City" styleClass="form-label-premium"/>
-                        <ComboBox fx:id="cityCombo" prefWidth="180" styleClass="combo-box-premium"/>
-                    </VBox>
-                    <VBox spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                        <Label text="Area / Sector" styleClass="form-label-premium"/>
-                        <ComboBox fx:id="areaCombo" prefWidth="180" styleClass="combo-box-premium"/>
-                    </VBox>
-                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="3">
-                        <Label text="Street Address / Details" styleClass="form-label-premium"/>
-                        <TextArea fx:id="addressArea" prefHeight="60" wrapText="true" styleClass="text-area-premium"/>
-                    </VBox>
-                </GridPane>
-            </VBox>
+        <!-- Section 3: Geographic Data (Full Width for better breathing room) -->
+        <VBox spacing="16" styleClass="form-section-card">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="📍" style="-fx-font-size: 18px;"/>
+                <Label text="Residency &amp; Location Data" styleClass="heading-md"/>
+            </HBox>
+            <GridPane hgap="30" vgap="18">
+                <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label text="District" styleClass="form-label-premium"/>
+                    <ComboBox fx:id="districtCombo" prefWidth="250" styleClass="combo-box-premium"/>
+                </VBox>
+                <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label text="City" styleClass="form-label-premium"/>
+                    <ComboBox fx:id="cityCombo" prefWidth="250" styleClass="combo-box-premium"/>
+                </VBox>
+                <VBox spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label text="Area / Sector" styleClass="form-label-premium"/>
+                    <ComboBox fx:id="areaCombo" prefWidth="250" styleClass="combo-box-premium"/>
+                </VBox>
+                <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="3">
+                    <Label text="Street Address / Residence Details" styleClass="form-label-premium"/>
+                    <TextArea fx:id="addressArea" prefHeight="70" wrapText="true" styleClass="text-area-premium" maxWidth="Infinity"/>
+                </VBox>
+            </GridPane>
+        </VBox>
 
+        <!-- Section 4: Professional & Medical -->
+        <HBox spacing="24">
             <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="💼" style="-fx-font-size: 18px;"/>
                     <Label text="Professional Context" styleClass="heading-md"/>
                 </HBox>
-                <GridPane hgap="20" vgap="15">
+                <GridPane hgap="25" vgap="15">
                     <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
                         <Label text="Occupation" styleClass="form-label-premium"/>
-                        <TextField fx:id="occupationField" promptText="Job Title" styleClass="text-field-premium"/>
+                        <TextField fx:id="occupationField" promptText="Job Title" styleClass="text-field-premium" prefWidth="250"/>
                     </VBox>
                     <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
                         <Label text="Employer / Company" styleClass="form-label-premium"/>
-                        <TextField fx:id="employerField" promptText="Current Employer" styleClass="text-field-premium"/>
+                        <TextField fx:id="employerField" promptText="Current Employer" styleClass="text-field-premium" prefWidth="250"/>
                     </VBox>
                 </GridPane>
             </VBox>
@@ -152,21 +153,21 @@
             <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="🏥" style="-fx-font-size: 18px;"/>
-                    <Label text="Medical Records" styleClass="heading-md"/>
+                    <Label text="Medical &amp; Health Records" styleClass="heading-md"/>
                 </HBox>
-                <HBox spacing="15">
+                <HBox spacing="20">
                     <VBox spacing="6">
                         <Label text="Blood Group" styleClass="form-label-premium"/>
-                        <ComboBox fx:id="bloodGroupCombo" prefWidth="120" styleClass="combo-box-premium"/>
+                        <ComboBox fx:id="bloodGroupCombo" prefWidth="150" styleClass="combo-box-premium"/>
                     </VBox>
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="DNA Profile Reference" styleClass="form-label-premium"/>
-                        <TextField fx:id="dnaProfileField" styleClass="text-field-premium"/>
+                        <TextField fx:id="dnaProfileField" styleClass="text-field-premium" promptText="Reference ID"/>
                     </VBox>
                 </HBox>
                 <VBox spacing="6">
-                    <Label text="Known Conditions / Injuries" styleClass="form-label-premium"/>
-                    <TextArea fx:id="diseasesArea" prefHeight="60" wrapText="true" styleClass="text-area-premium"/>
+                    <Label text="Known Medical Conditions / Chronic Injuries" styleClass="form-label-premium"/>
+                    <TextArea fx:id="diseasesArea" prefHeight="70" wrapText="true" styleClass="text-area-premium"/>
                 </VBox>
             </VBox>
         </HBox>

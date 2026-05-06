@@ -384,12 +384,18 @@ public class StatisticalReportsController {
         final WritableImage finalLineSnap = lineSnap;
         final WritableImage finalBarSnap = barSnap;
 
+        // Choose destination
+        javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Save PDF Report");
+        chooser.setInitialFileName("CMS_" + rt.replace(" ", "_") + "_" + System.currentTimeMillis() + ".pdf");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF Documents", "*.pdf"));
+        java.io.File selectedFile = chooser.showSaveDialog(reportTypeCombo.getScene().getWindow());
+
+        if (selectedFile == null) return;
+        final String outPath = selectedFile.getAbsolutePath();
+
         Task<Void> task = new Task<>() {
             @Override protected Void call() throws Exception {
-                String fileName = "CMS_" + rt.replace(" ", "_") + "_" +
-                                  System.currentTimeMillis() + ".pdf";
-                String outPath = System.getProperty("user.home") + "/Desktop/" + fileName;
-
                 // Use OpenPDF to create PDF with chart images
                 com.lowagie.text.Document doc = new com.lowagie.text.Document(
                     com.lowagie.text.PageSize.A4.rotate()); // Landscape for charts
@@ -453,17 +459,24 @@ public class StatisticalReportsController {
     //  Excel Export — Data tables with correct HQL
     // ═══════════════════════════════════════════════════
     @FXML private void handleExportExcel() {
+        String reportType = reportTypeCombo.getValue();
+        if (reportType == null) reportType = "Incident Summary";
+        final String rt = reportType;
+
+        javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
+        chooser.setTitle("Save Excel Report");
+        chooser.setInitialFileName("CMS_" + rt.replace(" ", "_") + "_" + System.currentTimeMillis() + ".xlsx");
+        chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Workbooks", "*.xlsx"));
+        java.io.File selectedFile = chooser.showSaveDialog(reportTypeCombo.getScene().getWindow());
+
+        if (selectedFile == null) return;
+        final String outputPath = selectedFile.getAbsolutePath();
+
         Task<Void> task = new Task<>() {
             @Override protected Void call() throws Exception {
-                String reportType = reportTypeCombo.getValue();
-                if (reportType == null) reportType = "Incident Summary";
-                
-                String fileName = "CMS_" + reportType.replace(" ", "_") + "_" + 
-                                  System.currentTimeMillis() + ".xlsx";
-                String outputPath = System.getProperty("user.home") + "/Desktop/" + fileName;
                 
                 org.apache.poi.ss.usermodel.Workbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
-                org.apache.poi.ss.usermodel.Sheet sheet = workbook.createSheet(reportType);
+                org.apache.poi.ss.usermodel.Sheet sheet = workbook.createSheet(rt);
                 
                 // Header style
                 org.apache.poi.ss.usermodel.CellStyle headerStyle = workbook.createCellStyle();
@@ -474,7 +487,7 @@ public class StatisticalReportsController {
                 headerStyle.setFillForegroundColor(org.apache.poi.ss.usermodel.IndexedColors.LIGHT_BLUE.getIndex());
                 headerStyle.setFillPattern(org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND);
                 
-                switch (reportType) {
+                switch (rt) {
                     case "Incident Summary" -> exportIncidentSummary(sheet, headerStyle);
                     case "Arrest Success Rate" -> exportArrestSuccess(sheet, headerStyle);
                     case "Evidence Inventory" -> exportEvidenceInventory(sheet, headerStyle);
