@@ -234,7 +234,7 @@
 /* Action Hub — Premium Frosted */
 .header-action-hub {
     -fx-background-color: rgba(255,255,255,0.55);
-    -fx-background-radius: 40; -fx-padding: 5 18;
+    -fx-background-radius: 40; -fx-padding: 5 22;
     -fx-border-color: rgba(0,191,165,0.1); -fx-border-width: 1.2;
 }
 .header-action-hub:hover { -fx-background-color: rgba(255,255,255,0.75); -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.12), 12, 0, 0, 0); }
@@ -243,7 +243,7 @@
 
 .btn-notif-premium { -fx-background-color: transparent; -fx-text-fill: -cms-teal; -fx-font-size: 20px; -fx-cursor: hand; }
 .btn-notif-premium:hover { -fx-scale-x: 1.15; -fx-scale-y: 1.15; -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.3), 10, 0, 0, 0); }
-.notif-text-premium { -fx-font-size: 9px; -fx-font-weight: 900; -fx-text-fill: white; }
+.notif-text-premium { -fx-font-size: 9px; -fx-font-weight: 900; -fx-text-fill: white; -fx-padding: 1 0 0 0; }
 
 .btn-logout-premium {
     -fx-background-color: linear-gradient(to right, #FF5252, #FF1744);

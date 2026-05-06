@@ -52,8 +52,8 @@
             <StackPane>
                 <Button fx:id="notificationBtn" text="&#128276;" onAction="#handleNotificationClick"
                         styleClass="btn-notif-premium"/>
-                <StackPane alignment="TOP_RIGHT" pickOnBounds="false" translateY="-4" translateX="4">
-                    <Circle radius="9" fill="#FF5252" stroke="white" strokeWidth="1.5"/>
+                <StackPane alignment="TOP_RIGHT" pickOnBounds="false" translateY="-2" translateX="2">
+                    <Circle radius="8" fill="#FF5252" stroke="white" strokeWidth="1.2"/>
                     <Label fx:id="notifCountLabel" text="0" styleClass="notif-text-premium"/>
                 </StackPane>
             </StackPane>
