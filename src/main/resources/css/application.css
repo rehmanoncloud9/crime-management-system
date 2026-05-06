@@ -462,15 +462,37 @@
 .list-view-transparent .list-cell { -fx-background-color: transparent; }
 
 /* ── DIALOG ── */
-.dialog-pane { -fx-background-color: white; -fx-border-color: -cms-border-accent; -fx-border-width: 1.5; -fx-border-radius: 16; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.15), 40, 0, 0, 10); }
-.dialog-pane .header-panel { -fx-background-color: rgba(0,191,165,0.05); }
-.dialog-pane .content { -fx-text-fill: -cms-t2; }
-.dialog-pane .button-bar .button { -fx-background-color: rgba(255,255,255,0.07); -fx-text-fill: rgba(255,255,255,0.8); -fx-border-color: rgba(255,255,255,0.12); -fx-border-radius: 8; -fx-background-radius: 8; }
-.dialog-pane .button-bar .button:hover { -fx-background-color: rgba(0,229,255,0.15); }
-.alert .dialog-pane { -fx-background-color: #0E1221 !important; }
-.alert .dialog-pane .content.label { -fx-text-fill: rgba(255,255,255,0.8) !important; }
-.alert .dialog-pane .header-panel { -fx-background-color: rgba(255,255,255,0.04) !important; }
-.alert .dialog-pane .header-panel .label { -fx-text-fill: white !important; }
+.dialog-pane { 
+    -fx-background-color: white; 
+    -fx-border-color: -cms-border-accent; -fx-border-width: 1.5; 
+    -fx-border-radius: 18; -fx-background-radius: 18; 
+    -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.18), 40, 0, 0, 10); 
+}
+.dialog-pane .header-panel { 
+    -fx-background-color: linear-gradient(to right, rgba(0,191,165,0.08), rgba(0,191,165,0.02)); 
+    -fx-padding: 18; -fx-background-radius: 18 18 0 0; 
+}
+.dialog-pane .header-panel .label { -fx-font-weight: 900; -fx-font-size: 17px; -fx-text-fill: -cms-teal; }
+
+.dialog-pane .content { -fx-text-fill: -cms-t2; -fx-font-size: 13.5px; -fx-padding: 24; }
+
+.dialog-pane .button-bar .button { 
+    -fx-background-color: white; -fx-text-fill: -cms-t2; 
+    -fx-border-color: rgba(0,191,165,0.15); -fx-border-radius: 10; -fx-background-radius: 10; 
+    -fx-padding: 8 18; -fx-font-weight: 700; -fx-cursor: hand;
+}
+.dialog-pane .button-bar .button:hover { 
+    -fx-background-color: rgba(0,191,165,0.08); -fx-border-color: -cms-teal; -fx-text-fill: -cms-teal; 
+}
+.dialog-pane .button-bar .button:default { 
+    -fx-background-color: -cms-teal; -fx-text-fill: white; -fx-border-color: -cms-teal; 
+}
+.dialog-pane .button-bar .button:default:hover { -fx-background-color: -cms-sky; -fx-border-color: -cms-sky; }
+
+.alert .dialog-pane { -fx-background-color: white !important; }
+.alert .dialog-pane .content.label { -fx-text-fill: -cms-t1 !important; }
+.alert .dialog-pane .header-panel { -fx-background-color: rgba(0,191,165,0.05) !important; }
+.alert .dialog-pane .header-panel .label { -fx-text-fill: -cms-teal !important; }
 
 /* ── CHECKBOXES ── */
 .check-box .box { -fx-background-color: rgba(0,191,165,0.06); -fx-border-color: rgba(0,191,165,0.2); -fx-border-radius: 5; -fx-background-radius: 5; }
