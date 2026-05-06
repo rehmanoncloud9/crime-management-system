@@ -192,21 +192,30 @@ GROQ_API_KEY=your_groq_api_key
 ```
 Without this the chatbot falls back to a built-in local response engine — it still works, just without the LLM.
 
+## Design Language: Aurora Nexus v2.0
+The application features the **Aurora Nexus v2.0** design system, a cutting-edge UI/UX framework designed specifically for this project. It goes beyond standard flat designs to offer a state-of-the-art experience:
+
+- **Liquid Glassmorphism**: Translucent, frosted-glass navigation panels and hubs with dynamic gradients.
+- **Claymorphism Identity Hubs**: Soft, 3D "bubbled" containers for user profiles and action groups that provide a tactile, premium feel.
+- **Holographic Widgets**: High-fidelity clock and status panels with vibrant neon accents.
+- **Interactive Micro-Animations**: Smooth scale transitions, rotations, and glows that respond to user presence.
+- **Accessibility & Contrast**: Carefully curated color palettes ensuring high visibility and readability across all modules.
+
 ---
 
 ## Notes for the examiner
 
 This project demonstrates:
 
-- **MVC architecture** — controllers, services, and repositories are cleanly separated
-- **ORM with Hibernate** — all database interactions go through entity mappings and HQL
-- **Role-based access control** — each user role sees a different dashboard and has different permissions
-- **Security fundamentals** — passwords are BCrypt-hashed, accounts lock after failed attempts, sessions expire
-- **Proper configuration management** — no credentials hardcoded anywhere in source code
-- **Audit trail** — every significant action is logged to the `audit_logs` table
-- **Normalization** — schema follows 1NF/2NF/3NF with proper foreign keys and junction tables
-- **Database integrity** — CHECK constraints, triggers for business rules, indexes on lookup columns
+- **Ultra-Premium UI/UX (Aurora Nexus)** — State-of-the-art glassmorphism and claymorphism implementation using custom CSS.
+- **MVC architecture** — controllers, services, and repositories are cleanly separated.
+- **ORM with Hibernate** — all database interactions go through entity mappings and HQL.
+- **Role-based access control** — each user role sees a different dashboard and has different permissions.
+- **Security fundamentals** — passwords are BCrypt-hashed, accounts lock after failed attempts, sessions expire.
+- **AI-Powered Intelligence** — Integrated LLM support (Groq) for database analysis and natural language queries.
+- **Audit trail** — every significant action is logged to the `audit_logs` table.
+- **Normalization** — schema follows 1NF/2NF/3NF with proper foreign keys and junction tables.
 
 ---
 
-*Built with JavaFX 21 · Hibernate 6 · MariaDB · Maven*
+*Built with Aurora Nexus Design System · JavaFX 21 · Hibernate 6 · MariaDB · Maven*
