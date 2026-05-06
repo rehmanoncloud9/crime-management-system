@@ -248,26 +248,34 @@ public class CaseManagementController {
 
     @FXML
     private void handleNewCase() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Create New Case");
-        dialog.setHeaderText("Link to Incident");
-        dialog.setContentText("Enter the Incident ID to upgrade to a Case:");
-        dialog.showAndWait().ifPresent(incidentIdStr -> {
-            try {
-                Long incidentId = Long.parseLong(incidentIdStr);
-                Task<Void> task = new Task<>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        caseService.createNewCaseFromIncident(incidentId,
-                            com.cms.service.SessionManager.getInstance().getCurrentUser());
-                        return null;
-                    }
-                };
-                task.setOnSucceeded(e -> loadCasesAsync());
-                new Thread(task).start();
-            } catch (Exception e) {
-                new Alert(Alert.AlertType.ERROR, "Invalid Input").showAndWait();
-            }
+        com.cms.service.IncidentService incidentService = new com.cms.service.IncidentService();
+        List<com.cms.model.CrimeIncident> unlinked = incidentService.getUnlinkedIncidents();
+        
+        if (unlinked.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "No unlinked incidents found. All field reports have already been assigned to cases.").showAndWait();
+            return;
+        }
+
+        ChoiceDialog<com.cms.model.CrimeIncident> dialog = new ChoiceDialog<>(unlinked.get(0), unlinked);
+        dialog.setTitle("Initiate New Case");
+        dialog.setHeaderText("Select Field Incident to Upgrade");
+        dialog.setContentText("Active Incidents:");
+        
+        dialog.showAndWait().ifPresent(selectedInc -> {
+            Task<Void> task = new Task<>() {
+                @Override
+                protected Void call() throws Exception {
+                    caseService.createNewCaseFromIncident(selectedInc.getId(),
+                        com.cms.service.SessionManager.getInstance().getCurrentUser());
+                    return null;
+                }
+            };
+            task.setOnSucceeded(e -> {
+                loadCasesAsync();
+                new Alert(Alert.AlertType.INFORMATION, "Case successfully initiated for incident: " + selectedInc.getIncidentNumber()).showAndWait();
+            });
+            task.setOnFailed(e -> new Alert(Alert.AlertType.ERROR, "System Failure: " + task.getException().getMessage()).showAndWait());
+            new Thread(task).start();
         });
     }
 

@@ -77,4 +77,15 @@ public class IncidentService {
         return HibernateUtil.<Long>executeTransaction(session ->
             new IncidentRepository(session).countInMonth(year, month));
     }
+
+    public List<CrimeIncident> searchIncidents(String keyword) {
+        return HibernateUtil.executeTransaction(session ->
+            new IncidentRepository(session).searchByKeyword(keyword));
+    }
+
+    public List<CrimeIncident> getUnlinkedIncidents() {
+        return HibernateUtil.executeTransaction(session ->
+            new IncidentRepository(session).findUnlinkedIncidents());
+    }
 }
+

@@ -56,4 +56,23 @@ public class IncidentRepository {
             .getSingleResult();
         return result != null ? result : 0L;
     }
+
+    public List<CrimeIncident> searchByKeyword(String keyword) {
+        if (keyword == null || keyword.isBlank()) return findAll(100, 0);
+        return entityManager.createQuery(
+                "SELECT i FROM CrimeIncident i WHERE LOWER(i.title) LIKE :kw OR LOWER(i.incidentNumber) LIKE :kw ORDER BY i.occurredAt DESC",
+                CrimeIncident.class)
+            .setParameter("kw", "%" + keyword.toLowerCase() + "%")
+            .setMaxResults(50)
+            .getResultList();
+    }
+
+    public List<CrimeIncident> findUnlinkedIncidents() {
+        // Find incidents that are NOT present in any CaseFile
+        return entityManager.createQuery(
+                "SELECT i FROM CrimeIncident i WHERE i.id NOT IN (SELECT c.incident.id FROM CaseFile c WHERE c.incident IS NOT NULL) ORDER BY i.occurredAt DESC",
+                CrimeIncident.class)
+            .getResultList();
+    }
 }
+

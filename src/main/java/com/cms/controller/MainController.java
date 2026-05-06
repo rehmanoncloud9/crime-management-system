@@ -121,7 +121,7 @@ public class MainController {
         addMenuButton("📊", "Dashboard", "Dashboard");
         addMenuButton("📁", "Cases", "CaseManagement");
         if (role != com.cms.model.enums.Role.ANALYST)
-            addMenuButton("🚨", "Incidents", "IncidentRegistration");
+            addMenuButton("🚨", "Incidents", "IncidentRegistry");
 
         addSection("PEOPLE");
         if (role == com.cms.model.enums.Role.ADMINISTRATOR)
