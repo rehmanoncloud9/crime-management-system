@@ -120,7 +120,18 @@ public class UserAdminController {
 
         User newUser = new User();
         newUser.setBadgeNumber(newBadgeField.getText().trim());
-        newUser.setFullName(newNameField.getText().trim());
+        // EVERY USER MUST HAVE AN ASSOCIATED PERSON RECORD (Database Constraint)
+        com.cms.model.Person person = new com.cms.model.Person();
+        String fullName = newNameField.getText().trim();
+        String[] parts = fullName.split(" ", 2);
+        person.setFirstName(parts[0]);
+        person.setLastName(parts.length > 1 ? parts[1] : "");
+        person.setEmail(newEmailField.getText().trim());
+        person.setPhone(newPhoneField.getText().trim());
+        person.setPersonStatus(com.cms.model.enums.PersonStatus.CITIZEN); // Default for officers
+        
+        newUser.setPerson(person); // CascadeType.ALL will save the person too
+        newUser.setFullName(fullName);
         newUser.setUsername(newBadgeField.getText().trim().toLowerCase());
         newUser.setRole(newRoleCombo.getValue());
         newUser.setPrecinct(newPrecinctField.getText().trim());
@@ -128,8 +139,8 @@ public class UserAdminController {
         newUser.setPhone(newPhoneField.getText().trim());
         newUser.setStatus(UserStatus.ACTIVE);
         newUser.setMustChangePassword(true);
-        // Temporary password = badge number + random 4-digit pin
-        // User will be forced to change it on first login (mustChangePassword=true above)
+        newUser.setDateOfJoining(java.time.LocalDate.now());
+
         String tempPassword = newUser.getBadgeNumber() + String.format("%04d", (int)(Math.random() * 10000));
         newUser.setPasswordHash(authService.hashPassword(tempPassword));
 

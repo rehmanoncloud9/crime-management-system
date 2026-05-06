@@ -8,127 +8,151 @@
       fx:controller="com.cms.controller.PersonRegistrationController" styleClass="content-area">
         <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
 
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Button text="← Back to Registry" onAction="#handleBack" styleClass="btn, btn-outline-sm"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="formTitle" text="Register Person Profile" styleClass="heading-xl"/>
-        </HBox>
+    <HBox spacing="16" alignment="CENTER_LEFT">
+        <Button text="← Back to Registry" onAction="#handleBack" styleClass="btn-premium-outline-sm"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="formTitle" text="Person Registration Portal" styleClass="heading-xl"/>
+    </HBox>
 
-        <!-- Photo + Form -->
+    <VBox spacing="24" styleClass="content-area-glass">
+        <!-- Section 1: Identity Hub -->
         <HBox spacing="24">
-            <VBox spacing="12" alignment="TOP_CENTER" styleClass="card" style="-fx-min-width: 180;">
-                <ImageView fx:id="photoView" fitWidth="150" fitHeight="150" preserveRatio="true"/>
-                <Button text="📷 Upload Photo" onAction="#handleUploadPhoto" styleClass="btn, btn-primary-sm" maxWidth="Infinity"/>
+            <VBox spacing="16" alignment="TOP_CENTER" styleClass="form-section-card" style="-fx-min-width: 220;">
+                <Label text="PHOTO IDENTITY" styleClass="form-label-premium"/>
+                <StackPane styleClass="photo-container-premium">
+                    <ImageView fx:id="photoView" fitWidth="180" fitHeight="180" preserveRatio="true"/>
+                </StackPane>
+                <Button text="📷 UPLOAD BIOMETRIC" onAction="#handleUploadPhoto" styleClass="btn-premium-teal-sm" maxWidth="Infinity"/>
             </VBox>
 
-            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="card">
+            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="Personal Information" styleClass="heading-md"/>
+                    <Label text="👤" style="-fx-font-size: 18px;"/>
+                    <Label text="Personal Identification" styleClass="heading-md"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <CheckBox fx:id="unknownPersonCheck" text="Unknown Person" style="-fx-text-fill: -cms-rose; -fx-font-weight: bold;"/>
+                    <CheckBox fx:id="unknownPersonCheck" text="UNKNOWN SUBJECT" style="-fx-text-fill: -cms-rose; -fx-font-weight: 900; -fx-font-size: 11px;"/>
                 </HBox>
-                <GridPane hgap="16" vgap="12">
-                    <Label text="First Name:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <TextField fx:id="firstNameField" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="250"/>
-
-                    <Label text="Last Name:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <TextField fx:id="lastNameField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-                    <Label text="Classification:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <ComboBox fx:id="personStatusCombo" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="250"/>
-
-                    <Label text="Gender:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <ComboBox fx:id="genderCombo" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-
-                    <Label text="Date of Birth:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                    <DatePicker fx:id="dobPicker" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-
-                    <Label text="Country:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                    <ComboBox fx:id="nationalityCombo" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-
-                    <Label text="CNIC (e.g., 12345-1234567-1):" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-                    <TextField fx:id="nationalIdField" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                <GridPane hgap="30" vgap="18">
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="First Name" styleClass="form-label-premium"/>
+                        <TextField fx:id="firstNameField" promptText="Given Name" prefWidth="250" styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Last Name" styleClass="form-label-premium"/>
+                        <TextField fx:id="lastNameField" promptText="Surname" prefWidth="250" styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="Classification" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="personStatusCombo" promptText="Select Status" prefWidth="250" styleClass="combo-box-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label text="Gender" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="genderCombo" promptText="Select Gender" prefWidth="250" styleClass="combo-box-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                        <Label text="Date of Birth" styleClass="form-label-premium"/>
+                        <DatePicker fx:id="dobPicker" prefWidth="250" styleClass="date-picker-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <Label text="CNIC / National ID" styleClass="form-label-premium"/>
+                        <TextField fx:id="nationalIdField" promptText="XXXXX-XXXXXXX-X" prefWidth="250" styleClass="text-field-premium"/>
+                    </VBox>
                 </GridPane>
             </VBox>
         </HBox>
 
-        <!-- Criminal Details -->
-        <VBox spacing="12" styleClass="card">
-            <Label text="Criminal Record Details" styleClass="heading-md"/>
-            <GridPane hgap="16" vgap="12">
-                <Label text="Aliases (Comma separated):" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <TextField fx:id="aliasesField" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="350"/>
-                
-                <Label text="Gang Affiliation:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <TextField fx:id="gangField" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="250"/>
-                
-                <Label text="Active Warrant:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <CheckBox fx:id="warrantCheck" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            </GridPane>
-        </VBox>
+        <!-- Section 2: Criminal & Physical -->
+        <HBox spacing="24">
+            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="⚖️" style="-fx-font-size: 18px;"/>
+                    <Label text="Criminal &amp; Affiliation" styleClass="heading-md"/>
+                </HBox>
+                <GridPane hgap="25" vgap="15">
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
+                        <Label text="Aliases (Monikers)" styleClass="form-label-premium"/>
+                        <TextField fx:id="aliasesField" promptText="Separated by commas..." styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="Gang Affiliation" styleClass="form-label-premium"/>
+                        <TextField fx:id="gangField" promptText="Known groups..." styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="1" alignment="BOTTOM_LEFT">
+                        <CheckBox fx:id="warrantCheck" text="ACTIVE WARRANT" style="-fx-text-fill: -cms-rose; -fx-font-weight: 800;"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
 
-        <!-- Physical Characteristics -->
-        <VBox spacing="12" styleClass="card">
-            <Label text="Physical Characteristics" styleClass="heading-md"/>
-            <HBox spacing="20">
+            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="📏" style="-fx-font-size: 18px;"/>
+                    <Label text="Physical Profile" styleClass="heading-md"/>
+                </HBox>
+                <HBox spacing="15">
+                    <VBox spacing="6">
+                        <Label text="Height (cm)" styleClass="form-label-premium"/>
+                        <TextField fx:id="heightField" prefWidth="100" styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Weight (kg)" styleClass="form-label-premium"/>
+                        <TextField fx:id="weightField" prefWidth="100" styleClass="text-field-premium"/>
+                    </VBox>
+                </HBox>
                 <VBox spacing="6">
-                    <Label text="Height (cm):"/>
-                    <TextField fx:id="heightField" prefWidth="120"/>
+                    <Label text="Distinguishing Marks" styleClass="form-label-premium"/>
+                    <TextArea fx:id="marksArea" prefHeight="60" wrapText="true" styleClass="text-area-premium"/>
                 </VBox>
-                <VBox spacing="6">
-                    <Label text="Weight (kg):"/>
-                    <TextField fx:id="weightField" prefWidth="120"/>
-                </VBox>
-            </HBox>
-            <VBox spacing="6">
-                <Label text="Distinguishing Marks:"/>
-                <TextArea fx:id="marksArea" prefHeight="70" wrapText="true"/>
             </VBox>
-            <GridPane hgap="16" vgap="12">
-                <Label text="District:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <ComboBox fx:id="districtCombo" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="200"/>
-                
-                <Label text="City:" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                <ComboBox fx:id="cityCombo" GridPane.columnIndex="3" GridPane.rowIndex="0" prefWidth="200"/>
-                
-                <Label text="Area/Neighborhood:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <ComboBox fx:id="areaCombo" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="200"/>
-            </GridPane>
-            <VBox spacing="6">
-                <Label text="Street Address / Details:"/>
-                <TextArea fx:id="addressArea" prefHeight="70" wrapText="true"/>
-            </VBox>
-        </VBox>
-
-        <!-- Medical Information -->
-        <VBox spacing="12" styleClass="card">
-            <Label text="Medical Information" styleClass="heading-md"/>
-            <GridPane hgap="16" vgap="12">
-                <Label text="Blood Group:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <ComboBox fx:id="bloodGroupCombo" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-
-                <Label text="DNA Profile Ref:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <TextField fx:id="dnaProfileField" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="250"/>
-            </GridPane>
-            <HBox spacing="20">
-                <VBox spacing="6" HBox.hgrow="ALWAYS">
-                    <Label text="Known Diseases:"/>
-                    <TextArea fx:id="diseasesArea" prefHeight="70" wrapText="true"/>
-                </VBox>
-                <VBox spacing="6" HBox.hgrow="ALWAYS">
-                    <Label text="Injuries:"/>
-                    <TextArea fx:id="injuriesArea" prefHeight="70" wrapText="true"/>
-                </VBox>
-            </HBox>
-            <VBox spacing="6">
-                <Label text="Medical Notes:"/>
-                <TextArea fx:id="medicalNotesArea" prefHeight="70" wrapText="true"/>
-            </VBox>
-        </VBox>
-
-        <!-- Actions -->
-        <HBox spacing="12">
-            <Button fx:id="saveBtn" onAction="#handleSave" text="SAVE PROFILE" styleClass="btn, btn-success"/>
-            <Button onAction="#handleClear" text="CLEAR" styleClass="btn, btn-outline"/>
         </HBox>
+
+        <!-- Section 3: Geographic & Medical -->
+        <HBox spacing="24">
+            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="📍" style="-fx-font-size: 18px;"/>
+                    <Label text="Residency Data" styleClass="heading-md"/>
+                </HBox>
+                <GridPane hgap="20" vgap="15">
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="District" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="districtCombo" prefWidth="180" styleClass="combo-box-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="City" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="cityCombo" prefWidth="180" styleClass="combo-box-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                        <Label text="Street Address / Details" styleClass="form-label-premium"/>
+                        <TextArea fx:id="addressArea" prefHeight="60" wrapText="true" styleClass="text-area-premium"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <VBox spacing="16" HBox.hgrow="ALWAYS" styleClass="form-section-card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="🏥" style="-fx-font-size: 18px;"/>
+                    <Label text="Medical Records" styleClass="heading-md"/>
+                </HBox>
+                <HBox spacing="15">
+                    <VBox spacing="6">
+                        <Label text="Blood Group" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="bloodGroupCombo" prefWidth="120" styleClass="combo-box-premium"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="DNA Profile Reference" styleClass="form-label-premium"/>
+                        <TextField fx:id="dnaProfileField" styleClass="text-field-premium"/>
+                    </VBox>
+                </HBox>
+                <VBox spacing="6">
+                    <Label text="Known Conditions / Injuries" styleClass="form-label-premium"/>
+                    <TextArea fx:id="diseasesArea" prefHeight="60" wrapText="true" styleClass="text-area-premium"/>
+                </VBox>
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <HBox spacing="16" alignment="CENTER_RIGHT">
+        <Button fx:id="saveBtn" onAction="#handleSave" text="COMMIT PROFILE" styleClass="btn-premium-teal"/>
+        <Button onAction="#handleClear" text="CLEAR DATA" styleClass="btn-premium-danger-outline"/>
+    </HBox>
 </VBox>

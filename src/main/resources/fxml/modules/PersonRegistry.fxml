@@ -5,26 +5,23 @@
 
 <VBox styleClass="module" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.cms.controller.PersonRegistryController">
-    <VBox spacing="16">
-        <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
-
-        <Label text="Person Registry" styleClass="heading-xl"/>
-
-        <!-- Toolbar -->
-        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="module-toolbar">
-            <Button onAction="#handleAddPerson" text="+ Add New Person" styleClass="btn, btn-primary"/>
+    <VBox spacing="20" styleClass="module-container">
+        <HBox spacing="16" alignment="CENTER_LEFT">
+            <Label text="Global Person Registry" styleClass="heading-xl"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <TextField fx:id="searchField" promptText="🔍 Search by name or CNIC..." prefWidth="320"/>
-            <Button onAction="#loadPersons" text="Refresh" styleClass="btn, btn-outline"/>
+            <HBox spacing="10" styleClass="search-bar-glass">
+                <TextField fx:id="searchField" promptText="🔍 Search name or CNIC..." prefWidth="350" styleClass="text-field-premium-sm"/>
+            </HBox>
+            <Button onAction="#handleAddPerson" text="+ REGISTER PROFILE" styleClass="btn-premium-teal"/>
+            <Button onAction="#loadPersons" text="↺" styleClass="btn-premium-outline-sm"/>
         </HBox>
 
-        <Separator/>
-
-        <!-- List Area -->
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-            <FlowPane fx:id="personFlowPane" hgap="20" vgap="20" style="-fx-padding: 10;">
-                <!-- Person cards injected here -->
-            </FlowPane>
-        </ScrollPane>
+        <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="content-area-glass">
+            <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent" VBox.vgrow="ALWAYS">
+                <FlowPane fx:id="personFlowPane" hgap="24" vgap="24" style="-fx-padding: 10;">
+                    <!-- High-fidelity Person cards injected here -->
+                </FlowPane>
+            </ScrollPane>
+        </VBox>
     </VBox>
 </VBox>

@@ -6,59 +6,74 @@
 
 <VBox styleClass="module" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.cms.controller.UserAdminController">
-    <VBox spacing="16">
-        <padding><Insets bottom="8" left="8" right="8" top="8"/></padding>
-
-        <Label text="Officers &amp; Users" styleClass="heading-xl"/>
-
-        <!-- Toolbar -->
-        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="module-toolbar">
-            <Button onAction="#handleCreateUser" text="+ Create New User" styleClass="btn, btn-primary"/>
+    <VBox spacing="20" styleClass="module-container">
+        <HBox spacing="16" alignment="CENTER_LEFT">
+            <Label text="Officer Command Center" styleClass="heading-xl"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <TextField fx:id="searchField" promptText="🔍 Search by badge # or name" prefWidth="280"/>
+            <HBox spacing="10" styleClass="search-bar-glass">
+                <TextField fx:id="searchField" promptText="🔍 Search badge or name..." prefWidth="320" styleClass="text-field-premium-sm"/>
+            </HBox>
+            <Button onAction="#handleCreateUser" text="+ ENLIST NEW OFFICER" styleClass="btn-premium-teal"/>
         </HBox>
 
-        <HBox spacing="20" VBox.vgrow="ALWAYS">
-            <!-- New User Form Panel (Hidden by default) -->
-            <VBox fx:id="formPanel" spacing="12" styleClass="card" prefWidth="320" managed="false" visible="false">
-                <Label text="New Officer Profile" styleClass="heading-md"/>
-                
-                <HBox alignment="CENTER_LEFT" spacing="12">
-                    <ImageView fx:id="newUserPhotoView" fitWidth="70" fitHeight="70" preserveRatio="true"/>
-                    <Button text="📷 Upload" onAction="#handleUploadNewPhoto" styleClass="btn, btn-outline"/>
+        <HBox spacing="24" VBox.vgrow="ALWAYS">
+            <!-- New User Form Panel (Sliding Card Effect) -->
+            <VBox fx:id="formPanel" spacing="20" styleClass="form-section-card-elevated" prefWidth="380" managed="false" visible="false">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🛡️" style="-fx-font-size: 20px;"/>
+                    <Label text="Register New Profile" styleClass="heading-md"/>
                 </HBox>
+                
+                <VBox alignment="CENTER" spacing="14" styleClass="photo-hub-premium">
+                    <StackPane styleClass="photo-container-premium-sm">
+                        <ImageView fx:id="newUserPhotoView" fitWidth="100" fitHeight="100" preserveRatio="true"/>
+                    </StackPane>
+                    <Button text="📷 UPLOAD PHOTO" onAction="#handleUploadNewPhoto" styleClass="btn-premium-outline-sm" maxWidth="140"/>
+                </VBox>
 
-                <GridPane vgap="10" hgap="8">
-                    <Label text="Badge #:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <TextField fx:id="newBadgeField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <GridPane vgap="18" hgap="12">
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Badge ID" styleClass="form-label-premium"/>
+                        <TextField fx:id="newBadgeField" promptText="OFF-XXX" styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Full Name" styleClass="form-label-premium"/>
+                        <TextField fx:id="newNameField" promptText="Full Legal Name" styleClass="text-field-premium"/>
+                    </VBox>
 
-                    <Label text="Full Name:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <TextField fx:id="newNameField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                        <Label text="Assigned Role" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="newRoleCombo" promptText="Select Command Level" maxWidth="Infinity" styleClass="combo-box-premium"/>
+                    </VBox>
 
-                    <Label text="Role:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <ComboBox fx:id="newRoleCombo" GridPane.columnIndex="1" GridPane.rowIndex="2" maxWidth="Infinity"/>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
+                        <Label text="Assigned Precinct" styleClass="form-label-premium"/>
+                        <TextField fx:id="newPrecinctField" promptText="Police Station Name" styleClass="text-field-premium"/>
+                    </VBox>
 
-                    <Label text="Precinct:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <TextField fx:id="newPrecinctField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-
-                    <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                    <TextField fx:id="newEmailField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-
-                    <Label text="Phone:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                    <TextField fx:id="newPhoneField" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                        <Label text="Contact Email" styleClass="form-label-premium"/>
+                        <TextField fx:id="newEmailField" promptText="official@cms.gov" styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                        <Label text="Contact Phone" styleClass="form-label-premium"/>
+                        <TextField fx:id="newPhoneField" promptText="+92 XXX XXXXXXX" styleClass="text-field-premium"/>
+                    </VBox>
                 </GridPane>
 
                 <Region VBox.vgrow="ALWAYS"/>
                 
-                <HBox spacing="10" alignment="CENTER_RIGHT">
-                    <Button text="Cancel" onAction="#handleCancelNewUser" styleClass="btn, btn-outline"/>
-                    <Button text="Save Officer" onAction="#handleSaveNewUser" styleClass="btn, btn-success"/>
+                <HBox spacing="12" alignment="CENTER_RIGHT">
+                    <Button text="DISCARD" onAction="#handleCancelNewUser" styleClass="btn-premium-danger-outline"/>
+                    <Button text="SAVE OFFICER" onAction="#handleSaveNewUser" styleClass="btn-premium-teal"/>
                 </HBox>
             </VBox>
 
             <!-- Officers Table (Now FlowPane) -->
-            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS">
-                <FlowPane fx:id="userFlowPane" hgap="15" vgap="15" style="-fx-padding: 10;"/>
+            <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent" HBox.hgrow="ALWAYS">
+                <FlowPane fx:id="userFlowPane" hgap="20" vgap="20" style="-fx-padding: 10;">
+                    <padding><Insets bottom="20" left="10" right="20" top="10"/></padding>
+                </FlowPane>
             </ScrollPane>
         </HBox>
     </VBox>
