@@ -261,8 +261,8 @@ public class LoginController {
             }
         } catch (Exception e) {
             logger.error("Failed to open support link", e);
-            String fallback = APP_CONFIG.getProperty("app.support.email", "administrator");
-            NexusAlert.show("Technical Support", "Could not open support link. Contact: " + fallback, NexusAlert.Type.ERROR);
+            String contactInfo = APP_CONFIG.getProperty("app.support.email", "administrator");
+            NexusAlert.show("Technical Support", "Could not open support link. Contact: " + contactInfo, NexusAlert.Type.ERROR);
         }
     }
 

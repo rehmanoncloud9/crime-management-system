@@ -144,11 +144,15 @@ public class AuthService {
 
     private void normalizeLockState(User user, UserRepository userRepository) {
         if (user.getLockedUntil() != null && user.getLockedUntil().isBefore(LocalDateTime.now())) {
+            boolean wasLocked = user.getStatus() == UserStatus.LOCKED
+                    || user.getFailedLoginAttempts() >= getLockoutAttempts();
             if (user.getStatus() == UserStatus.LOCKED) {
                 user.setStatus(UserStatus.ACTIVE);
             }
             user.setLockedUntil(null);
-            user.setFailedLoginAttempts(0);
+            if (wasLocked) {
+                user.setFailedLoginAttempts(0);
+            }
             userRepository.update(user);
         }
     }
