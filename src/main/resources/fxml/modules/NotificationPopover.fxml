@@ -5,21 +5,23 @@
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.cms.controller.NotificationPopoverController"
-      style="-fx-background-color: #0D1526; -fx-border-color: rgba(0,212,255,0.2); -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5); -fx-background-radius: 8; -fx-border-radius: 8;"
+      style="-fx-background-color: white; -fx-border-color: rgba(0,191,165,0.25); -fx-border-width: 1.5; -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.15), 30, 0, 0, 10); -fx-background-radius: 16; -fx-border-radius: 16;"
       prefWidth="350" maxHeight="500">
     
     <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
+        <Insets top="16" right="16" bottom="16" left="16"/>
     </padding>
 
     <HBox alignment="CENTER_LEFT">
-        <Label text="Notifications" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+        <Label text="Notifications" style="-fx-font-weight: 900; -fx-font-size: 16px; -fx-text-fill: -cms-teal; -fx-letter-spacing: 0.5px;"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="✕" onAction="#closePopover" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <Button text="✕" onAction="#closePopover" style="-fx-background-color: transparent; -fx-text-fill: -cms-t3; -fx-font-weight: 900; -fx-font-size: 14px; -fx-cursor: hand;"/>
     </HBox>
-    <Separator style="-fx-padding: 5 0 5 0;"/>
+    <Separator style="-fx-padding: 8 0 8 0;"/>
 
-    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;" hbarPolicy="NEVER">
-        <VBox fx:id="notificationList" spacing="8" style="-fx-background-color: #0D1526; -fx-padding: 5;"/>
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane-transparent" hbarPolicy="NEVER">
+        <VBox fx:id="notificationList" spacing="10" style="-fx-background-color: transparent; -fx-padding: 4;">
+            <Label text="No new notifications." style="-fx-text-fill: -cms-t3; -fx-font-style: italic; -fx-font-size: 13px;"/>
+        </VBox>
     </ScrollPane>
 </VBox>
