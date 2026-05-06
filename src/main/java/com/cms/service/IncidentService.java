@@ -46,6 +46,15 @@ public class IncidentService {
             return null;
         });
 
+        // Audit Trail
+        AuditService.getInstance().logAction(
+            incident.getReportingOfficer(),
+            com.cms.model.enums.AuditAction.CREATE,
+            "INCIDENT",
+            incident.getId(),
+            "Registered new incident: " + incident.getIncidentNumber() + " - " + incident.getTitle()
+        );
+
         // Notification after transaction (no nested TX)
         try {
             NotificationService.getInstance().createNotification(

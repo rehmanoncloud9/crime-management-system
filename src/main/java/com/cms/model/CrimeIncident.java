@@ -95,6 +95,7 @@ public class CrimeIncident {
     public CrimeIncident() {
         this.createdAt = LocalDateTime.now();
         this.reportedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
         this.status = IncidentStatus.REPORTED;
     }
 
@@ -115,8 +116,10 @@ public class CrimeIncident {
     // Lifecycle
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
-        if (reportedAt == null) reportedAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        if (createdAt == null) createdAt = now;
+        if (reportedAt == null) reportedAt = now;
+        if (updatedAt == null) updatedAt = now;
         if (status == null) status = IncidentStatus.REPORTED;
 
         validateTimeline();

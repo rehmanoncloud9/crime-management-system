@@ -559,3 +559,56 @@
 .alert-item { -fx-background-color: rgba(244,63,94,0.07); -fx-border-color: rgba(244,63,94,0.2); -fx-padding: 12; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-width: 1; }
 .scroll-pane > .viewport > * { -fx-background-color: transparent; }
 .combo-box-popup .list-view { -fx-background-color: white !important; }
+
+/* ── PREMIUM FORM ARCHITECTURE ── */
+.content-area-glass {
+    -fx-background-color: rgba(255,255,255,0.4);
+    -fx-background-radius: 24; -fx-padding: 24;
+    -fx-border-color: rgba(255,255,255,0.8); -fx-border-width: 1.5;
+}
+
+.form-section-card {
+    -fx-background-color: white;
+    -fx-background-radius: 20; -fx-padding: 24;
+    -fx-border-color: rgba(0,191,165,0.12); -fx-border-width: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 15, 0, 0, 5);
+}
+
+.form-label-premium {
+    -fx-font-size: 11px; -fx-font-weight: 800; -fx-text-fill: -cms-t3;
+    -fx-text-transform: uppercase; -fx-letter-spacing: 0.8px;
+}
+
+.text-field-premium, .combo-box-premium, .date-picker-premium, .text-area-premium {
+    -fx-background-color: rgba(0,191,165,0.03);
+    -fx-border-color: rgba(0,191,165,0.15); -fx-border-width: 1.5;
+    -fx-border-radius: 10; -fx-background-radius: 10;
+    -fx-padding: 10 14; -fx-text-fill: -cms-t1; -fx-font-size: 13.5px;
+}
+.text-field-premium:focused, .combo-box-premium:focused, .date-picker-premium:focused, .text-area-premium:focused {
+    -fx-background-color: white; -fx-border-color: -cms-teal;
+    -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.15), 12, 0, 0, 0);
+}
+
+.btn-premium-teal {
+    -fx-background-color: linear-gradient(to right, -cms-teal, #00D1B2);
+    -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 13px;
+    -fx-padding: 12 28; -fx-background-radius: 12; -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.4), 15, 0, 0, 0);
+}
+.btn-premium-teal:hover { -fx-scale-x: 1.05; -fx-scale-y: 1.05; -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.6), 20, 0, 0, 0); }
+
+.btn-premium-outline {
+    -fx-background-color: white; -fx-text-fill: -cms-teal;
+    -fx-border-color: -cms-teal; -fx-border-width: 1.5; -fx-border-radius: 12;
+    -fx-padding: 12 24; -fx-font-weight: 800; -fx-cursor: hand;
+}
+.btn-premium-outline:hover { -fx-background-color: rgba(0,191,165,0.06); }
+
+.btn-premium-danger-outline {
+    -fx-background-color: transparent; -fx-text-fill: #FF5252;
+    -fx-border-color: rgba(255,82,82,0.3); -fx-border-width: 1.2; -fx-border-radius: 12;
+    -fx-padding: 12 24; -fx-font-weight: 800; -fx-cursor: hand;
+}
+.btn-premium-danger-outline:hover { -fx-background-color: rgba(255,82,82,0.06); -fx-border-color: #FF5252; }
+

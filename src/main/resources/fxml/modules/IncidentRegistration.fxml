@@ -7,44 +7,73 @@
       fx:controller="com.cms.controller.IncidentRegistrationController" styleClass="content-area">
     <padding><Insets bottom="16" left="16" right="16" top="16"/></padding>
 
-        <Label text="Register New Crime Incident" styleClass="heading-xl"/>
+    <Label text="Incident Registration Portal" styleClass="heading-xl"/>
 
-        <VBox spacing="16" styleClass="card">
-            <Label text="Incident Details" styleClass="heading-md"/>
-            <GridPane hgap="20" vgap="14">
-                <Label text="Incident Title:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <TextField fx:id="titleField" promptText="Brief title of the incident"
-                           GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="400"/>
-
-                <Label text="Crime Type:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <ComboBox fx:id="typeCombo" promptText="Select Category"
-                          GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-                <Label text="Date &amp; Time:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <DatePicker fx:id="datePicker" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-
-                <Label text="District:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                <ComboBox fx:id="districtCombo" promptText="Select District" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="400" maxWidth="400"/>
-
-                <Label text="City:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                <ComboBox fx:id="cityCombo" promptText="Select City" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="400" maxWidth="400"/>
-
-                <Label text="Area:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                <ComboBox fx:id="areaCombo" promptText="Select Area" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="400" maxWidth="400"/>
-
-                <Label text="Location Details:" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-                <TextArea fx:id="locationArea" promptText="Precinct, building, or specific spot details"
-                          GridPane.columnIndex="1" GridPane.rowIndex="6" prefHeight="80" wrapText="true"/>
-
-                <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
-                <TextArea fx:id="descriptionArea" promptText="Detailed description of the event"
-                          GridPane.columnIndex="1" GridPane.rowIndex="7" prefHeight="150" wrapText="true"/>
+    <VBox spacing="24" styleClass="content-area-glass">
+        <!-- Section 1: Classification -->
+        <VBox spacing="14" styleClass="form-section-card">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="📋" style="-fx-font-size: 18px;"/>
+                <Label text="Case Classification" styleClass="heading-md"/>
+            </HBox>
+            <GridPane hgap="30" vgap="18">
+                <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label text="Incident Title" styleClass="form-label-premium"/>
+                    <TextField fx:id="titleField" promptText="Enter a descriptive title..." prefWidth="450" styleClass="text-field-premium"/>
+                </VBox>
+                <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label text="Crime Category" styleClass="form-label-premium"/>
+                    <ComboBox fx:id="typeCombo" promptText="Select Category" prefWidth="300" styleClass="combo-box-premium"/>
+                </VBox>
+                <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <Label text="Date of Occurrence" styleClass="form-label-premium"/>
+                    <DatePicker fx:id="datePicker" prefWidth="450" styleClass="date-picker-premium"/>
+                </VBox>
             </GridPane>
         </VBox>
 
-        <HBox spacing="12">
-            <Button fx:id="submitButton" onAction="#handleSubmit" text="SUBMIT REPORT" styleClass="btn, btn-success"/>
-            <Button fx:id="exportButton" onAction="#handleExportFIR" text="EXPORT FIR" styleClass="btn, btn-primary" disable="true"/>
-            <Button onAction="#handleCancel" text="CANCEL" styleClass="btn, btn-outline"/>
-        </HBox>
+        <!-- Section 2: Location -->
+        <VBox spacing="14" styleClass="form-section-card">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="📍" style="-fx-font-size: 18px;"/>
+                <Label text="Geographic Location" styleClass="heading-md"/>
+            </HBox>
+            <GridPane hgap="25" vgap="18">
+                <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label text="District" styleClass="form-label-premium"/>
+                    <ComboBox fx:id="districtCombo" promptText="Search District..." prefWidth="250" styleClass="combo-box-premium"/>
+                </VBox>
+                <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label text="City / Town" styleClass="form-label-premium"/>
+                    <ComboBox fx:id="cityCombo" promptText="Search City..." prefWidth="250" styleClass="combo-box-premium"/>
+                </VBox>
+                <VBox spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label text="Area / Sector" styleClass="form-label-premium"/>
+                    <ComboBox fx:id="areaCombo" promptText="Search Area..." prefWidth="250" styleClass="combo-box-premium"/>
+                </VBox>
+                <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="3">
+                    <Label text="Specific Location Details" styleClass="form-label-premium"/>
+                    <TextArea fx:id="locationArea" promptText="Precinct, building name, or landmarks..." prefHeight="80" wrapText="true" styleClass="text-area-premium"/>
+                </VBox>
+            </GridPane>
+        </VBox>
+
+        <!-- Section 3: Evidence & Description -->
+        <VBox spacing="14" styleClass="form-section-card">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="🖋️" style="-fx-font-size: 18px;"/>
+                <Label text="Detailed Narrative" styleClass="heading-md"/>
+            </HBox>
+            <VBox spacing="8">
+                <Label text="Full Event Description" styleClass="form-label-premium"/>
+                <TextArea fx:id="descriptionArea" promptText="Provide a comprehensive account of the event..." prefHeight="160" wrapText="true" styleClass="text-area-premium"/>
+            </VBox>
+        </VBox>
+    </VBox>
+
+    <HBox spacing="16" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+        <Button fx:id="submitButton" onAction="#handleSubmit" text="AUTHENTICATE &amp; SUBMIT" styleClass="btn-premium-teal"/>
+        <Button fx:id="exportButton" onAction="#handleExportFIR" text="GENERATE FIR PDF" styleClass="btn-premium-outline" disable="true"/>
+        <Button onAction="#handleCancel" text="DISCARD" styleClass="btn-premium-danger-outline"/>
+    </HBox>
     </VBox>
