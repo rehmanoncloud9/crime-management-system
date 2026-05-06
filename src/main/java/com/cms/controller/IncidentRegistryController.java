@@ -68,7 +68,7 @@ public class IncidentRegistryController {
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: -cms-t1;");
         titleLabel.setWrapText(true);
 
-        Label dateLabel = new Label("📅 " + (inc.getIncidentDate() != null ? inc.getIncidentDate().toString() : "N/A"));
+        Label dateLabel = new Label("📅 " + (inc.getOccurredAt() != null ? inc.getOccurredAt().toString() : "N/A"));
         dateLabel.getStyleClass().add("text-muted-sm");
 
         Label statusBadge = new Label(inc.getStatus() != null ? inc.getStatus().name() : "NEW");

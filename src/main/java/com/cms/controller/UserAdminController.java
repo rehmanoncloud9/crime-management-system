@@ -128,7 +128,7 @@ public class UserAdminController {
         person.setLastName(parts.length > 1 ? parts[1] : "");
         person.setEmail(newEmailField.getText().trim());
         person.setPhone(newPhoneField.getText().trim());
-        person.setPersonStatus(com.cms.model.enums.PersonStatus.CITIZEN); // Default for officers
+        person.setPersonStatus(com.cms.model.enums.PersonStatus.OFFICER); // Correct classification for officers
         
         newUser.setPerson(person); // CascadeType.ALL will save the person too
         newUser.setFullName(fullName);
