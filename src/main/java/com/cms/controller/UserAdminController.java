@@ -171,7 +171,7 @@ public class UserAdminController {
         
         // REUSE PERSON if email exists, otherwise create new
         com.cms.model.Person person = HibernateUtil.executeTransaction(session -> {
-            return session.createQuery("from Person where email = :email", com.cms.model.Person.class)
+            return session.createQuery("from Person where email = :email and deletedAt is null", com.cms.model.Person.class)
                     .setParameter("email", email)
                     .uniqueResult();
         });
@@ -189,6 +189,13 @@ public class UserAdminController {
         } else {
             // Update the existing person to be an officer if they were something else
             person.setPersonStatus(com.cms.model.enums.PersonStatus.OFFICER);
+            String[] parts = fullName.trim().split("\\s+", 2);
+            person.setFirstName(parts[0]);
+            person.setLastName(parts.length > 1 ? parts[1] : "Officer");
+            String phone = newPhoneField.getText().trim();
+            if (!phone.isEmpty()) {
+                person.setPhone(phone);
+            }
         }
 
         newUser.setPerson(person); 
@@ -197,6 +204,7 @@ public class UserAdminController {
             newUser.getBadgeNumber() + String.format("%04d", (int)(Math.random() * 10000)) : 
             newPasswordField.getText();
         newUser.setPasswordHash(authService.hashPassword(tempPassword));
+        newUser.setMustChangePassword(true);
 
         // Save image to local storage
         if (selectedPhotoFile != null) {
@@ -254,6 +262,11 @@ public class UserAdminController {
         String name = newNameField.getText().trim();
         if (badge.isEmpty() || name.isEmpty() || !name.matches("^[a-zA-Z\\s]+$")) {
             NexusAlert.showWarning("Badge and Name are required. Name can only contain letters.");
+            return false;
+        }
+        String username = newUsernameField.getText().trim();
+        if (username.isEmpty() || !username.matches("^[a-zA-Z0-9_]+$")) {
+            NexusAlert.showWarning("A valid Username is required (alphanumeric and underscores only).");
             return false;
         }
         if (newRoleCombo.getValue() == null) {

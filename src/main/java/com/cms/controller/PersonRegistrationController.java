@@ -257,12 +257,13 @@ public class PersonRegistrationController {
             javafx.concurrent.Task<Void> task = new javafx.concurrent.Task<>() {
                 @Override protected Void call() {
                     HibernateUtil.executeVoidTransaction(session -> {
-                        session.merge(finalPerson);
+                        Person managed = session.merge(finalPerson);
                         if (civToSave != null) {
+                            civToSave.setPerson(managed);
                             // Check if already exists to avoid duplicate
                             com.cms.model.Civilian existing = session.createQuery(
                                 "from Civilian where person.id = :pid", com.cms.model.Civilian.class)
-                                .setParameter("pid", finalPerson.getId())
+                                .setParameter("pid", managed.getId())
                                 .uniqueResult();
                             if (existing != null) {
                                 existing.setOccupation(civToSave.getOccupation());
@@ -271,6 +272,12 @@ public class PersonRegistrationController {
                             } else {
                                 session.persist(civToSave);
                             }
+                        } else {
+                            com.cms.model.Civilian existing = session.createQuery(
+                                "from Civilian where person.id = :pid", com.cms.model.Civilian.class)
+                                .setParameter("pid", managed.getId())
+                                .uniqueResult();
+                            if (existing != null) session.remove(existing);
                         }
                     });
                     return null;

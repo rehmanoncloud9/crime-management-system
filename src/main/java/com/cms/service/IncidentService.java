@@ -73,6 +73,19 @@ public class IncidentService {
             new IncidentRepository(session).findAll(limit, offset));
     }
 
+    public CrimeIncident updateIncident(CrimeIncident incident) {
+        return HibernateUtil.executeTransaction(session -> {
+            new IncidentRepository(session).save(incident);
+            return incident;
+        });
+    }
+
+    public void deleteIncident(Long id) {
+        HibernateUtil.executeVoidTransaction(session -> {
+            new IncidentRepository(session).delete(id);
+        });
+    }
+
     public long countInMonth(int year, int month) {
         return HibernateUtil.<Long>executeTransaction(session ->
             new IncidentRepository(session).countInMonth(year, month));

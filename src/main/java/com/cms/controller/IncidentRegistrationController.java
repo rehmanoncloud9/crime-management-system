@@ -390,6 +390,9 @@ public class IncidentRegistrationController {
         if (datePicker.getValue() == null) {
             alert(Alert.AlertType.WARNING, "Please select the date."); return false;
         }
+        if (datePicker.getValue().isAfter(java.time.LocalDate.now())) {
+            alert(Alert.AlertType.WARNING, "Incident date cannot be in the future."); return false;
+        }
         if (districtCombo.getValue() == null) {
             alert(Alert.AlertType.WARNING, "Please select a district."); return false;
         }

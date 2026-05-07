@@ -16,7 +16,7 @@ public class CivilianRepository {
     }
 
     public List<Civilian> findAll() {
-        return session.createQuery("from Civilian c left join fetch c.person", Civilian.class).list();
+        return session.createQuery("SELECT c FROM Civilian c JOIN c.person p WHERE p.deletedAt IS NULL", Civilian.class).list();
     }
 
     public List<Civilian> search(String keyword) {
@@ -26,9 +26,10 @@ public class CivilianRepository {
         String pattern = "%" + keyword.trim().toLowerCase() + "%";
         return session.createQuery(
             "SELECT c FROM Civilian c JOIN c.person p " +
-            "WHERE LOWER(p.firstName) LIKE :p OR LOWER(p.lastName) LIKE :p " +
+            "WHERE p.deletedAt IS NULL AND (" +
+            "LOWER(p.firstName) LIKE :p OR LOWER(p.lastName) LIKE :p " +
             "OR LOWER(p.nationalId) LIKE :p OR LOWER(c.occupation) LIKE :p " +
-            "OR LOWER(c.employer) LIKE :p", Civilian.class)
+            "OR LOWER(c.employer) LIKE :p)", Civilian.class)
             .setParameter("p", pattern)
             .getResultList();
     }

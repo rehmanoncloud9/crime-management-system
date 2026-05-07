@@ -68,6 +68,10 @@ public class IncidentRepository {
         else                          entityManager.merge(incident);
     }
 
+    public void delete(Long id) {
+        findById(id).ifPresent(entityManager::remove);
+    }
+
     public long countInMonth(int year, int month) {
         LocalDateTime start = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime end   = start.plusMonths(1);

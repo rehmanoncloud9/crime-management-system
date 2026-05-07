@@ -140,13 +140,25 @@ public class CriminalSearchController {
 
     @FXML
     private void handleSearch() {
-        String name = nameSearchField.getText();
+        String name = nameSearchField.getText().trim();
+        String id = idSearchField.getText().trim();
+        
+        String[] parts = name.split("\\s+", 2);
+        String first = parts.length > 0 ? parts[0] : "";
+        String last  = parts.length > 1 ? parts[1] : "";
 
         javafx.concurrent.Task<List<Person>> task = new javafx.concurrent.Task<>() {
             @Override
             protected List<Person> call() {
-                List<Person> results = personService.findCriminalsByName(name, name, 1000, 0); 
+                List<Person> results = personService.findCriminalsByName(first, last, 1000, 0); 
                 
+                if (!id.isEmpty()) {
+                    results = results.stream()
+                        .filter(p -> id.equalsIgnoreCase(p.getNationalId()) ||
+                                     (p.getId() != null && id.equals(String.valueOf(p.getId()))))
+                        .collect(Collectors.toList());
+                }
+
                 // Filter by gender if selected
                 if (genderFilter.getValue() != null) {
                     results = results.stream()
