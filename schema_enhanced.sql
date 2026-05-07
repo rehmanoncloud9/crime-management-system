@@ -1262,56 +1262,5 @@ END$$
 
 DELIMITER ;
 
-/*
-DESIGN DECISIONS - Known Denormalizations:
 
-1. persons.aliases (TEXT)
-   - Stores multiple aliases as newline-separated values
-   - Reason: UI simplicity, rare queries on alias_name
-   - Could extract to table: person_aliases(person_id, alias_name)
-   - For this course project: acceptable denormalization
-
-2. persons.gang_affiliation (VARCHAR 255)
-   - Stores primary gang affiliation as single value
-   - Reason: Law enforcement priority is single primary gang
-   - Could extract: person_gangs(person_id, gang_id) + gangs table
-   - Current design: sufficient for case requirements
-
-3. persons.risk_score (VARCHAR 20)
-   - DERIVED ATTRIBUTE per ERD. Stored for performance: computed by AI/ML pipeline.
-   - Cached here, refreshed periodically. Justified denormalization.
-
-NORMALIZATION IMPROVEMENTS IMPLEMENTED:
-
-✓ case_files.related_case_ids → related_cases M:M table (1NF)
-✓ All enum fields protected with CHECK constraints
-✓ Foreign key cascade rules enforced
-✓ Triggers prevent business logic violations
-✓ Indexes on frequently-queried columns
-✓ Views provide normalized data presentation layer
-✓ Stored procedures encapsulate complex operations
-
-ERD SPECIALISATION HIERARCHIES IMPLEMENTED:
-
-✓ Specialisation 1 — Overlapping (○), Partial: PERSONS → USERS / CIVILIANS
-✓ Specialisation 2 — Weak Entities: CASE_ROLES (Disjoint ⊕, Partial)
-
-✓ Normalization — Multivalued Attributes (1NF):
-    - persons.distinguishing_marks → person_marks table
-    - arrest_records.charges → arrest_charges table
-    - warrants.charges → warrant_charges table
-
-✓ Normalization — Strong Entities:
-    - promoted court_name to dedicated COURTS table linked via court_id.
-
-  Strategy: Joined-table (table-per-subclass) via person_id FK
-  users.person_id UNIQUE FK → persons(id), civilians.person_id UNIQUE FK → persons(id)
-
-✓ Specialisation 2 — Disjoint (⊕), Partial: PERSONS → CASE_SUSPECTS / CASE_VICTIMS / CASE_WITNESSES
-  Composite PK (case_id, person_id). Weak entities with descriptive attributes.
-  Disjoint constraint enforced via triggers trg_disjoint_victim/witness/suspect.
-  Legacy case_persons table dropped.
-*/
-
--- End of Database Enhancements
 SET FOREIGN_KEY_CHECKS = 1;
