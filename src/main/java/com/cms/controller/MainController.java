@@ -34,7 +34,7 @@ public class MainController {
     private static MainController instance;
     private boolean sidebarExpanded = true;
 
-    private static final double EXPANDED = 240.0;
+    private static final double EXPANDED = 180.0;
     private static final double COLLAPSED = 0.0;
 
     public static MainController getInstance() {
@@ -155,8 +155,8 @@ public class MainController {
 
     private void addSection(String title) {
         Label s = new Label(title);
-        s.setStyle("-fx-padding: 14 20 2 20; -fx-font-size: 9px; -fx-font-weight: bold;" +
-                "-fx-text-fill: rgba(0,212,255,0.38);");
+        s.setStyle("-fx-padding: 8 12 2 12; -fx-font-size: 8.5px; -fx-font-weight: bold;" +
+                "-fx-text-fill: rgba(0,212,255,0.45); -fx-opacity: 0.7;");
         sideMenu.getChildren().add(s);
     }
 

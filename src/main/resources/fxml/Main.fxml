@@ -20,29 +20,8 @@
             <Region layoutX="900" layoutY="400" prefWidth="500" prefHeight="500" opacity="0.08" 
                     style="-fx-background-color: radial-gradient(center 50% 50%, radius 50%, #B388FF 0%, transparent 80%); -fx-background-radius: 1000;"/>
             
-            <HBox style="-fx-background-color: transparent;" alignment="TOP_LEFT">
-
-            <!-- SIDEBAR -->
-            <ScrollPane fx:id="sidebarScroll"
-                        fitToWidth="true"
-                        hbarPolicy="NEVER"
-                        vbarPolicy="AS_NEEDED"
-                        style="-fx-background-color: transparent; -fx-border-color: transparent;"
-                        styleClass="sidebar-scroll">
-                <VBox fx:id="sideMenu"
-                      prefWidth="250" minWidth="250"
-                      styleClass="sidebar">
-                    <VBox styleClass="sidebar-brand">
-                        <Label text="CMS" styleClass="brand-title"/>
-                        <Label text="CRIME MANAGEMENT SYSTEM" styleClass="brand-subtitle"/>
-                    </VBox>
-                    <Separator/>
-                    <!-- Menu buttons injected by MainController.buildSidebar() -->
-                </VBox>
-            </ScrollPane>
-
-            <!-- MAIN CONTENT AREA -->
-            <ScrollPane fitToWidth="true" fitToHeight="true" HBox.hgrow="ALWAYS"
+            <!-- MAIN CONTENT AREA (Takes full background) -->
+            <ScrollPane fitToWidth="true" fitToHeight="true" 
                         style="-fx-background-color: transparent; -fx-border-color: transparent;"
                         hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
                         styleClass="main-content-scroll">
@@ -50,7 +29,26 @@
                            style="-fx-background-color: transparent; -fx-padding: 0;"/>
             </ScrollPane>
 
-        </HBox>
+            <!-- FLOATING SIDEBAR (Bottom Right) -->
+            <ScrollPane fx:id="sidebarScroll"
+                        fitToWidth="true"
+                        hbarPolicy="NEVER"
+                        vbarPolicy="NEVER"
+                        StackPane.alignment="BOTTOM_RIGHT"
+                        maxWidth="200"
+                        maxHeight="400"
+                        style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0 24 24 0;"
+                        styleClass="sidebar-scroll-floating">
+                <VBox fx:id="sideMenu"
+                      prefWidth="180"
+                      styleClass="sidebar-floating">
+                    <VBox styleClass="sidebar-brand-floating">
+                        <Label text="CMS" styleClass="brand-title-sm"/>
+                    </VBox>
+                    <!-- Menu buttons injected by MainController.buildSidebar() -->
+                </VBox>
+            </ScrollPane>
+
         </StackPane>
     </center>
 

@@ -58,7 +58,7 @@ public class EliteAIService {
 
     public String processMessage(String userMessage, String sessionId) {
         if (userMessage == null || userMessage.isBlank())
-            return "Looks like your message was empty — what can I help you with?";
+            return "Looks like your message was empty : what can I help you with?";
         String dbCtx = buildDatabaseContext();
         try {
             return callGroqAPI(userMessage, sessionId, dbCtx, getApiKey());
@@ -173,7 +173,7 @@ public class EliteAIService {
             String first = u != null ? u.getFullName().split(" ")[0] : "Officer";
             return "Hey " + first + "! Good to see you.\n\n" +
                    "You've got " + open + " open case" + (open == 1 ? "" : "s") + " right now. " +
-                   "I'm connected to the full database and ready to help — just ask me anything.\n\n" +
+                   "I'm connected to the full database and ready to help : just ask me anything.\n\n" +
                    "Try: \"show me active cases\", \"find Ali Hassan\", \"give me system statistics\", or just chat.";
         } catch (Exception e) {
             return "Hey there! I'm Alex, your CMS assistant. How can I help you today?";
@@ -208,11 +208,11 @@ public class EliteAIService {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
             List<CaseFile> cases = s.createQuery("FROM CaseFile cf WHERE cf.status=:st ORDER BY cf.id DESC",CaseFile.class)
                 .setParameter("st", CaseStatus.OPEN).setMaxResults(8).list();
-            if (cases.isEmpty()) return "Good news — there are no open cases at the moment!";
+            if (cases.isEmpty()) return "Good news : there are no open cases at the moment!";
             StringBuilder sb = new StringBuilder("Here are the currently open cases (" + cases.size() + " shown):\n\n");
             for (CaseFile cf : cases) {
                 sb.append("• **").append(cf.getCaseNumber()).append("**");
-                if (cf.getIncident() != null) sb.append(" — ").append(cf.getIncident().getTitle());
+                if (cf.getIncident() != null) sb.append(" : ").append(cf.getIncident().getTitle());
                 sb.append("\n");
             }
             return sb.toString();
@@ -227,7 +227,7 @@ public class EliteAIService {
             StringBuilder sb = new StringBuilder("The most recent cases are:\n\n");
             for (CaseFile cf : cases) {
                 sb.append("• **").append(cf.getCaseNumber()).append("** [").append(cf.getStatus()).append("]");
-                if (cf.getIncident() != null) sb.append(" — ").append(cf.getIncident().getTitle());
+                if (cf.getIncident() != null) sb.append(" : ").append(cf.getIncident().getTitle());
                 sb.append("\n");
             }
             return sb.toString();
@@ -258,7 +258,7 @@ public class EliteAIService {
             if (officers.isEmpty()) return "No officers found in the system.";
             StringBuilder sb = new StringBuilder("Here's the current roster:\n\n");
             for (User u : officers) {
-                sb.append("• **").append(u.getFullName()).append("** — ").append(u.getRole());
+                sb.append("• **").append(u.getFullName()).append("** : ").append(u.getRole());
                 if (u.getBadgeNumber() != null) sb.append(" [#").append(u.getBadgeNumber()).append("]");
                 if (u.getPrecinct() != null) sb.append(", ").append(u.getPrecinct());
                 sb.append("\n");
@@ -274,7 +274,7 @@ public class EliteAIService {
             StringBuilder sb = new StringBuilder("Recent evidence items:\n\n");
             for (Evidence e : items) {
                 sb.append("• **").append(e.getEvidenceNumber()).append("** [").append(e.getType()).append("]");
-                if (e.getStatus() != null) sb.append(" — ").append(e.getStatus());
+                if (e.getStatus() != null) sb.append(" : ").append(e.getStatus());
                 if (e.getCaseFile() != null) sb.append(" | Case: ").append(e.getCaseFile().getCaseNumber());
                 sb.append("\n");
             }
@@ -286,11 +286,11 @@ public class EliteAIService {
         try (Session s = HibernateUtil.getSessionFactory().openSession()) {
             List<Person> wanted = s.createQuery("FROM Person p WHERE p.hasActiveWarrant=true ORDER BY p.id DESC",Person.class)
                 .setMaxResults(10).list();
-            if (wanted.isEmpty()) return "There are currently no persons with active warrants — all clear!";
+            if (wanted.isEmpty()) return "There are currently no persons with active warrants : all clear!";
             StringBuilder sb = new StringBuilder("⚠️ The following " + wanted.size() + " person(s) have active warrants:\n\n");
             for (Person p : wanted) {
                 sb.append("• **").append(p.getFirstName()).append(" ").append(p.getLastName()).append("**");
-                if (p.getPersonStatus() != null) sb.append(" — ").append(p.getPersonStatus());
+                if (p.getPersonStatus() != null) sb.append(" : ").append(p.getPersonStatus());
                 if (p.getDistrict() != null) sb.append(", ").append(p.getDistrict().getName());
                 sb.append("\n");
             }
@@ -305,7 +305,7 @@ public class EliteAIService {
             StringBuilder sb = new StringBuilder("Here are all the crime categories in the system:\n\n");
             for (CrimeType ct : types) {
                 sb.append("• **").append(ct.getName()).append("** [").append(ct.getCode()).append("]");
-                if (ct.getDescription() != null) sb.append(" — ").append(ct.getDescription());
+                if (ct.getDescription() != null) sb.append(" : ").append(ct.getDescription());
                 sb.append("\n");
             }
             return sb.toString();
@@ -351,7 +351,7 @@ public class EliteAIService {
             sb.append("**Top crime types by incident count:**\n");
             int r = 1;
             for (Object[] row : top)
-                sb.append(r++).append(". **").append(row[0]).append("** — ").append(row[1]).append(" incident").append((long)row[1]==1?"":"s").append("\n");
+                sb.append(r++).append(". **").append(row[0]).append("** : ").append(row[1]).append(" incident").append((long)row[1]==1?"":"s").append("\n");
 
             long open   = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status=:st",Long.class).setParameter("st", CaseStatus.OPEN).uniqueResult();
             long closed = s.createQuery("SELECT COUNT(cf) FROM CaseFile cf WHERE cf.status IN (:stList)",Long.class)
@@ -375,7 +375,7 @@ public class EliteAIService {
             StringBuilder sb = new StringBuilder("Here are the latest system activities recorded:\n\n");
             for (AuditLog al : logs) {
                 sb.append("• **").append(al.getAction()).append("** by ").append(al.getUserName())
-                  .append(" — ").append(al.getDescription()).append("\n");
+                  .append(" : ").append(al.getDescription()).append("\n");
             }
             return sb.toString();
         } catch (Exception e) { return "Error fetching audit logs: " + e.getMessage(); }
@@ -388,7 +388,7 @@ public class EliteAIService {
             if (civs.isEmpty()) return "No civilians registered in the database.";
             StringBuilder sb = new StringBuilder("Here are the latest registered civilians:\n\n");
             for (Civilian c : civs) {
-                sb.append("• **").append(c.getPerson().getFirstName()).append(" ").append(c.getPerson().getLastName()).append("** — ")
+                sb.append("• **").append(c.getPerson().getFirstName()).append(" ").append(c.getPerson().getLastName()).append("** : ")
                   .append(c.getOccupation() != null ? c.getOccupation() : "General")
                   .append(" at ").append(c.getEmployer() != null ? c.getEmployer() : "Private").append("\n");
             }
@@ -401,32 +401,32 @@ public class EliteAIService {
     private String getIntelligentDefault(String msg) {
         return "I'm not quite sure what you mean by \"" + msg + "\", but I'm happy to help.\n\n" +
                "Here are some things you can ask me:\n" +
-               "• **\"statistics\"** — Full system overview\n" +
-               "• **\"active cases\"** — Open investigations\n" +
-               "• **\"find [name]\"** — Search persons or cases\n" +
-               "• **\"criminals\"** — Suspect registry\n" +
-               "• **\"evidence\"** — Evidence log\n" +
-               "• **\"analyze\"** — Crime patterns and trends\n" +
-               "• **\"high risk\"** — Persons with active warrants\n\n" +
-               "Or just ask me a question naturally — I'll do my best to understand!";
+               "• **\"statistics\"** : Full system overview\n" +
+               "• **\"active cases\"** : Open investigations\n" +
+               "• **\"find [name]\"** : Search persons or cases\n" +
+               "• **\"criminals\"** : Suspect registry\n" +
+               "• **\"evidence\"** : Evidence log\n" +
+               "• **\"analyze\"** : Crime patterns and trends\n" +
+               "• **\"high risk\"** : Persons with active warrants\n\n" +
+               "Or just ask me a question naturally : I'll do my best to understand!";
     }
 
     private String helpText() {
         return "Sure, here's what I can do for you:\n\n" +
                "**Query data:**\n" +
-               "• \"give me system statistics\" — numbers on everything\n" +
-               "• \"show active / recent cases\" — case overviews\n" +
-               "• \"list all criminals\" — suspect registry\n" +
-               "• \"who are the officers?\" — staff list\n" +
-               "• \"show evidence\" — evidence log summary\n" +
-               "• \"who has active warrants?\" — wanted persons\n\n" +
+               "• \"give me system statistics\" : numbers on everything\n" +
+               "• \"show active / recent cases\" : case overviews\n" +
+               "• \"list all criminals\" : suspect registry\n" +
+               "• \"who are the officers?\" : staff list\n" +
+               "• \"show evidence\" : evidence log summary\n" +
+               "• \"who has active warrants?\" : wanted persons\n\n" +
                "**Search:**\n" +
-               "• \"find Ali Hassan\" — search by name\n" +
-               "• \"search CASE-2026-001\" — look up a case\n\n" +
+               "• \"find Ali Hassan\" : search by name\n" +
+               "• \"search CASE-2026-001\" : look up a case\n\n" +
                "**Analysis:**\n" +
-               "• \"analyze crime patterns\" — trends and hotspots\n" +
-               "• \"what happened today?\" — recent activity\n\n" +
-               "You can also just ask me questions naturally — I'm connected to the live database!";
+               "• \"analyze crime patterns\" : trends and hotspots\n" +
+               "• \"what happened today?\" : recent activity\n\n" +
+               "You can also just ask me questions naturally : I'm connected to the live database!";
     }
 
     private boolean matchesAny(String msg, String... keywords) {

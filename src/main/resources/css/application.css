@@ -166,28 +166,33 @@
 .btn-back:hover { -fx-background-color: rgba(0,191,165,0.12); -fx-text-fill: -cms-teal; -fx-cursor: hand; }
 
 /* ── SIDEBAR ── */
-.sidebar {
-    -fx-background-color: linear-gradient(to bottom, #E8F8F5, #F0FFF4); -fx-padding: 0;
-    -fx-pref-width: 250; -fx-min-width: 250;
-    -fx-border-color: rgba(0,191,165,0.15); -fx-border-width: 0 1 0 0;
+.sidebar-floating {
+    -fx-background-color: rgba(255,255,255,0.4);
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-color: rgba(255,255,255,0.6);
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 8);
+    -fx-padding: 8;
+    -fx-opacity: 0.4;
 }
-.sidebar-brand { -fx-padding: 24 16 20 16; -fx-border-color: rgba(0,191,165,0.1); -fx-border-width: 0 0 1 0; }
-.sidebar-brand .brand-title { -fx-text-fill: -cms-teal; -fx-font-size: 20px; -fx-font-weight: 800; -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.25), 10, 0, 0, 0); }
-.sidebar-brand .brand-subtitle { -fx-text-fill: -cms-t3; -fx-font-size: 10px; -fx-font-weight: 700; -fx-letter-spacing: 1px; }
+.sidebar-floating:hover { -fx-opacity: 1.0; -fx-background-color: rgba(255,255,255,0.85); }
+
+.sidebar-brand-floating { -fx-padding: 8 12; -fx-alignment: center; }
+.brand-title-sm { -fx-text-fill: -cms-teal; -fx-font-size: 14px; -fx-font-weight: 900; }
+
 .sidebar-btn {
     -fx-background-color: transparent; -fx-text-fill: -cms-t3;
-    -fx-alignment: CENTER_LEFT; -fx-padding: 0 20;
-    -fx-font-size: 13.5px; -fx-cursor: hand; -fx-max-width: 9999;
-    -fx-pref-height: 48; -fx-min-height: 48; -fx-max-height: 48; -fx-background-radius: 0;
+    -fx-alignment: CENTER_LEFT; -fx-padding: 0 12;
+    -fx-font-size: 11px; -fx-cursor: hand; -fx-max-width: 9999;
+    -fx-pref-height: 34; -fx-min-height: 34; -fx-max-height: 34; -fx-background-radius: 12;
 }
 .sidebar-btn:hover {
-    -fx-background-color: rgba(0,191,165,0.06); -fx-text-fill: -cms-teal;
-    -fx-border-color: -cms-teal; -fx-border-width: 0 0 0 3;
+    -fx-background-color: rgba(0,191,165,0.1); -fx-text-fill: -cms-teal;
 }
 .sidebar-btn-active {
-    -fx-background-color: rgba(0,191,165,0.1); -fx-text-fill: -cms-teal; -fx-font-weight: 800;
-    -fx-border-color: -cms-teal; -fx-border-width: 0 0 0 4;
-    -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.15), 12, 0, 0, 0);
+    -fx-background-color: -cms-teal; -fx-text-fill: white; -fx-font-weight: 800;
+    -fx-effect: dropshadow(gaussian, rgba(0,191,165,0.3), 10, 0, 0, 0);
 }
 
 /* ── APP HEADER — Aurora Nexus Premium ── */

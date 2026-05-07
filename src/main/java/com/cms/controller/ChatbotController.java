@@ -57,25 +57,15 @@ public class ChatbotController {
         setupInputField();
         setupChatContainer();
 
-        // Welcome message
-        Platform.runLater(() -> {
-            aiService.processMessage("hello", sessionId);  // warm up
-            addAIMessage(
-                "👋 **CMS Intelligence Assistant Online**\n\n" +
-                "I have full access to your case database.\n" +
-                "Try: `statistics`, `active cases`, `find [name]`, `analyze`\n\n" +
-                "💡 _Type_ `configure` _to enable Groq AI (free Llama 3-70B)_",
-                false
-            );
-        });
+        // Welcome message is now handled by the FXML overlay
 
-        updateStatus("Ready — Database Connected");
+        updateStatus("AI Under Training — Local Datasets");
         if (sendButton != null) {
             AnimationHelper.addHoverLift(sendButton);
             AnimationHelper.addClickPress(sendButton);
         }
 
-        logger.info("Elite chatbot initialized for session: {}", sessionId);
+        logger.info("Elite chatbot initialized in preview mode for session: {}", sessionId);
     }
 
     private void setupInputField() {
@@ -120,7 +110,7 @@ public class ChatbotController {
                 Platform.runLater(() -> {
                     hideTypingIndicator();
                     addAIMessage(response, true);
-                    updateStatus("Ready — Database Connected");
+                    updateStatus("AI Under Training — Local Datasets");
                     if (sendButton != null) sendButton.setDisable(false);
                     inputField.requestFocus();
                 });

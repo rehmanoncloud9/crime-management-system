@@ -21,15 +21,23 @@
     <!-- Chat scroll area -->
     <ScrollPane fx:id="chatScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
                 styleClass="chat-scroll-area" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-        <VBox fx:id="chatContainer" spacing="16" styleClass="chat-container">
-            <!-- Messages will be injected here -->
-        </VBox>
+        <StackPane VBox.vgrow="ALWAYS">
+            <VBox alignment="CENTER" spacing="20" style="-fx-padding: 40;">
+                <Label text="🤖" style="-fx-font-size: 64px;"/>
+                <Label text="AI Forensic Assistant" styleClass="heading-lg"/>
+                <Label text="COMING SOON" 
+                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: var(--aurora-teal); -fx-letter-spacing: 0.2em;"/>
+                <Label text="The next generation of CMS intelligence is being trained on our local crime datasets. Soon you will be able to query records using natural language." 
+                       wrapText="true" textAlignment="CENTER" styleClass="text-muted" maxWidth="400"/>
+            </VBox>
+            <VBox fx:id="chatContainer" spacing="16" styleClass="chat-container" visible="false" managed="false"/>
+        </StackPane>
     </ScrollPane>
  
     <!-- Input bar -->
     <HBox fx:id="inputBar" alignment="CENTER" spacing="12" styleClass="app-header" style="-fx-border-width: 1 0 0 0; -fx-padding: 16 24;">
         <TextField fx:id="inputField" promptText="Ask anything about the system..."
-                   HBox.hgrow="ALWAYS" styleClass="chat-input"/>
-        <Button fx:id="sendButton" text="➤ SEND" onAction="#handleSend" styleClass="btn, btn-primary"/>
+                   HBox.hgrow="ALWAYS" styleClass="chat-input" disable="true"/>
+        <Button fx:id="sendButton" text="➤ SEND" onAction="#handleSend" styleClass="btn, btn-primary" disable="true"/>
     </HBox>
 </VBox>
