@@ -192,30 +192,29 @@ GROQ_API_KEY=your_groq_api_key
 ```
 Without this the chatbot falls back to a built-in local response engine — it still works, just without the LLM.
 
-## Design Language: Aurora Nexus v2.0
-The application features the **Aurora Nexus v2.0** design system, a cutting-edge UI/UX framework designed specifically for this project. It goes beyond standard flat designs to offer a state-of-the-art experience:
+## Modern UI Design
+The application uses a custom CSS framework designed specifically for this project to provide a modern and professional user experience:
 
-- **Liquid Glassmorphism**: Translucent, frosted-glass navigation panels and hubs with dynamic gradients.
-- **Claymorphism Identity Hubs**: Soft, 3D "bubbled" containers for user profiles and action groups that provide a tactile, premium feel.
-- **Holographic Widgets**: High-fidelity clock and status panels with vibrant neon accents.
-- **Interactive Micro-Animations**: Smooth scale transitions, rotations, and glows that respond to user presence.
-- **Accessibility & Contrast**: Carefully curated color palettes ensuring high visibility and readability across all modules.
-
----
-
-## Notes for the examiner
-
-This project demonstrates:
-
-- **Ultra-Premium UI/UX (Aurora Nexus)** — State-of-the-art glassmorphism and claymorphism implementation using custom CSS.
-- **MVC architecture** — controllers, services, and repositories are cleanly separated.
-- **ORM with Hibernate** — all database interactions go through entity mappings and HQL.
-- **Role-based access control** — each user role sees a different dashboard and has different permissions.
-- **Security fundamentals** — passwords are BCrypt-hashed, accounts lock after failed attempts, sessions expire.
-- **AI-Powered Intelligence** — Integrated LLM support (Groq) for database analysis and natural language queries.
-- **Audit trail** — every significant action is logged to the `audit_logs` table.
-- **Normalization** — schema follows 1NF/2NF/3NF with proper foreign keys and junction tables.
+- **Glassmorphism**: Translucent sidebars and navigation panels with soft gradients.
+- **Modern Containers**: Rounded, shadow-based containers for user profiles and action groups.
+- **Dynamic Widgets**: Interactive clock and status panels.
+- **Smooth Animations**: Transitions and hover effects that make the interface feel responsive.
+- **High Accessibility**: High-contrast color palettes for better readability across all modules.
 
 ---
 
-*Built with Aurora Nexus Design System · JavaFX 21 · Hibernate 6 · MariaDB · Maven*
+## Final Summary
+This project covers several core database and software engineering concepts:
+
+- **Advanced UI/UX** — Modern interface design using custom CSS (Glassmorphism).
+- **Clean Architecture** — Proper separation of controllers, services, and repositories (MVC).
+- **ORM Integration** — Used Hibernate 6 for all database mappings and transactions.
+- **Access Control** — Different dashboards and permissions based on user roles (Admin, Officer, etc.).
+- **Data Security** — Implemented BCrypt hashing and session management.
+- **AI Integration** — Supports natural language queries through the Groq API.
+- **Logging** — Tracks all important actions in a dedicated audit log.
+- **Database Normalization** — The 48-table schema is fully normalized (3NF/BCNF).
+
+---
+
+*JavaFX 21 · Hibernate 6 · MariaDB · Maven*
