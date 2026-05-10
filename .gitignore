@@ -6,10 +6,30 @@
 # Build artifacts
 target/
 *.class
+dependency-reduced-pom.xml
 
-# Environment variables
+# Environment and Data
 .env
-
-# Database credentials - never commit real passwords
 src/main/resources/db.properties
 db.properties
+data/
+
+# Documentation and Presentations (Excluded from Git)
+presentation/
+report/
+scratch/
+CMS_Presentation*/
+CMS_Presentation*.zip
+*.pdf
+*.docx
+*.pptx
+*.zip
+*.log
+
+# Antigravity / AI artifacts
+.gemini/
+knowledge/
+brain/
+artifacts/
+logs/
+.tempmediaStorage/
