@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,21 +147,56 @@ public class ArrestRegistrationController {
 
         // Case selection
         ComboBox<CaseFile> caseCombo = new ComboBox<>();
+        caseCombo.setMaxWidth(Double.MAX_VALUE);
+        caseCombo.setPrefHeight(40);
         List<CaseFile> cases = caseService.findAllCases();
         caseCombo.setItems(FXCollections.observableArrayList(cases));
+        
+        caseCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override protected void updateItem(CaseFile item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setGraphic(null);
+                else {
+                    VBox cell = new VBox(2);
+                    Label id = new Label(item.getCaseNumber());
+                    id.setStyle("-fx-font-weight: 800; -fx-text-fill: -cms-teal;");
+                    String title = item.getIncident() != null ? item.getIncident().getTitle() : "Untitled";
+                    Label info = new Label(title);
+                    info.setStyle("-fx-font-size: 10px; -fx-text-fill: #5A7A78;");
+                    cell.getChildren().addAll(id, info);
+                    setGraphic(cell);
+                }
+            }
+        });
         caseCombo.setConverter(new javafx.util.StringConverter<>() {
             @Override public String toString(CaseFile cf) { return cf != null ? cf.getCaseNumber() : ""; }
             @Override public CaseFile fromString(String s) { return null; }
         });
 
-        // Suspect selection (from persons in DB)
+        // Suspect selection
         ComboBox<Person> suspectCombo = new ComboBox<>();
+        suspectCombo.setMaxWidth(Double.MAX_VALUE);
+        suspectCombo.setPrefHeight(40);
         List<Person> persons = personService.findAll(200, 0);
         suspectCombo.setItems(FXCollections.observableArrayList(persons));
-        suspectCombo.setConverter(new javafx.util.StringConverter<>() {
-            @Override public String toString(Person p) {
-                return p != null ? p.getFirstName() + " " + p.getLastName() + " (ID: " + p.getId() + ")" : "";
+        
+        suspectCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override protected void updateItem(Person p, boolean empty) {
+                super.updateItem(p, empty);
+                if (empty || p == null) setGraphic(null);
+                else {
+                    VBox cell = new VBox(2);
+                    Label name = new Label(p.getFullName());
+                    name.setStyle("-fx-font-weight: 800; -fx-text-fill: -cms-teal;");
+                    Label cnic = new Label("CNIC: " + (p.getCnic() != null ? p.getCnic() : "Unknown"));
+                    cnic.setStyle("-fx-font-size: 10px; -fx-text-fill: #5A7A78;");
+                    cell.getChildren().addAll(name, cnic);
+                    setGraphic(cell);
+                }
             }
+        });
+        suspectCombo.setConverter(new javafx.util.StringConverter<>() {
+            @Override public String toString(Person p) { return p != null ? p.getFullName() : ""; }
             @Override public Person fromString(String s) { return null; }
         });
 

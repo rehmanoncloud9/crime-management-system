@@ -16,6 +16,7 @@
                 <VBox spacing="12" style="-fx-padding: 12;">
                     <HBox spacing="12">
                         <Button text="+ Add Court Case" onAction="#handleAddCase" styleClass="btn, btn-primary"/>
+                        <Button text="⚖️ Update Status/Verdict" onAction="#handleUpdateStatus" styleClass="btn, btn-success"/>
                         <Button text="Refresh" onAction="#loadData" styleClass="btn, btn-outline"/>
                     </HBox>
                     <TableView fx:id="courtCasesTable" VBox.vgrow="ALWAYS" prefHeight="350">
@@ -33,6 +34,7 @@
                 <VBox spacing="12" style="-fx-padding: 12;">
                     <HBox spacing="12">
                         <Button text="+ Schedule Hearing" onAction="#handleScheduleHearing" styleClass="btn, btn-success"/>
+                        <Button text="📝 Record Outcome" onAction="#handleRecordOutcome" styleClass="btn, btn-primary"/>
                         <Button text="Refresh" onAction="#loadData" styleClass="btn, btn-outline"/>
                     </HBox>
                     <TableView fx:id="hearingsTable" VBox.vgrow="ALWAYS" prefHeight="350">
