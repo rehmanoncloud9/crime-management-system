@@ -1,7 +1,10 @@
 package com.cms.controller;
 
 import com.cms.model.CrimeType;
+import com.cms.model.User;
+import com.cms.model.enums.Role;
 import com.cms.service.CrimeTypeService;
+import com.cms.service.SessionManager;
 import com.cms.util.NexusAlert;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -51,6 +54,18 @@ public class ConfigController {
 
     @FXML
     public void initialize() {
+        // RBAC: Only administrators can modify system settings
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        boolean isAdmin = currentUser != null && currentUser.getRole() == Role.ADMINISTRATOR;
+        
+        if (!isAdmin) {
+            systemNameField.setEditable(false);
+            defaultPrecinctField.setEditable(false);
+            autoBackupCheck.setDisable(true);
+            aiSensitivitySlider.setDisable(true);
+            // We'll also block the save action method
+        }
+
         loadConfig();
         setupCrimeTypeTable();
         loadCrimeTypes();
@@ -88,6 +103,11 @@ public class ConfigController {
 
     @FXML
     private void handleSave() {
+        if (SessionManager.getInstance().getCurrentUser().getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can modify system configuration.");
+            return;
+        }
+
         Properties props = new Properties();
         try (FileInputStream in = new FileInputStream(CONFIG_FILE)) {
             props.load(in);
@@ -109,6 +129,11 @@ public class ConfigController {
 
     @FXML
     private void handleAddCrimeType() {
+        if (SessionManager.getInstance().getCurrentUser().getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can manage crime type classifications.");
+            return;
+        }
+
         // Simple dialog for adding crime type
         Dialog<CrimeType> dialog = new Dialog<>();
         dialog.setTitle("Add Crime Type");
@@ -142,6 +167,11 @@ public class ConfigController {
     }
 
     private void handleDeleteCrimeType() {
+        if (SessionManager.getInstance().getCurrentUser().getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can remove crime type classifications.");
+            return;
+        }
+
         CrimeType selected = crimeTypeTable.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 

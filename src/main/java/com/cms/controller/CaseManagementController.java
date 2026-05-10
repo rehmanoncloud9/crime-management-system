@@ -2,6 +2,7 @@ package com.cms.controller;
 
 import com.cms.model.CaseFile;
 import com.cms.model.Person;
+import com.cms.model.enums.Role;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -98,7 +99,8 @@ public class CaseManagementController {
             }
         };
         task.setOnSucceeded(e -> caseListView.setItems(FXCollections.observableArrayList(task.getValue())));
-        new Thread(task).start();
+        task.setOnFailed(e -> { /* silently log */ });
+        Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 
     private void showCaseDetails(CaseFile selected) {
@@ -137,12 +139,17 @@ public class CaseManagementController {
         try { labelCrimeType.setText(cf.getIncident() != null && cf.getIncident().getCrimeType() != null ? cf.getIncident().getCrimeType().getName() : "N/A"); } catch (Exception ex) { labelCrimeType.setText("N/A"); }
         try { labelDescription.setText(cf.getIncident() != null ? cf.getIncident().getDescription() : ""); } catch (Exception ex) { labelDescription.setText(""); }
 
-        com.cms.model.enums.Role currentRole = com.cms.service.SessionManager.getInstance().getCurrentUser().getRole();
-        if (currentRole == com.cms.model.enums.Role.ANALYST) {
-            startInvestigateBtn.setDisable(true);
-            closeCaseBtn.setDisable(true);
-        } else {
-            startInvestigateBtn.setDisable(cf.getStatus() != com.cms.model.enums.CaseStatus.OPEN);
+        com.cms.model.User currentUser = com.cms.service.SessionManager.getInstance().getCurrentUser();
+        com.cms.model.enums.Role currentRole = currentUser != null ? currentUser.getRole() : null;
+        
+        // RBAC: Officers can start investigations, but only Investigators/Admins can CLOSE them.
+        boolean canStart = currentRole == Role.ADMINISTRATOR || currentRole == Role.DETECTIVE || currentRole == Role.OFFICER;
+        boolean canClose = currentRole == Role.ADMINISTRATOR || currentRole == Role.DETECTIVE;
+        
+        startInvestigateBtn.setDisable(!canStart || cf.getStatus() != com.cms.model.enums.CaseStatus.OPEN);
+        closeCaseBtn.setDisable(!canClose);
+        
+        if (canClose) {
             boolean isClosed = cf.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_CONVICTED ||
                                cf.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_ACQUITTED ||
                                cf.getStatus() == com.cms.model.enums.CaseStatus.CLOSED_UNSOLVED;
@@ -212,7 +219,7 @@ public class CaseManagementController {
             // Load all involved persons
             populatePersonCards(selected);
         });
-        new Thread(task).start();
+        Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 
     private void populatePersonCards(CaseFile cf) {
@@ -268,44 +275,111 @@ public class CaseManagementController {
             }
         };
         task.setOnSucceeded(e -> caseListView.setItems(FXCollections.observableArrayList(task.getValue())));
-        new Thread(task).start();
+        Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 
     @FXML
     private void handleNewCase() {
+        com.cms.model.User currentUser = com.cms.service.SessionManager.getInstance().getCurrentUser();
+        if (currentUser.getRole() == Role.ANALYST) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nAnalysts cannot initiate new criminal cases.");
+            return;
+        }
+
         com.cms.service.IncidentService incidentService = new com.cms.service.IncidentService();
         List<com.cms.model.CrimeIncident> unlinked = incidentService.getUnlinkedIncidents();
         
         if (unlinked.isEmpty()) {
-            NexusAlert.showWarning("No unlinked incidents found. All field reports have already been assigned to cases.");
+            NexusAlert.showWarning("CLEAR STATUS\n\nNo unlinked field reports found. All incidents have been assigned to active cases.");
             return;
         }
 
-        ChoiceDialog<com.cms.model.CrimeIncident> dialog = new ChoiceDialog<>(unlinked.get(0), unlinked);
-        dialog.setTitle("Initiate New Case");
-        dialog.setHeaderText("Select Field Incident to Upgrade");
-        dialog.setContentText("Active Incidents:");
+        // --- CUSTOM PREMIUM DIALOG ---
+        Dialog<com.cms.model.CrimeIncident> dialog = new Dialog<>();
+        dialog.setTitle("Nexus Command | Case Initiation");
+        dialog.setHeaderText("INTELLIGENCE UPGRADE\nSelect a field incident to promote to a formal investigation.");
         
+        // Style the dialog pane
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.getStyleClass().add("dialog-pane");
+        dialogPane.setPrefWidth(500);
+
+        ButtonType initiateBtnType = new ButtonType("Initiate Case", ButtonBar.ButtonData.OK_DONE);
+        dialogPane.getButtonTypes().addAll(initiateBtnType, ButtonType.CANCEL);
+
+        VBox content = new VBox(15);
+        content.setPadding(new javafx.geometry.Insets(20));
+        
+        Label lbl = new Label("Select Active Field Incident:");
+        lbl.getStyleClass().add("form-label-premium");
+        
+        ComboBox<com.cms.model.CrimeIncident> incidentCombo = new ComboBox<>(FXCollections.observableArrayList(unlinked));
+        incidentCombo.setMaxWidth(Double.MAX_VALUE);
+        incidentCombo.setPrefHeight(45);
+        incidentCombo.getStyleClass().add("combo-box");
+
+        // Premium Cell Factory for the Dropdown
+        incidentCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(com.cms.model.CrimeIncident item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    VBox cell = new VBox(2);
+                    Label id = new Label(item.getIncidentNumber());
+                    id.setStyle("-fx-font-weight: 900; -fx-text-fill: -cms-teal; -fx-font-size: 13px;");
+                    
+                    String title = item.getTitle() != null ? item.getTitle() : "Untitled Incident";
+                    String date = item.getOccurredAt() != null ? item.getOccurredAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy")) : "N/A";
+                    Label info = new Label(title + " — " + date);
+                    info.setStyle("-fx-font-size: 11px; -fx-text-fill: #5A7A78;");
+                    
+                    cell.getChildren().addAll(id, info);
+                    setGraphic(cell);
+                }
+            }
+        });
+
+        // String Converter for the selection area
+        incidentCombo.setConverter(new javafx.util.StringConverter<>() {
+            @Override public String toString(com.cms.model.CrimeIncident ci) {
+                return ci == null ? "" : ci.getIncidentNumber() + " — " + (ci.getTitle() != null ? ci.getTitle() : "Unassigned");
+            }
+            @Override public com.cms.model.CrimeIncident fromString(String s) { return null; }
+        });
+
+        incidentCombo.getSelectionModel().selectFirst();
+        content.getChildren().addAll(lbl, incidentCombo);
+        dialogPane.setContent(content);
+
+        dialog.setResultConverter(btn -> btn == initiateBtnType ? incidentCombo.getValue() : null);
+
         dialog.showAndWait().ifPresent(selectedInc -> {
             Task<Void> task = new Task<>() {
                 @Override
                 protected Void call() throws Exception {
-                    caseService.createNewCaseFromIncident(selectedInc.getId(),
-                        com.cms.service.SessionManager.getInstance().getCurrentUser());
+                    caseService.createNewCaseFromIncident(selectedInc.getId(), currentUser);
                     return null;
                 }
             };
             task.setOnSucceeded(e -> {
                 loadCasesAsync();
-                NexusAlert.showInfo("Case successfully initiated for incident: " + selectedInc.getIncidentNumber());
+                NexusAlert.showInfo("INVESTIGATION INITIATED\n\nCase assigned to: " + selectedInc.getIncidentNumber());
             });
-            task.setOnFailed(e -> NexusAlert.showError("System Failure: " + task.getException().getMessage()));
-            new Thread(task).start();
+            task.setOnFailed(e -> NexusAlert.showError("REGISTRY FAILURE\n\nFailed to link case: " + task.getException().getMessage()));
+            Thread th = new Thread(task); th.setDaemon(true); th.start();
         });
     }
 
     @FXML
     private void handleStartInvestigation() {
+        Role role = com.cms.service.SessionManager.getInstance().getCurrentUser().getRole();
+        if (role == Role.ANALYST) {
+            NexusAlert.showWarning("READ-ONLY\n\nAnalysts cannot assign investigators.");
+            return;
+        }
+
         CaseFile selected = caseListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
@@ -322,11 +396,60 @@ public class CaseManagementController {
             return;
         }
 
-        // Show officer choice dialog
-        ChoiceDialog<com.cms.model.User> dialog = new ChoiceDialog<>(freeOfficers.get(0), freeOfficers);
-        dialog.setTitle("Assign Investigator");
-        dialog.setHeaderText("Select a free officer to assign as Primary Investigator");
-        dialog.setContentText("Officer:");
+        // --- CUSTOM PREMIUM ASSIGNMENT DIALOG ---
+        Dialog<com.cms.model.User> dialog = new Dialog<>();
+        dialog.setTitle("Nexus Command | Assignment");
+        dialog.setHeaderText("PERSONNEL DEPLOYMENT\nSelect a certified officer for primary case investigation.");
+        
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.getStyleClass().add("dialog-pane");
+        dialogPane.setPrefWidth(450);
+
+        ButtonType assignBtnType = new ButtonType("Assign Officer", ButtonBar.ButtonData.OK_DONE);
+        dialogPane.getButtonTypes().addAll(assignBtnType, ButtonType.CANCEL);
+
+        VBox content = new VBox(15);
+        content.setPadding(new javafx.geometry.Insets(20));
+        
+        Label lbl = new Label("Available Field Investigators:");
+        lbl.getStyleClass().add("form-label-premium");
+        
+        ComboBox<com.cms.model.User> officerCombo = new ComboBox<>(FXCollections.observableArrayList(freeOfficers));
+        officerCombo.setMaxWidth(Double.MAX_VALUE);
+        officerCombo.setPrefHeight(45);
+        officerCombo.getStyleClass().add("combo-box");
+
+        // Premium Cell Factory
+        officerCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(com.cms.model.User item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    VBox cell = new VBox(2);
+                    Label name = new Label(item.getFullName());
+                    name.setStyle("-fx-font-weight: 800; -fx-text-fill: -cms-teal;");
+                    
+                    Label rank = new Label(item.getRole().name() + " — Badge #" + (item.getId() + 1000));
+                    rank.setStyle("-fx-font-size: 10px; -fx-text-fill: -cms-t3;");
+                    
+                    cell.getChildren().addAll(name, rank);
+                    setGraphic(cell);
+                }
+            }
+        });
+
+        officerCombo.setConverter(new javafx.util.StringConverter<>() {
+            @Override public String toString(com.cms.model.User u) { return u == null ? "" : u.getFullName(); }
+            @Override public com.cms.model.User fromString(String s) { return null; }
+        });
+
+        officerCombo.getSelectionModel().selectFirst();
+        content.getChildren().addAll(lbl, officerCombo);
+        dialogPane.setContent(content);
+
+        dialog.setResultConverter(btn -> btn == assignBtnType ? officerCombo.getValue() : null);
 
         dialog.showAndWait().ifPresent(officer -> {
             Task<Void> task = new Task<>() {
@@ -336,14 +459,12 @@ public class CaseManagementController {
                 }
             };
             task.setOnSucceeded(e -> {
-                NexusAlert.showInfo("Investigation started!\nAssigned: " + officer.getFullName());
-                
-                // Refresh list and the current detail view
+                NexusAlert.showInfo("INVESTIGATION DEPLOYED\n\nPrimary Investigator: " + officer.getFullName());
                 loadCasesAsync();
                 showCaseDetails(selected); 
             });
             task.setOnFailed(e ->
-                NexusAlert.showError("Failed: " + task.getException().getMessage()));
+                NexusAlert.showError("DEPLOYMENT FAILURE\n\n" + task.getException().getMessage()));
             Thread th = new Thread(task); th.setDaemon(true); th.start();
         });
     }
@@ -352,23 +473,62 @@ public class CaseManagementController {
     private void handleLinkSuspect() {
         if (selectedCase == null) return;
         
-        // Step 1: Pick Role
+        // Step 1: Pick Role (Simple Choice is okay for enums usually, but let's be consistent)
         List<com.cms.model.enums.PersonStatus> roles = List.of(
             com.cms.model.enums.PersonStatus.SUSPECT, 
             com.cms.model.enums.PersonStatus.VICTIM, 
             com.cms.model.enums.PersonStatus.WITNESS
         );
         ChoiceDialog<com.cms.model.enums.PersonStatus> roleDialog = new ChoiceDialog<>(com.cms.model.enums.PersonStatus.SUSPECT, roles);
-        roleDialog.setTitle("Select Role");
+        roleDialog.setTitle("Role Selection");
+        roleDialog.setHeaderText("Specify Legal Status");
         roleDialog.setContentText("Link person as:");
         
         roleDialog.showAndWait().ifPresent(role -> {
-            // Step 2: Pick Person
-            List<Person> allPeople = personService.findAll(100, 0);
-            ChoiceDialog<Person> personDialog = new ChoiceDialog<>(null, allPeople);
+            // Step 2: Pick Person (High Fidelity)
+            List<Person> allPeople = personService.findAll(200, 0);
+            
+            Dialog<Person> personDialog = new Dialog<>();
             personDialog.setTitle("Link Person to Case");
-            personDialog.setHeaderText("Select a person to link as " + role);
-            personDialog.setContentText("Person:");
+            personDialog.setHeaderText("REGISTRY SEARCH\nSelect a civilian to link as " + role);
+            
+            DialogPane dp = personDialog.getDialogPane();
+            dp.getStyleClass().add("dialog-pane");
+            dp.setPrefWidth(450);
+
+            ButtonType linkBtn = new ButtonType("Link to Case", ButtonBar.ButtonData.OK_DONE);
+            dp.getButtonTypes().addAll(linkBtn, ButtonType.CANCEL);
+
+            ComboBox<Person> personCombo = new ComboBox<>(FXCollections.observableArrayList(allPeople));
+            personCombo.setMaxWidth(Double.MAX_VALUE);
+            personCombo.setPrefHeight(45);
+            personCombo.getStyleClass().add("combo-box");
+
+            personCombo.setCellFactory(lv -> new ListCell<>() {
+                @Override protected void updateItem(Person p, boolean empty) {
+                    super.updateItem(p, empty);
+                    if (empty || p == null) setGraphic(null);
+                    else {
+                        VBox cell = new VBox(2);
+                        Label name = new Label(p.getFullName());
+                        name.setStyle("-fx-font-weight: 800; -fx-text-fill: -cms-teal;");
+                        Label cnic = new Label("CNIC: " + (p.getCnic() != null ? p.getCnic() : "Unknown"));
+                        cnic.setStyle("-fx-font-size: 10px; -fx-text-fill: -cms-t3;");
+                        cell.getChildren().addAll(name, cnic);
+                        setGraphic(cell);
+                    }
+                }
+            });
+            personCombo.setConverter(new javafx.util.StringConverter<>() {
+                @Override public String toString(Person p) { return p == null ? "" : p.getFullName(); }
+                @Override public Person fromString(String s) { return null; }
+            });
+
+            VBox box = new VBox(10, new Label("Select Person:"), personCombo);
+            box.setPadding(new javafx.geometry.Insets(20));
+            dp.setContent(box);
+
+            personDialog.setResultConverter(b -> b == linkBtn ? personCombo.getValue() : null);
 
             personDialog.showAndWait().ifPresent(person -> {
                 javafx.concurrent.Task<Void> linkTask = new javafx.concurrent.Task<>() {
@@ -378,14 +538,20 @@ public class CaseManagementController {
                     }
                 };
                 linkTask.setOnSucceeded(ev -> showCaseDetails(selectedCase));
-                linkTask.setOnFailed(ev -> NexusAlert.showError("Link Failed: " + linkTask.getException().getMessage()));
-                new Thread(linkTask).start();
+                linkTask.setOnFailed(ev -> NexusAlert.showError("REGISTRY FAILURE\n\nLink Failed: " + linkTask.getException().getMessage()));
+                Thread th = new Thread(linkTask); th.setDaemon(true); th.start();
             });
         });
     }
 
     @FXML
     private void handleCloseCase() {
+        Role role = com.cms.service.SessionManager.getInstance().getCurrentUser().getRole();
+        if (role != Role.ADMINISTRATOR && role != Role.DETECTIVE) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Investigators and Administrators can close cases.");
+            return;
+        }
+
         CaseFile selected = caseListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
         TextInputDialog dialog = new TextInputDialog();
@@ -404,7 +570,7 @@ public class CaseManagementController {
                 showCaseDetails(selected);
                 NexusAlert.showInfo("Case has been successfully closed.");
             });
-            new Thread(task).start();
+            Thread th = new Thread(task); th.setDaemon(true); th.start();
         });
     }
 }

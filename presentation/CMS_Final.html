@@ -897,60 +897,6 @@
     </div>
   </div>
 
-  <!-- ══ SLIDE 11.5: STORED PROCEDURES ══ -->
-  <div class="slide">
-    <div class="section-header">
-      <span class="liquid-pill">Physical Schema · Procedural</span>
-      <h2>Stored Procedures</h2>
-    </div>
-    <div class="grid-2" style="gap:18px;">
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <div class="glass" style="padding:20px; flex:1;">
-          <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--aurora-teal);">Encapsulating Business Logic</h3>
-          <p style="font-size:13.5px;color:var(--text-secondary);line-height:1.6;margin-bottom:15px;">
-            Stored procedures move critical "state change" logic into the database engine. This ensures that no matter which application connects, the business rules are applied identically.
-          </p>
-          <div class="highlight-box">
-            <h3 style="font-size:13px;font-weight:700;margin-bottom:8px;">Case Closure Procedure (`sp_close_case`)</h3>
-            <p style="font-size:12.5px;color:var(--text-muted);line-height:1.5;">
-              This procedure handles the sensitive operation of closing a case. It validates prerequisites, updates the status, and <strong>mandates</strong> an audit log entry within a single atomic transaction.
-            </p>
-          </div>
-        </div>
-        <div class="clay" style="padding:18px;">
-          <h3 style="font-size:13px;font-weight:700;color:var(--aurora-teal);margin-bottom:8px;">Key Advantages</h3>
-          <ul style="font-size:12.5px;color:var(--text-secondary);list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;">
-            <li class="norm-step"><b>Atomicity</b> Status update and Audit Log entry happen together or not at all.</li>
-            <li class="norm-step"><b>Maintenance</b> Rules can be updated in one place without re-deploying the Java app.</li>
-            <li class="norm-step"><b>Abstraction</b> Application only needs to call <code style="font-size:11px;">CALL sp_close_case(...)</code>.</li>
-          </ul>
-        </div>
-      </div>
-      <div class="glass" style="padding:16px 18px; display:flex; flex-direction:column;">
-        <h3 style="font-size:13px;font-weight:700;margin-bottom:9px;">Implementation Detail</h3>
-        <div class="fd-box" style="font-size:10.5px;line-height:1.5;background:#f8f9fa; flex:1; overflow-y:auto;">
-          <span class="sql-kw">CREATE PROCEDURE</span> sp_close_case(<br>
-          &nbsp;&nbsp;<span class="sql-kw">IN</span> p_case_id <span class="sql-kw">BIGINT</span>, <span class="sql-kw">IN</span> p_status <span class="sql-kw">VARCHAR</span>(50),<br>
-          &nbsp;&nbsp;<span class="sql-kw">IN</span> p_reason <span class="sql-kw">TEXT</span>, <span class="sql-kw">IN</span> p_user_id <span class="sql-kw">BIGINT</span><br>
-          )<br>
-          <span class="sql-kw">BEGIN</span><br>
-          &nbsp;&nbsp;<span class="sql-kw">START TRANSACTION</span>;<br><br>
-          &nbsp;&nbsp;<span class="sql-comment">-- 1. Validate parameters (omitted for brevity)</span><br><br>
-          &nbsp;&nbsp;<span class="sql-comment">-- 2. Execute Primary Update</span><br>
-          &nbsp;&nbsp;<span class="sql-kw">UPDATE</span> case_files <span class="sql-kw">SET</span> status = p_status, <br>
-          &nbsp;&nbsp;&nbsp;&nbsp;closed_at = <span class="sql-kw">NOW</span>(), closure_reason = p_reason<br>
-          &nbsp;&nbsp;<span class="sql-kw">WHERE</span> id = p_case_id;<br><br>
-          &nbsp;&nbsp;<span class="sql-comment">-- 3. Forced Audit Entry (cannot be bypassed)</span><br>
-          &nbsp;&nbsp;<span class="sql-kw">INSERT INTO</span> audit_logs(user_id, action, description) <br>
-          &nbsp;&nbsp;<span class="sql-kw">VALUES</span>(p_user_id, <span class="sql-str">'CLOSE_CASE'</span>, <span class="sql-str">'Case closed...'</span>);<br><br>
-          &nbsp;&nbsp;<span class="sql-kw">COMMIT</span>;<br>
-          <span class="sql-kw">END</span>$$
-        </div>
-        <p style="font-size:11px;color:var(--text-muted);margin-top:10px;font-style:italic;">*Procedure logic ensures that "Closure" and "Audit" are tightly coupled at the engine level.</p>
-      </div>
-    </div>
-  </div>
-
   <!-- ══ SLIDE 12: DATA ENGINE FLOW ══ -->
   <div class="slide">
     <div class="section-header">

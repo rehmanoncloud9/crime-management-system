@@ -1,8 +1,10 @@
 package com.cms.controller;
 
 import com.cms.model.CaseFile;
-
+import com.cms.model.User;
+import com.cms.model.enums.Role;
 import com.cms.service.ReportingService;
+import com.cms.service.SessionManager;
 import com.cms.util.NexusAlert;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -85,6 +87,11 @@ public class ChargeSheetsController {
 
     @FXML
     private void handleGenerate() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null || (currentUser.getRole() != Role.ADMINISTRATOR && currentUser.getRole() != Role.DETECTIVE)) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Lead Investigators and Administrators can sign off on Charge Sheets.");
+            return;
+        }
 
         CaseFile selected = caseCombo.getValue();
         if (selected == null) {

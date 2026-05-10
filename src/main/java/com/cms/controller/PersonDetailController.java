@@ -2,6 +2,7 @@ package com.cms.controller;
 
 import com.cms.model.*;
 import com.cms.model.enums.*;
+import com.cms.model.enums.Role;
 import com.cms.service.PersonService;
 import com.cms.service.HibernateUtil;
 import com.cms.service.NavigationService;
@@ -247,7 +248,32 @@ public class PersonDetailController {
     private void handleUpdateStatus() {
         if (currentPerson == null) return;
 
-        List<PersonStatus> statuses = List.of(PersonStatus.values());
+        // RBAC: Only ADMINISTRATOR and INVESTIGATOR can change status
+        com.cms.model.User currentUser = com.cms.service.SessionManager.getInstance().getCurrentUser();
+        Role userRole = currentUser.getRole();
+
+        if (userRole == Role.ANALYST) {
+            NexusAlert.showWarning("READ-ONLY\n\nAnalysts cannot modify person classifications.");
+            return;
+        }
+
+        // Protect OFFICER-type persons from reclassification by non-admins
+        if (currentPerson.getPersonStatus() == PersonStatus.OFFICER && userRole != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("PROTECTED RECORD\n\nThis person is a law enforcement officer.\nOnly Administrators can modify officer records.");
+            return;
+        }
+
+        // Build allowed statuses based on role
+        List<PersonStatus> statuses = new java.util.ArrayList<>();
+        for (PersonStatus s : PersonStatus.values()) {
+            // Only ADMINISTRATOR can set someone as OFFICER
+            if (s == PersonStatus.OFFICER && userRole != Role.ADMINISTRATOR) continue;
+            // Only INVESTIGATOR/ADMIN can set someone as CRIMINAL (requires legal conviction)
+            if (s == PersonStatus.CRIMINAL && (userRole != Role.ADMINISTRATOR && userRole != Role.DETECTIVE)) continue;
+            
+            statuses.add(s);
+        }
+
         ChoiceDialog<PersonStatus> dialog = new ChoiceDialog<>(currentPerson.getPersonStatus(), statuses);
         dialog.setTitle("Update Status");
         dialog.setHeaderText("Update Classification for " + currentPerson.getFirstName());
@@ -273,6 +299,13 @@ public class PersonDetailController {
 
     @FXML
     private void handleLinkToCase() {
+        // RBAC: Officers can link, but not officer-type persons
+        com.cms.model.User currentUser = com.cms.service.SessionManager.getInstance().getCurrentUser();
+        if (currentPerson.getPersonStatus() == PersonStatus.OFFICER && currentUser.getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("PROTECTED RECORD\n\nCannot link a registered officer to a case from here.\nUse the Case Management module instead.");
+            return;
+        }
+
         NavigationService.getInstance().navigateTo("Link to Case", "/fxml/modules/LinkCaseDialog.fxml", controller -> {
             if (controller instanceof com.cms.controller.LinkCaseController linkCtrl) {
                 linkCtrl.setPerson(currentPerson);
@@ -284,12 +317,29 @@ public class PersonDetailController {
     @FXML
     private void handleEditProfile() {
         if (currentPerson == null) return;
+
+        // RBAC: Analysts are read-only
+        com.cms.model.User currentUser = com.cms.service.SessionManager.getInstance().getCurrentUser();
+        Role userRole = currentUser.getRole();
+
+        if (userRole == Role.ANALYST) {
+            NexusAlert.showWarning("READ-ONLY\n\nAnalysts cannot edit person profiles.");
+            return;
+        }
+
+        // Protect OFFICER-type persons from editing by non-admins
+        if (currentPerson.getPersonStatus() == PersonStatus.OFFICER && userRole != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("PROTECTED RECORD\n\nOnly Administrators can modify officer profiles.");
+            return;
+        }
+
         NavigationService.getInstance().navigateTo("Edit Profile: " + currentPerson.getFirstName(), "/fxml/modules/PersonRegistration.fxml", (controller) -> {
             if (controller instanceof PersonRegistrationController prc) {
                 prc.loadPersonRecord(currentPerson.getId());
             }
         });
     }
+
 
     public static class InvolvementData {
         List<CaseHistoryItem> cases = new ArrayList<>();

@@ -18,7 +18,7 @@
 
         <HBox spacing="24" VBox.vgrow="ALWAYS">
             <!-- New User Form Panel (Sliding Card Effect) -->
-            <VBox fx:id="formPanel" spacing="20" styleClass="form-section-card-elevated" prefWidth="380" managed="false" visible="false">
+            <VBox fx:id="formPanel" spacing="20" styleClass="form-section-card-elevated" prefWidth="420" managed="false" visible="false">
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="🛡️" style="-fx-font-size: 20px;"/>
                     <Label text="Register New Profile" styleClass="heading-md"/>
@@ -31,42 +31,93 @@
                     <Button text="📷 UPLOAD PHOTO" onAction="#handleUploadNewPhoto" styleClass="btn-premium-outline-sm" maxWidth="140"/>
                 </VBox>
 
-                <GridPane vgap="18" hgap="12">
+                <!-- IDENTITY -->
+                <Label text="🪪 IDENTITY VERIFICATION" styleClass="form-label-premium" style="-fx-font-weight: bold;"/>
+                <GridPane vgap="14" hgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
                     <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                        <Label text="Badge ID" styleClass="form-label-premium"/>
+                        <Label text="Badge ID *" styleClass="form-label-premium"/>
                         <TextField fx:id="newBadgeField" promptText="OFF-XXX" styleClass="text-field-premium"/>
                     </VBox>
                     <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <Label text="Full Name" styleClass="form-label-premium"/>
+                        <Label text="Full Name *" styleClass="form-label-premium"/>
                         <TextField fx:id="newNameField" promptText="Full Legal Name" styleClass="text-field-premium"/>
                     </VBox>
 
-                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
-                        <Label text="Assigned Role" styleClass="form-label-premium"/>
-                        <ComboBox fx:id="newRoleCombo" promptText="Select Command Level" maxWidth="Infinity" styleClass="combo-box-premium"/>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="CNIC / National ID *" styleClass="form-label-premium"/>
+                        <TextField fx:id="newCnicField" promptText="XXXXX-XXXXXXX-X" styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label text="Date of Birth" styleClass="form-label-premium"/>
+                        <DatePicker fx:id="newDobPicker" maxWidth="Infinity" styleClass="date-picker-premium"/>
                     </VBox>
 
-                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
-                        <Label text="Assigned Precinct" styleClass="form-label-premium"/>
-                        <TextField fx:id="newPrecinctField" promptText="Police Station Name" styleClass="text-field-premium"/>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                        <Label text="Gender *" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="newGenderCombo" promptText="Select Gender" maxWidth="Infinity" styleClass="combo-box-premium"/>
                     </VBox>
-
-                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="3">
-                        <Label text="Contact Email" styleClass="form-label-premium"/>
-                        <TextField fx:id="newEmailField" promptText="official@cms.gov" styleClass="text-field-premium"/>
-                    </VBox>
-                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                        <Label text="Contact Phone" styleClass="form-label-premium"/>
-                        <TextField fx:id="newPhoneField" promptText="+92 XXX XXXXXXX" styleClass="text-field-premium"/>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <Label text="Assigned Role *" styleClass="form-label-premium"/>
+                        <ComboBox fx:id="newRoleCombo" promptText="Command Level" maxWidth="Infinity" styleClass="combo-box-premium"/>
                     </VBox>
                 </GridPane>
 
-                <Separator style="-fx-opacity: 0.2;"/>
+                <Separator style="-fx-opacity: 0.15;"/>
+
+                <!-- DEPLOYMENT -->
+                <Label text="🏢 DEPLOYMENT DETAILS" styleClass="form-label-premium" style="-fx-font-weight: bold;"/>
+                <GridPane vgap="14" hgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Rank / Title" styleClass="form-label-premium"/>
+                        <TextField fx:id="newRankField" promptText="Inspector, etc." styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Department" styleClass="form-label-premium"/>
+                        <TextField fx:id="newDeptField" promptText="Homicide, Narcotics" styleClass="text-field-premium"/>
+                    </VBox>
+
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                        <Label text="Assigned Precinct" styleClass="form-label-premium"/>
+                        <TextField fx:id="newPrecinctField" promptText="Police Station Name" styleClass="text-field-premium"/>
+                    </VBox>
+                </GridPane>
+
+                <Separator style="-fx-opacity: 0.15;"/>
+
+                <!-- CONTACT -->
+                <Label text="📞 CONTACT INFORMATION" styleClass="form-label-premium" style="-fx-font-weight: bold;"/>
+                <GridPane vgap="14" hgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Contact Email *" styleClass="form-label-premium"/>
+                        <TextField fx:id="newEmailField" promptText="official@cms.gov" styleClass="text-field-premium"/>
+                    </VBox>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Contact Phone" styleClass="form-label-premium"/>
+                        <TextField fx:id="newPhoneField" promptText="+92XXXXXXXXXX" styleClass="text-field-premium"/>
+                    </VBox>
+                </GridPane>
+
+                <Separator style="-fx-opacity: 0.15;"/>
                 
                 <Label text="🔐 ACCESS CREDENTIALS" styleClass="form-label-premium" style="-fx-font-weight: bold;"/>
                 <HBox spacing="12">
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Username" styleClass="form-label-premium-sm"/>
+                        <Label text="Username *" styleClass="form-label-premium-sm"/>
                         <TextField fx:id="newUsernameField" promptText="Login Username" styleClass="text-field-premium-sm"/>
                     </VBox>
                     <VBox spacing="6" HBox.hgrow="ALWAYS">

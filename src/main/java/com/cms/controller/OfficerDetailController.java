@@ -3,6 +3,7 @@ package com.cms.controller;
 import com.cms.model.User;
 import com.cms.model.CaseFile;
 import com.cms.model.enums.UserStatus;
+import com.cms.model.enums.Role;
 import com.cms.model.enums.IncidentStatus;
 import com.cms.service.UserService;
 import com.cms.service.HibernateUtil;
@@ -122,7 +123,7 @@ public class OfficerDetailController {
             });
         });
 
-        new Thread(task).start();
+        Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 
     private void updateUI() {
@@ -131,9 +132,10 @@ public class OfficerDetailController {
         badgeLabel.setText("BADGE #" + (currentOfficer.getBadgeNumber() != null ? currentOfficer.getBadgeNumber() : "N/A"));
         
         roleBadge.setText(currentOfficer.getRole() != null ? currentOfficer.getRole().name() : "N/A");
-        statusBadge.setText(currentOfficer.getStatus().name());
+        UserStatus status = currentOfficer.getStatus();
+        statusBadge.setText(status != null ? status.name() : "UNKNOWN");
         
-        boolean isActive = currentOfficer.getStatus() == UserStatus.ACTIVE;
+        boolean isActive = status == UserStatus.ACTIVE;
         statusCircle.setFill(isActive ? Color.web("#16a34a") : Color.web("#e11d48"));
         statusBadge.getStyleClass().setAll("badge-premium", isActive ? "badge-success" : "badge-danger");
         statusBtn.setText(isActive ? "Suspend Account" : "Activate Account");
@@ -158,6 +160,18 @@ public class OfficerDetailController {
         } else {
             photoView.setImage(getDefaultAvatar());
         }
+
+        // RBAC: Only Admin can modify officer status or edit profiles
+        User actor = SessionManager.getInstance().getCurrentUser();
+        boolean isAdmin = actor != null && actor.getRole() == Role.ADMINISTRATOR;
+        
+        statusBtn.setVisible(isAdmin);
+        statusBtn.setManaged(isAdmin);
+        
+        // Note: The Edit button is likely in the FXML. Let's find it.
+        // Looking at the controller methods, we have handleEditProfile and handleResetPassword.
+        // We should disable those actions at the button level if possible, 
+        // or just let the method check handle it.
     }
 
     private Image getDefaultAvatar() {
@@ -203,7 +217,7 @@ public class OfficerDetailController {
             });
         });
 
-        new Thread(task).start();
+        Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 
     private void updatePerformanceStats(List<CaseFile> cases) {
@@ -233,8 +247,8 @@ public class OfficerDetailController {
     @FXML
     private void handleToggleStatus() {
         User actor = SessionManager.getInstance().getCurrentUser();
-        if (actor == null) {
-            NexusAlert.showError("No active session found.");
+        if (actor == null || actor.getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can modify officer account status.");
             return;
         }
 
@@ -259,12 +273,18 @@ public class OfficerDetailController {
                 showLoading(false);
                 NexusAlert.showError("Failed to update status: " + task.getException().getMessage());
             }));
-            new Thread(task).start();
+            Thread th = new Thread(task); th.setDaemon(true); th.start();
         }
     }
 
     @FXML
     private void handleResetPassword() {
+        User actor = SessionManager.getInstance().getCurrentUser();
+        if (actor == null || actor.getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can reset officer passwords.");
+            return;
+        }
+        
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Reset Password");
         dialog.setHeaderText("Enter new password for " + currentOfficer.getFullName());
@@ -298,7 +318,7 @@ public class OfficerDetailController {
                     showLoading(false);
                     NexusAlert.showError("Password reset failed: " + task.getException().getMessage());
                 }));
-                new Thread(task).start();
+                Thread th = new Thread(task); th.setDaemon(true); th.start();
             } else {
                 NexusAlert.showError("Passwords do not match.");
             }
@@ -307,6 +327,12 @@ public class OfficerDetailController {
 
     @FXML
     private void handleEditProfile() {
+        User actor = SessionManager.getInstance().getCurrentUser();
+        if (actor == null || actor.getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can modify officer profile details.");
+            return;
+        }
+
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
                 getClass().getResource("/fxml/modules/OfficerEditDialog.fxml"));

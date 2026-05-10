@@ -27,8 +27,9 @@ public class MainApp extends Application {
             System.out.println(">>> [CMS-BOOT] System initialized.");
         } catch (Throwable e) {
             System.err.println(">>> [CMS-BOOT-ERROR] Initialization CRITICAL FAILURE!");
-            logger.error("Application error", e);
             logger.error("Database initialization failed", e);
+            javafx.application.Platform.exit();
+            return;
         }
 
         // 2) Always try to load UI

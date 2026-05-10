@@ -48,10 +48,10 @@
         </HBox>
     </VBox>
 
-    <HBox spacing="6" alignment="CENTER">
+    <HBox spacing="6" alignment="CENTER" style="-fx-padding: 5 0 0 0;">
         <Button text="Profile" fx:id="viewBtn" id="viewBtn" styleClass="btn, btn-primary-sm, btn-xs" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
         <Button text="Edit" fx:id="editBtn" id="editBtn" styleClass="btn, btn-outline-sm, btn-xs" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
         <Button text="Suspend" fx:id="statusBtn" id="statusBtn" styleClass="btn, btn-outline-sm, btn-xs" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-        <Button text="🗑" fx:id="deleteBtn" id="deleteBtn" styleClass="btn, btn-danger, btn-xs" style="-fx-padding: 5 8;"/>
+        <Button text="🗑" fx:id="deleteBtn" id="deleteBtn" styleClass="btn, btn-delete-icon"/>
     </HBox>
 </VBox>

@@ -132,16 +132,19 @@ public class MainController {
 
         addSection("INTELLIGENCE");
         addMenuButton("🤖", "AI Assistant", "ChatbotView");
-        if (role != com.cms.model.enums.Role.OFFICER) {
-            addMenuButton("📈", "Reports", "StatisticalReports");
-            if (role == com.cms.model.enums.Role.ADMINISTRATOR
-                    || role == com.cms.model.enums.Role.SUPERVISOR
-                    || role == com.cms.model.enums.Role.ANALYST)
-                addMenuButton("📊", "Executive KPIs", "ExecutiveDashboard");
+        
+        // Reports are now visible to Officers (Field Intelligence)
+        addMenuButton("📈", "Reports", "StatisticalReports");
+
+        if (role == com.cms.model.enums.Role.ADMINISTRATOR
+                || role == com.cms.model.enums.Role.SUPERVISOR
+                || role == com.cms.model.enums.Role.ANALYST
+                || role == com.cms.model.enums.Role.DETECTIVE) {
+            addMenuButton("📊", "Executive KPIs", "ExecutiveDashboard");
         }
 
         addSection("SYSTEM");
-        if (role == com.cms.model.enums.Role.ADMINISTRATOR)
+        if (role == com.cms.model.enums.Role.ADMINISTRATOR || role == com.cms.model.enums.Role.DETECTIVE)
             addMenuButton("⚖️", "Court", "CourtManagement");
         if (role != com.cms.model.enums.Role.ANALYST)
             addMenuButton("📦", "Evidence", "EvidenceLog");
@@ -155,8 +158,7 @@ public class MainController {
 
     private void addSection(String title) {
         Label s = new Label(title);
-        s.setStyle("-fx-padding: 8 12 2 12; -fx-font-size: 8.5px; -fx-font-weight: bold;" +
-                "-fx-text-fill: rgba(0,212,255,0.45); -fx-opacity: 0.7;");
+        s.getStyleClass().add("sidebar-section-header");
         sideMenu.getChildren().add(s);
     }
 

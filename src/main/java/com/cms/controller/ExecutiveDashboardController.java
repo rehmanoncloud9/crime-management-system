@@ -51,6 +51,24 @@ public class ExecutiveDashboardController {
 
     @FXML
     public void initialize() {
+        // RBAC: Restricted Strategic Intelligence
+        com.cms.model.User user = com.cms.service.SessionManager.getInstance().getCurrentUser();
+        com.cms.model.enums.Role role = user != null ? user.getRole() : null;
+        boolean hasAccess = role == com.cms.model.enums.Role.ADMINISTRATOR || 
+                           role == com.cms.model.enums.Role.DETECTIVE;
+
+        if (!hasAccess) {
+            Platform.runLater(() -> {
+                if (closureRateLabel != null) closureRateLabel.setText("LOCKED");
+                if (activeWarrantsLabel != null) activeWarrantsLabel.setText("N/A");
+                if (highPriorityCasesLabel != null) highPriorityCasesLabel.setText("N/A");
+                if (totalIncidentsLabel != null) totalIncidentsLabel.setText("N/A");
+                
+                com.cms.util.NexusAlert.showWarning("CLASSIFIED ACCESS\n\nThe Executive Dashboard is restricted to Command Staff.");
+            });
+            return;
+        }
+
         styleCharts();
         loadMetrics();
         loadDistribution();

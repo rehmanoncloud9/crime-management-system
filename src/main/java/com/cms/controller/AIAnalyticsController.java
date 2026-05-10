@@ -1,6 +1,10 @@
 package com.cms.controller;
 
 import com.cms.model.Person;
+import com.cms.model.User;
+import com.cms.model.enums.Role;
+import com.cms.service.SessionManager;
+import com.cms.util.NexusAlert;
 import com.cms.service.AIChatService;
 import com.cms.service.AIService;
 import com.cms.service.PersonService;
@@ -54,6 +58,24 @@ public class AIAnalyticsController {
 
     @FXML
     public void initialize() {
+        // RBAC: Restricted Intelligence Access
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        Role role = currentUser != null ? currentUser.getRole() : null;
+        boolean hasAccess = role == Role.ADMINISTRATOR || role == Role.DETECTIVE || role == Role.OFFICER;
+
+        if (!hasAccess) {
+            chatMessages.getChildren().clear();
+            Label msg = new Label("🤖 CLASSIFIED ACCESS ONLY\n\nAI Command and Risk Analytics are restricted to Investigators and Administrators.");
+            msg.getStyleClass().add("text-muted");
+            msg.setStyle("-fx-font-size: 14px; -fx-text-alignment: center; -fx-padding: 50;");
+            chatMessages.getChildren().add(msg);
+            chatInput.setDisable(true);
+            chatInput.setPromptText("Unauthorized: Insufficient clearance");
+            
+            riskTable.setPlaceholder(new Label("Access Restricted: Unauthorized Role"));
+            return; 
+        }
+
         setupTable();
         styleCharts();
         loadDataAsync();

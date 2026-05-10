@@ -56,7 +56,7 @@ public class PersonRegistryController {
             personFlowPane.getChildren().setAll(new Label("Error loading data."));
         });
 
-        new Thread(task).start();
+        Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 
     private Pane buildPersonCard(Person p) {

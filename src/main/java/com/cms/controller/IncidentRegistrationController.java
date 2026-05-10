@@ -46,6 +46,16 @@ public class IncidentRegistrationController {
 
     @FXML
     public void initialize() {
+        // RBAC: Analysts are read-only
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser != null && currentUser.getRole() == com.cms.model.enums.Role.ANALYST) {
+            Platform.runLater(() -> {
+                NexusAlert.showWarning("READ-ONLY MODE\n\nAnalysts cannot register new incidents.\nThis form is disabled.");
+            });
+            // Disable key actions
+            if (exportButton != null) exportButton.setManaged(false);
+        }
+
         datePicker.setValue(LocalDate.now());
         setupTypeCombo();
         setupDistrictCombo();

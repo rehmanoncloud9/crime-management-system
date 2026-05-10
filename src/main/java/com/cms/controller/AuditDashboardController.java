@@ -12,6 +12,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import com.cms.service.SessionManager;
+import com.cms.model.User;
+import com.cms.model.enums.Role;
+import com.cms.util.NexusAlert;
+
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +38,22 @@ public class AuditDashboardController {
 
     @FXML
     public void initialize() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        Role role = currentUser != null ? currentUser.getRole() : null;
+        
+        // RBAC: Allow all law enforcement roles to view logs for transparency
+        boolean hasAccess = role == Role.ADMINISTRATOR || 
+                           role == Role.DETECTIVE || 
+                           role == Role.OFFICER;
+
+        if (!hasAccess) {
+            Platform.runLater(() -> {
+                NexusAlert.showWarning("ACCESS DENIED\n\nYou do not have clearance to view system audit logs.\nContact a System Administrator.");
+                auditTable.setPlaceholder(new Label("Unauthorized Access: Law Enforcement clearance required."));
+            });
+            return;
+        }
+
         setupTable();
         setupFilters();
         loadLogs();

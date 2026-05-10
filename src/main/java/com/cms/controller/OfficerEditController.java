@@ -36,6 +36,8 @@ public class OfficerEditController {
     @FXML private TextField phoneField;
     @FXML private TextField precinctField;
     @FXML private ComboBox<UserStatus> statusCombo;
+    @FXML private PasswordField newPasswordField;
+    @FXML private PasswordField confirmPasswordField;
 
     private final UserService userService = new UserService();
     private final ImageStorageService imageService = ImageStorageService.getInstance();
@@ -106,6 +108,22 @@ public class OfficerEditController {
             return;
         }
 
+        // Validate Password Change
+        String pass = newPasswordField.getText();
+        String confirm = confirmPasswordField.getText();
+        boolean changingPass = !pass.isEmpty();
+
+        if (changingPass) {
+            if (pass.length() < 6) {
+                NexusAlert.showWarning("Password must be at least 6 characters.");
+                return;
+            }
+            if (!pass.equals(confirm)) {
+                NexusAlert.showWarning("Passwords do not match.");
+                return;
+            }
+        }
+
         try {
             // Handle photo change
             if (selectedPhotoFile != null) {
@@ -126,6 +144,16 @@ public class OfficerEditController {
             officer.setPhone(phoneField.getText().trim().isEmpty() ? null : phoneField.getText().trim());
             officer.setPrecinct(precinctField.getText().trim().isEmpty() ? null : precinctField.getText().trim());
             officer.setStatus(statusCombo.getValue());
+
+            // Handle Password Change
+            if (changingPass) {
+                com.cms.service.AuthService auth = new com.cms.service.AuthService();
+                officer.setPasswordHash(auth.hashPassword(pass));
+                officer.setMustChangePassword(false); // Manually set, so no need to force change
+                
+                com.cms.model.User actor = com.cms.service.SessionManager.getInstance().getCurrentUser();
+                com.cms.service.AuditService.getInstance().logAction(actor, "PASSWORD_CHANGE_ADMIN", "Admin changed password for: " + officer.getUsername());
+            }
 
             // Persist
             userService.updateUser(officer);

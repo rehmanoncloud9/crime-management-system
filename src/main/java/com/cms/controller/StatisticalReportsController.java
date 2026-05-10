@@ -1,7 +1,10 @@
 package com.cms.controller;
 
+import com.cms.model.User;
+import com.cms.model.enums.Role;
 import com.cms.service.HibernateUtil;
 import com.cms.service.IncidentService;
+import com.cms.service.SessionManager;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -44,6 +47,21 @@ public class StatisticalReportsController {
 
     @FXML
     public void initialize() {
+        // RBAC: Restricted Analytics Access
+        User user = SessionManager.getInstance().getCurrentUser();
+        Role role = user != null ? user.getRole() : null;
+        boolean hasAccess = role == Role.ADMINISTRATOR || role == Role.DETECTIVE || 
+                           role == Role.OFFICER || role == Role.ANALYST || role == Role.SUPERVISOR;
+
+        if (!hasAccess) {
+            Platform.runLater(() -> {
+                NexusAlert.showWarning("ACCESS RESTRICTED\n\nStatistical analytics and performance reports require Operational Clearance.");
+            });
+            // We'll let the load finish but the user will be alerted and we could potentially 
+            // hide components here if we wanted to be stricter.
+            return;
+        }
+
         reportTypeCombo.setItems(FXCollections.observableArrayList(
             "Incident Summary","Arrest Success Rate","Evidence Inventory","Officer Performance"));
         
@@ -376,7 +394,7 @@ public class StatisticalReportsController {
         WritableImage lineSnap = null;
         WritableImage barSnap = null;
         SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.web("#07090F"));
+        params.setFill(Color.web("#07090F")); // Match Nexus Dark
 
         if (crimeTrendChart != null) lineSnap = crimeTrendChart.snapshot(params, null);
         if (districtChart != null) barSnap = districtChart.snapshot(params, null);
@@ -386,8 +404,8 @@ public class StatisticalReportsController {
 
         // Choose destination
         javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
-        chooser.setTitle("Save PDF Report");
-        chooser.setInitialFileName("CMS_" + rt.replace(" ", "_") + "_" + System.currentTimeMillis() + ".pdf");
+        chooser.setTitle("Save Executive Intelligence Briefing");
+        chooser.setInitialFileName("Nexus_Report_" + rt.replace(" ", "_") + ".pdf");
         chooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF Documents", "*.pdf"));
         java.io.File selectedFile = chooser.showSaveDialog(reportTypeCombo.getScene().getWindow());
 
@@ -396,62 +414,113 @@ public class StatisticalReportsController {
 
         Task<Void> task = new Task<>() {
             @Override protected Void call() throws Exception {
-                // Use OpenPDF to create PDF with chart images
+                // Use OpenPDF to create high-end briefing
                 com.lowagie.text.Document doc = new com.lowagie.text.Document(
-                    com.lowagie.text.PageSize.A4.rotate()); // Landscape for charts
-                com.lowagie.text.pdf.PdfWriter.getInstance(doc, new java.io.FileOutputStream(outPath));
+                    com.lowagie.text.PageSize.A4, 36, 36, 54, 54); 
+                com.lowagie.text.pdf.PdfWriter writer = com.lowagie.text.pdf.PdfWriter.getInstance(doc, new java.io.FileOutputStream(outPath));
                 doc.open();
 
-                // Title
+                // Header Section with Logo
+                com.lowagie.text.pdf.PdfPTable headerTable = new com.lowagie.text.pdf.PdfPTable(2);
+                headerTable.setWidthPercentage(100);
+                headerTable.setWidths(new float[]{3, 1});
+
+                // Title Cell
                 com.lowagie.text.Font titleFont = new com.lowagie.text.Font(
-                    com.lowagie.text.Font.HELVETICA, 20, com.lowagie.text.Font.BOLD,
-                    new java.awt.Color(0, 212, 255));
-                doc.add(new com.lowagie.text.Paragraph("Crime Management System — " + rt, titleFont));
+                    com.lowagie.text.Font.HELVETICA, 24, com.lowagie.text.Font.BOLD,
+                    new java.awt.Color(15, 23, 42)); // Slate 900
+                com.lowagie.text.pdf.PdfPCell titleCell = new com.lowagie.text.pdf.PdfPCell(
+                    new com.lowagie.text.Phrase("NEXUS COMMAND\nIntelligence Briefing", titleFont));
+                titleCell.setBorder(com.lowagie.text.Rectangle.NO_BORDER);
+                titleCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+                headerTable.addCell(titleCell);
+
+                // Logo Cell
+                try {
+                    // We'll look for the generated logo in the brain/artifacts dir
+                    String logoPath = "C:\\Users\\HP\\.gemini\\antigravity\\brain\\e015d7e3-e4c5-42a1-921d-848e499699a1\\nexus_command_logo_1778393505976.png";
+                    com.lowagie.text.Image logo = com.lowagie.text.Image.getInstance(logoPath);
+                    logo.scaleToFit(80, 80);
+                    com.lowagie.text.pdf.PdfPCell logoCell = new com.lowagie.text.pdf.PdfPCell(logo);
+                    logoCell.setBorder(com.lowagie.text.Rectangle.NO_BORDER);
+                    logoCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
+                    headerTable.addCell(logoCell);
+                } catch (Exception e) {
+                    headerTable.addCell(""); // Fallback
+                }
+
+                doc.add(headerTable);
                 doc.add(new com.lowagie.text.Paragraph(" "));
 
-                // Date range info
-                com.lowagie.text.Font infoFont = new com.lowagie.text.Font(
-                    com.lowagie.text.Font.HELVETICA, 11, com.lowagie.text.Font.NORMAL,
-                    new java.awt.Color(107, 191, 204));
-                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMM yyyy");
-                String rangeText = "Date Range: " + getEffectiveStart().format(fmt) + " — " + getEffectiveEnd().format(fmt);
-                doc.add(new com.lowagie.text.Paragraph(rangeText, infoFont));
-                doc.add(new com.lowagie.text.Paragraph("Generated: " + LocalDate.now().format(fmt), infoFont));
+                // Separator Line
+                com.lowagie.text.pdf.draw.LineSeparator ls = new com.lowagie.text.pdf.draw.LineSeparator();
+                ls.setLineColor(new java.awt.Color(59, 130, 246)); // Blue 500
+                ls.setLineWidth(2);
+                doc.add(new com.lowagie.text.pdf.draw.VerticalPositionMark(ls, 0));
+
+                // Report Type & Meta
+                com.lowagie.text.Font subTitleFont = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 16, com.lowagie.text.Font.BOLD, new java.awt.Color(37, 99, 235));
+                doc.add(new com.lowagie.text.Paragraph("REPORT: " + rt.toUpperCase(), subTitleFont));
+                
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+                com.lowagie.text.Font metaFont = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10, com.lowagie.text.Font.ITALIC, new java.awt.Color(100, 116, 139));
+                doc.add(new com.lowagie.text.Paragraph("Classification: LAW ENFORCEMENT SENSITIVE", metaFont));
+                doc.add(new com.lowagie.text.Paragraph("Period: " + getEffectiveStart().format(fmt) + " to " + getEffectiveEnd().format(fmt), metaFont));
+                doc.add(new com.lowagie.text.Paragraph("Generation Date: " + LocalDate.now().format(fmt), metaFont));
                 doc.add(new com.lowagie.text.Paragraph(" "));
 
-                // Embed chart snapshots as images
+                // Charts Section
                 if (finalLineSnap != null) {
+                    doc.add(new com.lowagie.text.Paragraph("1.0 Temporal Analysis (Monthly Trends)", 
+                        new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 12, com.lowagie.text.Font.BOLD)));
+                    doc.add(new com.lowagie.text.Paragraph(" "));
+                    
                     BufferedImage bImg = SwingFXUtils.fromFXImage(finalLineSnap, null);
                     File tmpLine = File.createTempFile("cms_line_chart", ".png");
                     ImageIO.write(bImg, "png", tmpLine);
                     com.lowagie.text.Image chartImg = com.lowagie.text.Image.getInstance(tmpLine.getAbsolutePath());
-                    chartImg.scaleToFit(680, 320);
+                    chartImg.scaleToFit(500, 250);
                     chartImg.setAlignment(com.lowagie.text.Image.MIDDLE);
                     doc.add(chartImg);
                     doc.add(new com.lowagie.text.Paragraph(" "));
                     tmpLine.deleteOnExit();
                 }
+
                 if (finalBarSnap != null) {
+                    if (finalLineSnap != null) doc.newPage(); // New page if multi-chart
+                    
+                    doc.add(new com.lowagie.text.Paragraph("2.0 Geospatial Distribution", 
+                        new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 12, com.lowagie.text.Font.BOLD)));
+                    doc.add(new com.lowagie.text.Paragraph(" "));
+                    
                     BufferedImage bImg = SwingFXUtils.fromFXImage(finalBarSnap, null);
                     File tmpBar = File.createTempFile("cms_bar_chart", ".png");
                     ImageIO.write(bImg, "png", tmpBar);
                     com.lowagie.text.Image chartImg = com.lowagie.text.Image.getInstance(tmpBar.getAbsolutePath());
-                    chartImg.scaleToFit(680, 320);
+                    chartImg.scaleToFit(500, 250);
                     chartImg.setAlignment(com.lowagie.text.Image.MIDDLE);
                     doc.add(chartImg);
                     tmpBar.deleteOnExit();
                 }
 
+                // Security Footer
+                com.lowagie.text.Font footerFont = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 8, com.lowagie.text.Font.NORMAL, new java.awt.Color(148, 163, 184));
+                com.lowagie.text.Paragraph footer = new com.lowagie.text.Paragraph(
+                    "\n\n\n\nCONFIDENTIAL — PROPERTY OF NEXUS COMMAND\nUnauthorized reproduction or distribution is strictly prohibited under Digital Evidence Act.", 
+                    footerFont);
+                footer.setAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+                doc.add(footer);
+
                 doc.close();
 
                 Platform.runLater(() ->
-                    NexusAlert.showInfo("PDF report saved to:\n" + outPath)
+                    NexusAlert.showInfo("Executive Intelligence Briefing saved to:\n" + outPath)
                 );
                 return null;
             }
         };
         task.setOnFailed(e -> Platform.runLater(() ->
-            NexusAlert.showError("PDF Export failed: " + task.getException().getMessage())));
+            NexusAlert.showError("Briefing generation failed: " + task.getException().getMessage())));
         Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 

@@ -37,7 +37,12 @@ public class UserAdminController {
     @FXML private ImageView newUserPhotoView;
     @FXML private TextField newBadgeField;
     @FXML private TextField newNameField;
+    @FXML private TextField newCnicField;
+    @FXML private DatePicker newDobPicker;
+    @FXML private ComboBox<com.cms.model.enums.Gender> newGenderCombo;
     @FXML private ComboBox<Role> newRoleCombo;
+    @FXML private TextField newRankField;
+    @FXML private TextField newDeptField;
     @FXML private TextField newPrecinctField;
     @FXML private TextField newEmailField;
     @FXML private TextField newPhoneField;
@@ -53,10 +58,19 @@ public class UserAdminController {
 
     @FXML
     public void initialize() {
+        // RBAC: Only administrators can manage users
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null || currentUser.getRole() != Role.ADMINISTRATOR) {
+            logger.warn("Non-admin user {} tried to access UserAdmin", currentUser != null ? currentUser.getUsername() : "UNKNOWN");
+            // Find and hide the enlist button (lookup in the parent if needed, or we can just disable all actions)
+            // But we can also check if the enlist button is an FXML field
+        }
+
         loadUsers();
         setupSearch();
         setupFormListeners();
         newRoleCombo.setItems(FXCollections.observableArrayList(Role.values()));
+        newGenderCombo.setItems(FXCollections.observableArrayList(com.cms.model.enums.Gender.values()));
     }
 
     private void setupFormListeners() {
@@ -107,6 +121,10 @@ public class UserAdminController {
 
     @FXML
     private void handleCreateUser() {
+        if (SessionManager.getInstance().getCurrentUser().getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can enlist new officers.");
+            return;
+        }
         formPanel.setVisible(true);
         formPanel.setManaged(true);
     }
@@ -129,27 +147,26 @@ public class UserAdminController {
 
     @FXML
     private void handleSaveNewUser() {
+        if (SessionManager.getInstance().getCurrentUser().getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can save officer profiles.");
+            return;
+        }
         if (!validateNewUserInputs()) return;
 
         final String badge = newBadgeField.getText().trim();
         final String username = newUsernameField.getText().trim().toLowerCase();
         final String email = newEmailField.getText().trim();
 
-        // Check for duplicates before attempting save to provide better error messages
+        // Check for duplicates — username and badge only (email is handled by Person reuse below)
         try {
-            User existing = HibernateUtil.executeTransaction(session -> {
+            String conflict = HibernateUtil.executeTransaction(session -> {
                 UserRepository repo = new UserRepository(session);
-                return repo.findByUsername(username)
-                    .or(() -> repo.findByBadgeNumber(badge))
-                    .or(() -> repo.findByEmail(email))
-                    .orElse(null);
+                if (repo.findByUsername(username).isPresent()) return "Username";
+                if (repo.findByBadgeNumber(badge).isPresent()) return "Badge ID";
+                return null;
             });
 
-            if (existing != null) {
-                String conflict = "Username";
-                if (existing.getBadgeNumber().equalsIgnoreCase(badge)) conflict = "Badge ID";
-                else if (existing.getEmail() != null && existing.getEmail().equalsIgnoreCase(email)) conflict = "Email Address";
-
+            if (conflict != null) {
                 NexusAlert.showError("ACCOUNT CLASH: An officer with this " + conflict + " already exists.\n\n" +
                         "Please verify the credentials or search for the existing user.");
                 return;
@@ -163,6 +180,8 @@ public class UserAdminController {
         newUser.setUsername(username);
         newUser.setRole(newRoleCombo.getValue());
         newUser.setPrecinct(newPrecinctField.getText().trim());
+        newUser.setOfficerRank(newRankField.getText().trim().isEmpty() ? null : newRankField.getText().trim());
+        newUser.setDepartment(newDeptField.getText().trim().isEmpty() ? null : newDeptField.getText().trim());
         newUser.setStatus(UserStatus.ACTIVE);
         newUser.setMustChangePassword(true);
         newUser.setDateOfJoining(java.time.LocalDate.now());
@@ -182,17 +201,38 @@ public class UserAdminController {
             person.setFirstName(parts[0]);
             // Ensure lastName is never blank to satisfy @NotBlank constraint
             person.setLastName(parts.length > 1 ? parts[1] : "Officer"); 
-            person.setEmail(email);
-            String phone = newPhoneField.getText().trim();
+            person.setEmail(email.isEmpty() ? null : email);
+            String phone = newPhoneField.getText().trim().replaceAll("[\\s\\-()]", "");
             person.setPhone(phone.isEmpty() ? null : phone);
+            // Set identity fields
+            String cnic = newCnicField.getText().trim().replaceAll("[\\s\\-]", "");
+            person.setNationalId(cnic.isEmpty() ? null : cnic);
+            if (newDobPicker.getValue() != null) person.setDateOfBirth(newDobPicker.getValue());
+            if (newGenderCombo.getValue() != null) person.setGender(newGenderCombo.getValue());
             person.setPersonStatus(com.cms.model.enums.PersonStatus.OFFICER);
         } else {
+            // Check if this Person is ALREADY linked to an existing User
+            final com.cms.model.Person existingPerson = person;
+            boolean alreadyLinked = HibernateUtil.executeTransaction(session -> {
+                Long count = session.createQuery(
+                    "SELECT COUNT(u) FROM User u WHERE u.person.id = :pid", Long.class)
+                    .setParameter("pid", existingPerson.getId())
+                    .uniqueResult();
+                return count != null && count > 0;
+            });
+
+            if (alreadyLinked) {
+                NexusAlert.showError("ACCOUNT CLASH: This email is already linked to an existing officer account.\n\n" +
+                        "Please use a different email or search for the existing officer.");
+                return;
+            }
+
             // Update the existing person to be an officer if they were something else
             person.setPersonStatus(com.cms.model.enums.PersonStatus.OFFICER);
             String[] parts = fullName.trim().split("\\s+", 2);
             person.setFirstName(parts[0]);
             person.setLastName(parts.length > 1 ? parts[1] : "Officer");
-            String phone = newPhoneField.getText().trim();
+            String phone = newPhoneField.getText().trim().replaceAll("[\\s\\-()]", "");
             if (!phone.isEmpty()) {
                 person.setPhone(phone);
             }
@@ -215,7 +255,9 @@ public class UserAdminController {
         javafx.concurrent.Task<Void> task = new javafx.concurrent.Task<>() {
             @Override
             protected Void call() {
-                userService.saveUser(newUser);
+                HibernateUtil.executeVoidTransaction(session -> {
+                    session.persist(newUser);
+                });
                 return null;
             }
         };
@@ -236,17 +278,39 @@ public class UserAdminController {
             String errMsg = ex.getMessage();
             if (errMsg == null) errMsg = "Unknown database error";
 
-            // Better error categorization
-            if (errMsg.contains("Constraint") || (ex.getCause() != null && ex.getCause().getMessage().contains("Constraint"))) {
-                if (errMsg.contains("badge_number") || errMsg.contains("badge")) {
-                    errMsg = "BADGE CLASH: An officer with Badge ID '" + badge + "' already exists.";
-                } else if (errMsg.contains("username")) {
-                    errMsg = "USERNAME CLASH: The username '" + username + "' is already taken.";
-                } else if (errMsg.contains("email")) {
-                    errMsg = "EMAIL CLASH: A person with the email '" + email + "' is already registered in the system.";
+            // Better error categorization — safely check cause
+            String causeMsg = (ex.getCause() != null && ex.getCause().getMessage() != null) 
+                ? ex.getCause().getMessage() : "";
+            String combined = errMsg + " " + causeMsg;
+
+            // Check for Bean Validation errors first
+            if (combined.contains("Validation failed") || combined.contains("ConstraintViolation")) {
+                // Extract the actual field violation message
+                if (combined.contains("phone") || combined.contains("Pattern")) {
+                    errMsg = "INVALID PHONE: Phone number format is invalid.\n\n" +
+                             "Use digits only, optionally starting with +. Example: +923361918300";
+                } else if (combined.contains("email") || combined.contains("Email")) {
+                    errMsg = "INVALID EMAIL: The email address format is incorrect.\n\n" +
+                             "Please enter a valid email like: name@domain.com";
+                } else if (combined.contains("NotBlank") || combined.contains("must not be blank")) {
+                    errMsg = "MISSING FIELD: A required field is empty.\n\n" +
+                             "Please ensure Full Name (first and last) are provided.";
                 } else {
-                    errMsg = "ACCOUNT CLASH: A duplicate record was detected for this Badge ID or Email.\n\n" +
-                             "Please verify the credentials or search for existing records.";
+                    errMsg = "VALIDATION ERROR: Please check your input.\n\n" +
+                             "Details: " + combined.substring(0, Math.min(combined.length(), 250));
+                }
+            } else if (combined.contains("Duplicate") || combined.contains("unique")) {
+                if (combined.contains("badge_number") || combined.contains("badge")) {
+                    errMsg = "BADGE CLASH: An officer with Badge ID '" + badge + "' already exists.";
+                } else if (combined.contains("username")) {
+                    errMsg = "USERNAME CLASH: The username '" + username + "' is already taken.";
+                } else if (combined.contains("email")) {
+                    errMsg = "EMAIL CLASH: A person with the email '" + email + "' is already registered in the system.";
+                } else if (combined.contains("person_id")) {
+                    errMsg = "PERSON CLASH: This person is already linked to another officer account.";
+                } else {
+                    errMsg = "DATABASE CONFLICT: A duplicate record was detected.\n\n" +
+                             "Details: " + combined.substring(0, Math.min(combined.length(), 200));
                 }
             } else {
                 errMsg = "System Error: " + errMsg;
@@ -257,11 +321,22 @@ public class UserAdminController {
         new Thread(task).start();
     }
 
+
     private boolean validateNewUserInputs() {
         String badge = newBadgeField.getText().trim();
         String name = newNameField.getText().trim();
         if (badge.isEmpty() || name.isEmpty() || !name.matches("^[a-zA-Z\\s]+$")) {
             NexusAlert.showWarning("Badge and Name are required. Name can only contain letters.");
+            return false;
+        }
+        // CNIC validation (13 digits after stripping dashes)
+        String cnic = newCnicField.getText().trim().replaceAll("[\\s\\-]", "");
+        if (cnic.isEmpty() || !cnic.matches("^[0-9]{13}$")) {
+            NexusAlert.showWarning("A valid 13-digit CNIC is required.\n\nFormat: XXXXX-XXXXXXX-X");
+            return false;
+        }
+        if (newGenderCombo.getValue() == null) {
+            NexusAlert.showWarning("Please select a Gender.");
             return false;
         }
         String username = newUsernameField.getText().trim();
@@ -284,10 +359,16 @@ public class UserAdminController {
     private void clearNewUserForm() {
         newBadgeField.clear();
         newNameField.clear();
+        newCnicField.clear();
+        newDobPicker.setValue(null);
+        newGenderCombo.setValue(null);
+        newRankField.clear();
+        newDeptField.clear();
         newEmailField.clear();
         newPrecinctField.clear();
         newUsernameField.clear();
         newPasswordField.clear();
+        newPhoneField.clear();
         newRoleCombo.setValue(null);
         selectedPhotoFile = null;
         newUserPhotoView.setImage(null);
@@ -339,8 +420,19 @@ public class UserAdminController {
 
             // Events
             viewBtn.setOnAction(ev -> showOfficerDetail(user));
-            editBtn.setOnAction(ev -> showOfficerEdit(user));
-            statusBtn.setOnAction(ev -> handleToggleStatus(user));
+            
+            User actor = SessionManager.getInstance().getCurrentUser();
+            boolean isAdmin = actor != null && actor.getRole() == Role.ADMINISTRATOR;
+
+            if (isAdmin) {
+                editBtn.setOnAction(ev -> showOfficerEdit(user));
+                statusBtn.setOnAction(ev -> handleToggleStatus(user));
+            } else {
+                editBtn.setVisible(false);
+                editBtn.setManaged(false);
+                statusBtn.setVisible(false);
+                statusBtn.setManaged(false);
+            }
             
             // Set status button style
             if (user.getStatus() != UserStatus.ACTIVE) {
@@ -353,7 +445,12 @@ public class UserAdminController {
 
             Button deleteBtn = (Button) card.lookup("#deleteBtn");
             if (deleteBtn != null) {
-                deleteBtn.setOnAction(ev -> handleDeleteOfficer(user));
+                if (isAdmin) {
+                    deleteBtn.setOnAction(ev -> handleDeleteOfficer(user));
+                } else {
+                    deleteBtn.setVisible(false);
+                    deleteBtn.setManaged(false);
+                }
             }
 
             return card;
@@ -379,7 +476,10 @@ public class UserAdminController {
 
     private void handleToggleStatus(User user) {
         User actor = SessionManager.getInstance().getCurrentUser();
-        if (actor == null) return;
+        if (actor == null || actor.getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can modify officer status.");
+            return;
+        }
 
         userService.toggleUserStatus(user.getId(), actor);
         loadUsers(); // Refresh list
@@ -388,11 +488,16 @@ public class UserAdminController {
     // ==================== UTILITIES ====================
 
     private void handleDeleteOfficer(User user) {
+        User actor = SessionManager.getInstance().getCurrentUser();
+        if (actor == null || actor.getRole() != Role.ADMINISTRATOR) {
+            NexusAlert.showWarning("ACCESS DENIED\n\nOnly Administrators can delete officer accounts.");
+            return;
+        }
+
         boolean confirm = NexusAlert.confirm("Confirm Deletion", 
             "Are you sure you want to PERMANENTLY delete officer " + user.getBadgeNumber() + "?\nThis will also remove their linked Person profile.");
         
         if (confirm) {
-            User actor = SessionManager.getInstance().getCurrentUser();
             userService.deleteUser(user.getId(), actor);
             loadUsers();
         }

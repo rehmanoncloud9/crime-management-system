@@ -11,6 +11,26 @@
         <fx:include source="SessionHeader.fxml"/>
     </top>
 
+    <!-- LEFT: Vertical Navigation Rail -->
+    <left>
+        <ScrollPane fx:id="sidebarScroll"
+                    fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="NEVER"
+                    prefWidth="180"
+                    style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                    styleClass="sidebar-scroll-rail">
+            <VBox fx:id="sideMenu"
+                  prefWidth="180"
+                  styleClass="sidebar-rail">
+                <VBox styleClass="sidebar-brand-rail">
+                    <Label text="CMS COMMAND" styleClass="brand-title-sm"/>
+                </VBox>
+                <!-- Menu buttons injected by MainController.buildSidebar() -->
+            </VBox>
+        </ScrollPane>
+    </left>
+
     <!-- BODY -->
     <center>
         <StackPane>
@@ -29,25 +49,6 @@
                            style="-fx-background-color: transparent; -fx-padding: 0;"/>
             </ScrollPane>
 
-            <!-- FLOATING SIDEBAR (Bottom Right) -->
-            <ScrollPane fx:id="sidebarScroll"
-                        fitToWidth="true"
-                        hbarPolicy="NEVER"
-                        vbarPolicy="NEVER"
-                        StackPane.alignment="BOTTOM_RIGHT"
-                        maxWidth="200"
-                        maxHeight="400"
-                        style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0 24 24 0;"
-                        styleClass="sidebar-scroll-floating">
-                <VBox fx:id="sideMenu"
-                      prefWidth="180"
-                      styleClass="sidebar-floating">
-                    <VBox styleClass="sidebar-brand-floating">
-                        <Label text="CMS" styleClass="brand-title-sm"/>
-                    </VBox>
-                    <!-- Menu buttons injected by MainController.buildSidebar() -->
-                </VBox>
-            </ScrollPane>
 
         </StackPane>
     </center>

@@ -52,7 +52,12 @@ public class IncidentRegistryController {
             }
         });
 
-        new Thread(task).start();
+        task.setOnFailed(e -> {
+            logger.error("Failed to load incidents", task.getException());
+            incidentFlowPane.getChildren().setAll(new Label("Error loading incidents."));
+        });
+
+        Thread th = new Thread(task); th.setDaemon(true); th.start();
     }
 
     private Pane buildIncidentCard(CrimeIncident inc) {
