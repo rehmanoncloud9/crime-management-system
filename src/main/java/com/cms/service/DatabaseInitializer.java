@@ -216,14 +216,18 @@ public class DatabaseInitializer {
             String passwordHash = BCrypt.hashpw(adminPassword, BCrypt.gensalt());
 
             // 1. Create person record
-            stmt.executeUpdate(
-                "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, gender, created_at, updated_at) " +
-                "VALUES ('Rehman', 'OnCloud9', true, 'OFFICER', '" + adminEmail + "', 'OTHER', NOW(), NOW())",
-                Statement.RETURN_GENERATED_KEYS);
-
             long personId = -1;
-            try (ResultSet keys = stmt.getGeneratedKeys()) {
-                if (keys.next()) personId = keys.getLong(1);
+            try (PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO persons (first_name, last_name, is_identified, person_status, email, gender, created_at, updated_at) " +
+                "VALUES (?, ?, true, 'OFFICER', ?, 'OTHER', NOW(), NOW())",
+                Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, "Rehman");
+                ps.setString(2, "OnCloud9");
+                ps.setString(3, adminEmail);
+                ps.executeUpdate();
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys.next()) personId = keys.getLong(1);
+                }
             }
 
             if (personId == -1) {

@@ -53,7 +53,10 @@ public class AnalyticsService {
 
             List<GeoPointDTO> points = new ArrayList<>();
             for (Object[] row : results) {
-                points.add(new GeoPointDTO((Double)row[0], (Double)row[1], (Long)row[2], (String)row[3]));
+                java.math.BigDecimal lat = (java.math.BigDecimal) row[0];
+                java.math.BigDecimal lon = (java.math.BigDecimal) row[1];
+                long count = ((Number) row[2]).longValue();
+                points.add(new GeoPointDTO(lat.doubleValue(), lon.doubleValue(), count, (String) row[3]));
             }
             return points;
         });

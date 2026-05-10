@@ -66,8 +66,10 @@ public class Evidence {
 
     // Constructors
     public Evidence() {
-        this.createdAt = LocalDateTime.now();
-        this.collectedAt = LocalDateTime.now(); // Default to now
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+        this.collectedAt = now; 
         this.status = EvidenceStatus.COLLECTED;
     }
 
@@ -83,8 +85,13 @@ public class Evidence {
     // Lifecycle hooks
     @PrePersist
     protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
         if (createdAt == null) {
-            createdAt = LocalDateTime.now();
+            createdAt = now;
+        }
+        // Ensure updatedAt is not null for initial save
+        if (updatedAt == null) {
+            updatedAt = now;
         }
         if (status == null) {
             status = EvidenceStatus.COLLECTED;

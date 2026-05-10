@@ -214,7 +214,8 @@ public class AIChatService {
                 String ctName = (String) pq.getAttribute("crimeType");
                 CrimeType ct = new CrimeTypeService().findCrimeType(ctName);
                 if (ct == null) {
-                    ct = session.createQuery("FROM CrimeType", CrimeType.class).setMaxResults(1).uniqueResult();
+                    session.getTransaction().rollback();
+                    return "❌ Crime type '" + ctName + "' not found. Please specify a valid crime type.";
                 }
                 incident.setCrimeType(ct);
                 incident.setReportingOfficer(SessionManager.getInstance().getCurrentUser());
@@ -233,7 +234,13 @@ public class AIChatService {
                 Person p = new Person();
                 p.setFirstName((String) pq.getAttribute("firstName"));
                 p.setLastName((String) pq.getAttribute("lastName"));
-                p.setPersonStatus(PersonStatus.valueOf(((String)pq.getAttribute("status")).toUpperCase()));
+                try {
+                    PersonStatus status = PersonStatus.valueOf(((String) pq.getAttribute("status")).toUpperCase());
+                    p.setPersonStatus(status);
+                } catch (Exception ex) {
+                    session.getTransaction().rollback();
+                    return "❌ Invalid status. Try: SUSPECT, WITNESS, VICTIM, CRIMINAL, IN_CUSTODY.";
+                }
                 session.persist(p);
                 session.getTransaction().commit();
                 return "👤 Person **" + p.getFirstName() + " " + p.getLastName() + "** added to database.";
@@ -255,7 +262,10 @@ public class AIChatService {
             List<Person> list = session.createQuery("FROM Person WHERE firstName LIKE :name OR lastName LIKE :name", Person.class)
                     .setParameter("name", "%" + target + "%").list();
             
-            if (list.isEmpty()) return "Person '" + target + "' not found.";
+            if (list.isEmpty()) {
+                session.getTransaction().rollback();
+                return "Person '" + target + "' not found.";
+            }
             Person p = list.get(0);
             
             if ("status".equalsIgnoreCase(attr)) {

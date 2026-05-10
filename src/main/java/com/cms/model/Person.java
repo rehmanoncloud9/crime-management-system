@@ -213,6 +213,18 @@ public class Person {
         this.riskScoreUpdatedAt = LocalDateTime.now();
     }
 
+    // ── CONVENIENCE HELPERS ──
+
+    /** Returns first and last name combined */
+    public String getFullName() {
+        return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
+    }
+
+    /** Alias for getNationalId() used in local context */
+    public String getCnic() {
+        return nationalId;
+    }
+
     @Transient
     public Integer getAge() {
         if (dateOfBirth == null) return null;
